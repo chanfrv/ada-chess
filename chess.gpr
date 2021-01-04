@@ -2,7 +2,7 @@ project Chess is
 
    for Source_Dirs use ("src", "src/common", "src/host", "src/server");
    for Object_Dir use "obj";
-   for Main use ("host.adb", "server.adb");
+   for Main use ("client.adb", "server.adb");
 
 end Chess;
 

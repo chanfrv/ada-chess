@@ -12,7 +12,7 @@ package board is
 	type Move_t is
 		record
 			From : Coordinates_t;
-			To : Coordinates_t;
+			To   : Coordinates_t;
 		end record;
 	
 		
@@ -32,7 +32,11 @@ package board is
 	
 	type Board_t is array (File_t, Rank_t) of BoardPiece_t;
 	
-	
+		
+	-- TODO add more errors
+	type MoveResult_t is (Success, Invalid_Move);
+		
+		
 	Empty   : constant BoardPiece_T := (IsEmpty => True);
 	
 	BKing   : constant BoardPiece_t := (False, King, Black);
@@ -51,16 +55,16 @@ package board is
 	
 	
 	StartBoard : constant Board_t :=
-	 ((BRook, BKnight, BBishop, BQueen, BKing, BBishop, BKnight, BRook),
-	  (BPawn, BPawn, BPawn, BPawn, BPawn, BPawn, BPawn, BPawn),
-	  (Empty, Empty, Empty, Empty, Empty, Empty, Empty, Empty),
-	  (Empty, Empty, Empty, Empty, Empty, Empty, Empty, Empty),
-	  (Empty, Empty, Empty, Empty, Empty, Empty, Empty, Empty),
-	  (Empty, Empty, Empty, Empty, Empty, Empty, Empty, Empty),
-	  (WPawn, WPawn, WPawn, WPawn, WPawn, WPawn, WPawn, WPawn),
-	  (WRook, WKnight, WBishop, WQueen, WKing, WBishop, WKnight, WRook));
+	  ((BRook, BKnight, BBishop, BQueen, BKing, BBishop, BKnight, BRook),
+	(BPawn, BPawn, BPawn, BPawn, BPawn, BPawn, BPawn, BPawn),
+	(Empty, Empty, Empty, Empty, Empty, Empty, Empty, Empty),
+	(Empty, Empty, Empty, Empty, Empty, Empty, Empty, Empty),
+	(Empty, Empty, Empty, Empty, Empty, Empty, Empty, Empty),
+	(Empty, Empty, Empty, Empty, Empty, Empty, Empty, Empty),
+	(WPawn, WPawn, WPawn, WPawn, WPawn, WPawn, WPawn, WPawn),
+	(WRook, WKnight, WBishop, WQueen, WKing, WBishop, WKnight, WRook));
 	
 	
-	procedure Move(Board : Board_t; CurrMove : Move_t);
+	function Move(Board : Board_t; CurrMove : Move_t) return MoveResult_t;
 	
 end board;

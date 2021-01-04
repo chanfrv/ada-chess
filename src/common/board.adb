@@ -1,9 +1,9 @@
 package body board is
 
-	procedure Move(Board : Board_t; CurrMove : Move_t) is
+	function Move(Board : Board_t; CurrMove : Move_t) return MoveResult_t is
 	begin
-		-- TODO
-		null;
+		-- TODO check valid move etc then move
+		return Success;
 	end Move;
 
 end board;
