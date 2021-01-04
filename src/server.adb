@@ -11,29 +11,16 @@ procedure Server is
 		Channel : Stream_Access;
 	end record;
 	
-	type Player_Access_t is access all Player_t;
-		
-	function GetMove(Input : String) return Move_t is
-	begin
-		-- TODO convert "a5" string to move record
-		return ((A, 1), (B, 1));
-	end GetMove;
-	
-	procedure BroadcastMove(Move : Move_t) is
-	begin
-		-- TODO when a player does a move, the server must propagate
-		-- it to the other player
-		null;
-	end BroadcastMove;
+	subtype Player_Index_t is Natural range 1 .. 2;
+	type Players_t is array (Player_Index_t) of Player_t;
 
 	Address    : Sock_Addr_Type;
 	Server     : Socket_Type;
-	Player1    : aliased Player_t;
-	Player2    : aliased Player_t;
+	Players    : Players_t;
 	
 	Finished   : Boolean;
 	Board      : Board_t;
-	CurrPlayer : Player_Access_t;
+	CurrPlayer : Player_Index_t;
 	CurrMove   : Move_t;
 	MoveResult : MoveResult_t;
 begin
@@ -47,22 +34,22 @@ begin
 	Put_Line("Listening for connections");
 	
 	-- Player 1
-	Accept_Socket(Server, Player1.Socket, Address);
+	Accept_Socket(Server, Players(1).Socket, Address);
 	Put_Line("Accepted client 1");
-	Player1.Channel := Stream(Player1.Socket);
-	-- Authenticate, assign color...
+	Players(1).Channel := Stream(Players(1).Socket);
+	-- TODO Authenticate, assign color...
 	-- Player 2
-	Accept_Socket(Server, Player2.Socket, Address);
+	Accept_Socket(Server, Players(2).Socket, Address);
 	Put_Line("Accepted client 2");
-	Player2.Channel := Stream(Player2.Socket);
+	Players(2).Channel := Stream(Players(2).Socket);
 	
 	-- Play
 	Board := StartBoard;
 	Finished := False;
-	CurrPlayer := Player1'Access;
+	CurrPlayer := 1; -- TODO find player with color white
 	
 	while not Finished loop
-		CurrMove := GetMove(String'Input(CurrPlayer.Channel));
+		--CurrMove := GetMove(String'Input(Players(CurrPlayer).Channel));
 		MoveResult := Move(Board, CurrMove);
 	
 		case MoveResult is
@@ -70,8 +57,8 @@ begin
 		-- TODO send error to client
 			null;
 		when Success =>
-			BroadcastMove(CurrMove);
-			-- TODO change curr player
+			-- TODO broadcast move to the other player
+			CurrPlayer := 3 - CurrPlayer;
 		end case;
 				
 		Finished := True;
@@ -79,6 +66,6 @@ begin
 				
 	-- Close
 	Close_Socket(Server);
-	Close_Socket(Player1.Socket);
-	Close_Socket(Player2.Socket);
+	Close_Socket(Players(1).Socket);
+	Close_Socket(Players(2).Socket);
 end Server;
