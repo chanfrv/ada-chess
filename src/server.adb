@@ -13,6 +13,26 @@ procedure Server is
 	
 	subtype Player_Index_t is Natural range 1 .. 2;
 	type Players_t is array (Player_Index_t) of Player_t;
+		
+	procedure AcceptPlayer(Server : in out Socket_Type; Address : in out Sock_Addr_Type; Player : in out Player_t) is
+	begin
+		Accept_Socket(Server, Player.Socket, Address);
+		Player.Channel := Stream(Player.Socket);
+		Put_Line("Accepted client");
+		-- TODO Authenticate, assign color...
+	end AcceptPlayer;
+		
+	function GetWhitePlayer(Players : in Players_t) return Player_Index_t is
+	begin
+		-- TODO
+		return 1;
+	end GetWhitePlayer;
+		
+	function GetMove(Input : in String) return Move_t is
+	begin
+		-- TODO
+		return ((A, 1), (A, 2));
+	end GetMove;
 
 	Address    : Sock_Addr_Type;
 	Server     : Socket_Type;
@@ -33,28 +53,23 @@ begin
 	Listen_Socket(Server);
 	Put_Line("Listening for connections");
 	
-	-- Player 1
-	Accept_Socket(Server, Players(1).Socket, Address);
-	Put_Line("Accepted client 1");
-	Players(1).Channel := Stream(Players(1).Socket);
-	-- TODO Authenticate, assign color...
-	-- Player 2
-	Accept_Socket(Server, Players(2).Socket, Address);
-	Put_Line("Accepted client 2");
-	Players(2).Channel := Stream(Players(2).Socket);
+	-- Accept players
+	for Index in 1 .. 2 loop
+		AcceptPlayer(Server, Address, Players(Index));
+	end loop;
 	
 	-- Play
 	Board := StartBoard;
 	Finished := False;
-	CurrPlayer := 1; -- TODO find player with color white
+	CurrPlayer := GetWhitePlayer(Players);
 	
 	while not Finished loop
-		--CurrMove := GetMove(String'Input(Players(CurrPlayer).Channel));
+		CurrMove := GetMove(String'Input(Players(CurrPlayer).Channel));
 		MoveResult := Move(Board, CurrMove);
 	
 		case MoveResult is
 		when Invalid_Move =>
-		-- TODO send error to client
+		-- TODO send error to current player
 			null;
 		when Success =>
 			-- TODO broadcast move to the other player
