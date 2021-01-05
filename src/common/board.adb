@@ -192,10 +192,16 @@ package body Board is
         return Invalid_Move;
     end KingTest;
 
+    function FindPiece(Board : in Board_t; Coordinates : in Opt_Coordinates_t) return Cell_t is
+    begin
+        -- TODO find the piece from the algebraic info
+        return (False, Pawn, White);
+    end FindPiece;
+
     function Move(Board : in out Board_t; CurrMove : in Move_t; CurrPlayerColor : in Color_t) return MoveResult_t is
         BoardPiece: Cell_t;
     begin
-        BoardPiece := Board(CurrMove.From.File, CurrMove.From.Rank);
+        BoardPiece := FindPiece(Board, CurrMove.From);
 
         if BoardPiece.IsEmpty or BoardPiece.Color /= CurrPlayerColor then
             return Invalid_Move;
