@@ -1,4 +1,19 @@
-package body board is
+with Ada.Characters.Handling; use Ada.Characters.Handling;
+
+
+package body Board is
+
+    function Image(Move : Move_t) return String is
+    begin
+        return "a1 a2";
+    end Image;
+
+    function Value(Move : String) return Move_t is
+    begin
+        -- TODO
+        return ((a, 1), (a, 2));
+    end Value;
+
 
     function GetCoordinates(File : Integer; Rank : Integer) return Coordinates_t is
     begin
@@ -72,4 +87,4 @@ package body board is
         return Playing;
     end Game_Ended;
 
-end board;
+end Board;

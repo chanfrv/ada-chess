@@ -1,8 +1,8 @@
-package board is
+package Board is
 
-    -- Board file.
+    -- Board file
     type File_t is (a, b, c, d, e, f, g, h);
-    -- Board rank.
+    -- Board rank
     subtype Rank_t is Positive range 1 .. 8;
 
 
@@ -18,7 +18,7 @@ package board is
            end case;
         end record;
 
-    -- Pair of coordinates describing a move from x to y.
+    -- Pair of coordinates describing a move from x to y
     type Move_t is
         record
             From : Coordinates_t;
@@ -26,14 +26,14 @@ package board is
         end record;
 
 
-    -- The piece colors.
+    -- The piece colors
     type Color_t is (White, Black);
-    -- The pieces.
+    -- The pieces
     type Piece_t is (King, Queen, Rook, Bishop, Knight, Pawn);
 
-    -- Record describing the content of the board cells.
-    -- A cell is either Empty or not empty, the latter resulting in
-    -- a combination of the piece and its color.
+    -- Record describing the pieces as they are present on a cell.
+    -- A cell is either Empty or not empty, in which case it is a
+    -- combination of the piece and its color.
     type Cell_t(IsEmpty : Boolean := True) is
         record
             case IsEmpty is
@@ -45,7 +45,6 @@ package board is
             end case;
         end record;
 
-    -- The board is a 2 dimensional array of cells.
     type Board_t is array (File_t, Rank_t) of Cell_t;
 
 
@@ -54,7 +53,7 @@ package board is
     -- TODO add more errors
     type MoveResult_t is (Valid_Move, Invalid_Move);
 
-    -- The differents outcomes of a game.
+    -- The differents outcomes of a game
     type GameResult_t is (Playing, Check, Checkmate, Resignation);
 
 
@@ -91,6 +90,14 @@ package board is
         (WRook,   WPawn, Empty, Empty, Empty, Empty, BPawn, BRook  )  -- h
     );
 
+
+    -- Converts the coordinates pair to an algebraic notation.
+    function Image(Move : Move_t) return String;
+
+    -- Converts an algebraic string to a coordinates pair.
+    function Value(Move : String) return Move_t;
+
+
     -- Move the piece on CurrMove.From to the position CurrMove.To
     -- on the given chess board Board.
     function Move(Board : in out Board_t; CurrMove : in Move_t; CurrPlayerColor : in Color_t) return MoveResult_t;
@@ -99,4 +106,4 @@ package board is
     -- or it is a tie.
     function Game_Ended(Board : in Board_t) return GameResult_t;
 
-end board;
+end Board;
