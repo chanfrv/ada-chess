@@ -92,8 +92,8 @@ begin
     Bind_Socket(Server, Address);
     Listen_Socket(Server);
 
-    Put_Line("Listening on " & Image(Address.Addr) & ":" & Trim(Address.Port'Image, Ada.Strings.Left));
-    
+    Put_Line("Listening on " & Image(Address));
+
     -- Accept players
     for Index in Player_Index_t'First .. Player_Index_t'Last loop
         Put_Line("Waiting for player " & Trim(Index'Image, Ada.Strings.Left));

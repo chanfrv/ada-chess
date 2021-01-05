@@ -20,7 +20,8 @@ procedure Client is
     My_Color    : Color_t;
 
     -- TODO put the complete algebraic notation regex
-    Move_Regexp : constant Regexp := Compile("[KQRBN]?([a-h]|[1-8]|[a-h][1-8])?[x]?[a-h][1-8]");
+    Move_String : constant String := "[KQRBN]?([a-h]|[1-8]|[a-h][1-8])?[x]?[a-h][1-8]";
+    Move_Regexp : constant Regexp := Compile(Move_String);
 begin
     -- Connect
     Address.Addr := Addresses(Get_Host_By_Name(Host_Name), 1);
@@ -35,7 +36,7 @@ begin
     Connect_Socket(Socket, Address);
     Channel := Stream(Socket);
 
-    Put_Line("Listening on " & Image(Address.Addr) & ":" & Trim(Address.Port'Image, Ada.Strings.Left));
+    Put_Line("Connecting to " & Image(Address));
 
     -- Play
     My_Color := Color_t'Value(String'Input(Channel));
@@ -59,7 +60,8 @@ Game_Loop:
         elsif Match(Str(1 .. Last), Move_Regexp) = True then
             String'Output(Channel, Str(1 .. Last));
         else
-            Put_Line("Invalid command: " & Str(1 .. Last));
+            Put_Line("Invalid command: " & Str(1 .. Last) &
+                     ", a move must follow the pattern '" & Move_String & "'");
         end if;
 
         -- Receive response (success, error, you win...)
