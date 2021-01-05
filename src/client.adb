@@ -20,7 +20,7 @@ procedure Client is
     My_Color    : Color_t;
 
     -- TODO put the complete algebraic notation regex
-    Move_Regexp : constant Regexp := Compile("[a-z][0-9] [a-z][0-9]");
+    Move_Regexp : constant Regexp := Compile("[KQRBN]?([a-h]|[1-8]|[a-h][1-8])?[x]?[a-h][1-8]");
 begin
     -- Connect
     Address.Addr := Addresses(Get_Host_By_Name(Host_Name), 1);
@@ -57,7 +57,7 @@ Game_Loop:
         elsif Str(1 .. Last) = "forfeit" then
             null;
         elsif Match(Str(1 .. Last), Move_Regexp) = True then
-            null;
+            String'Output(Channel, Str(1 .. Last));
         else
             Put_Line("Invalid command: " & Str(1 .. Last));
         end if;

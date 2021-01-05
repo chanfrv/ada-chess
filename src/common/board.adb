@@ -14,13 +14,15 @@ package body Board is
         Index : Positive;
         Curr : Character;
     begin
+        Put_Line("Disambiguity substring: '" & Move_Str & "'");
+
         Index := Move_Str'Last;
         Curr := Move_Str(Index);
         Move.Piece := Pawn;
 
         case Curr is
             when '1'|'2'|'3'|'4'|'5'|'6'|'7'|'8' =>
-                Move.From.Rank := Rank_t'Value(Curr'Image);
+                Move.From.Rank := Rank_t'Value("" & Curr);
 
                 if Move_Str'Length > 1 then
                     Index := Index - 1;
@@ -33,7 +35,7 @@ package body Board is
 
         case Curr is
             when 'a'|'b'|'c'|'d'|'e'|'f'|'g'|'h' =>
-                Move.From.File := File_t'Value(Curr'Image);
+                Move.From.File := File_t'Value("" & Curr);
 
                 if Move_Str'Length > 1 then
                     Index := Index - 1;
@@ -62,6 +64,8 @@ package body Board is
 
     procedure GetCapture(Move_Str : String; Move : in out Move_t) is
     begin
+        Put_Line("Capture substring: '" & Move_Str & "'");
+
         if Move_Str'Length = 0 then
             Move.Capture := False;
         elsif Move_Str(Move_Str'Last) = 'x' then
@@ -81,10 +85,12 @@ package body Board is
         File_C : Character;
         Rank_C : Character;
     begin
+        Put_Line("Movement string: '" & Move_Str & "'");
+
         File_C := Move_Str(Move_Str'Last - 1);
         case File_C is
             when 'a'|'b'|'c'|'d'|'e'|'f'|'g'|'h' =>
-                Move.To.File := File_t'Value(File_C'Image);
+                Move.To.File := File_t'Value("" & File_C);
             when others =>
                 Put_Line("Invalid destination file");
         end case;
@@ -92,7 +98,7 @@ package body Board is
         Rank_C := Move_Str(Move_Str'Last);
         case Rank_C is
             when '1'|'2'|'3'|'4'|'5'|'6'|'7'|'8' =>
-                Move.To.Rank := Rank_t'Value(Rank_C'Image);
+                Move.To.Rank := Rank_t'Value("" & Rank_C);
             when others =>
                 Put_Line("Invalid destination rank");
         end case;

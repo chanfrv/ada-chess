@@ -113,6 +113,7 @@ Game_Loop:
 
         -- Receive the move from the current player
         CurrMove := Value(String'Input(CurrPlayer.Channel));
+        Put_Line("Move string parsed");
         -- Play the move
         MoveResult := Move(Board, CurrMove, CurrPlayer.Color);
 
