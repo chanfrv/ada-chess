@@ -51,21 +51,19 @@ procedure Server is
 
     -- Get the white player from the player record to set him
     -- as the first player to move.
-    function GetWhitePlayer(Players : in Players_t) return Player_Index_t is
+    function GetWhitePlayer(Players : in Players_t) return Natural is
+        WhiteIndex : Natural := 0;
     begin
-        -- TODO
-        return 1;
+    White_Loop:
+        for Index in Players'First .. Players'Last loop
+            if Players(Index).Color = White then
+                WhiteIndex := Index;
+                exit White_Loop;
+            end if;
+        end loop White_Loop;
+        
+        return WhiteIndex;
     end GetWhitePlayer;
-
-    -- Receives a movement string in the Portable Game Notation
-    -- and convert it into a movement record.
-    -- @see https://en.wikipedia.org/wiki/Portable_Game_Notation
-    function GetMove(Player : in Player_t ; Input : in String) return Move_t is
-    begin
-        Put_Line("[" & Image(Player) & "] Moved '" & Input & "'");
-        -- TODO
-        return ((A, 1), (A, 2));
-    end GetMove;
 
     
     -- Server network information
@@ -98,7 +96,7 @@ begin
     
     -- Accept players
     for Index in Player_Index_t'First .. Player_Index_t'Last loop
-        Put_Line("Waiting for player " & Index'Image);
+        Put_Line("Waiting for player " & Trim(Index'Image, Ada.Strings.Left));
         AcceptPlayer(Index, Color_t'Val(Index - 1), Server, Address, Players(Index));
     end loop;
 
@@ -114,7 +112,7 @@ Game_Loop:
         Put_Line("Waiting for " & Image(CurrPlayer) & " move");
 
         -- Receive the move from the current player
-        CurrMove := GetMove(CurrPlayer, String'Input(CurrPlayer.Channel));
+        CurrMove := Value(String'Input(CurrPlayer.Channel));
         -- Play the move
         MoveResult := Move(Board, CurrMove, CurrPlayer.Color);
 
