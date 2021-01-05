@@ -1,22 +1,27 @@
 with GNAT.Sockets; use GNAT.Sockets;
+with Gnat.Regexp; use GNAT.Regexp;
 with Ada.Text_IO; use Ada.Text_IO;
 with Ada.Command_Line; use Ada.Command_Line;
 with Ada.Characters.Handling; use Ada.Characters.Handling;
 with Ada.Strings.Fixed; use Ada.Strings.Fixed;
 with Board; use Board;
+with Communication; use Communication;
 
 
 procedure Client is
     -- Network information
-    Address   : Sock_Addr_Type;
-    Socket    : Socket_Type;
-    Channel   : Stream_Access;
+    Address     : Sock_Addr_Type;
+    Socket      : Socket_Type;
+    Channel     : Stream_Access;
 
     -- Game information
-    GameState : GameResult_t;
-    Str       : String(1 .. 80);
-    Last      : Natural;
-    My_Color  : Color_t;
+    GameState   : GameResult_t;
+    Str         : String(1 .. 80);
+    Last        : Natural;
+    My_Color    : Color_t;
+
+    -- TODO put the complete algebraic notation regex
+    Move_Regexp : constant Regexp := Compile("[a-z][0-9] [a-z][0-9]");
 begin
     -- Connect
     Address.Addr := Addresses(Get_Host_By_Name(Host_Name), 1);
@@ -48,7 +53,15 @@ Game_Loop:
         exit Game_Loop when Str(1 .. Last) = "quit";
 
         -- Send the move to the server
-        String'Output(Channel, Str);
+        if Str(1 .. Last) = "quit" then
+            exit Game_Loop;
+        elsif Str(1 .. Last) = "forfeit" then
+            Send(Channel, (Id => Forfeit));
+        elsif Match(Str(1 .. Last), Move_Regexp) = True then
+            Send(Channel, (Id => Move, Move => Value(Str(1 .. Last))));
+        else
+            Put_Line("Invalid command: " & Str(1 .. Last));
+        end if;
 
         -- Receive response (success, error, you win...)
         Put_Line(String'Input(Channel));
