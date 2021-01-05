@@ -1,28 +1,42 @@
 with GNAT.Sockets; use GNAT.Sockets;
 with Ada.Text_IO; use Ada.Text_IO;
+with Ada.Command_Line; use Ada.Command_Line;
+with Ada.Characters.Handling; use Ada.Characters.Handling;
+with Ada.Strings.Fixed; use Ada.Strings.Fixed;
 with Board; use Board;
 
 
 procedure Server is
 
+    -- Index type in the player array
+    subtype Player_Index_t is Natural range 1 .. 2;
     -- Record associating a player color and its network identity
     type Player_t is
         record
+            Id      : Player_Index_t;
             Color   : Color_t;
             Socket  : Socket_Type;
             Channel : Stream_Access;
         end record;
-    -- Index type in the player array
-    subtype Player_Index_t is Natural range 1 .. 2;
     -- Player array containing 2 player records
     type Players_t is array (Player_Index_t) of Player_t;
 
+
+    -- Image of a player
+    function Image(Player : Player_t) return String is
+    begin
+        return "Player "
+          & Trim(Player.Id'Image, Ada.Strings.Left)
+          & " (" & To_Lower(Player.Color'Image) & ")";
+    end Image;
+    
     -- Wait for a player, accept him, assign him a color
-    procedure AcceptPlayer(
-        Color   : in Color_t;
-        Server  : in out Socket_Type;
-        Address : in out Sock_Addr_Type;
-        Player  : out Player_t) is
+    procedure AcceptPlayer(Id      : in Player_Index_t;
+                           Color   : in Color_t;
+                           Server  : in out Socket_Type;
+                           Address : in out Sock_Addr_Type;
+                           Player  : out Player_t)
+    is
         -- Local network info
         Socket  : Socket_Type;
         Channel : Stream_Access;
@@ -32,7 +46,7 @@ procedure Server is
         -- TODO Authenticate, assign color...
         Put_Line("Assigned color " & Color'Image);
         String'Output(Channel, Color'Image);
-        Player := (Color => Color, Socket => Socket, Channel => Channel);
+        Player := (Id => Id, Color => Color, Socket => Socket, Channel => Channel);
     end AcceptPlayer;
 
     -- Get the white player from the player record to set him
@@ -48,11 +62,12 @@ procedure Server is
     -- @see https://en.wikipedia.org/wiki/Portable_Game_Notation
     function GetMove(Player : in Player_t ; Input : in String) return Move_t is
     begin
-        Put_Line("[" & Player.Color'Image & "] Moved '" & Input & "'");
+        Put_Line("[" & Image(Player) & "] Moved '" & Input & "'");
         -- TODO
         return ((A, 1), (A, 2));
     end GetMove;
 
+    
     -- Server network information
     Address         : Sock_Addr_Type;
     Server          : Socket_Type;
@@ -67,17 +82,24 @@ procedure Server is
     CurrPlayer      : Player_t;
 begin
     -- Connect
-    Address.Addr := Addresses(Get_Host_By_Name (Host_Name), 1);
+    Address.Addr := Addresses(Get_Host_By_Name(Host_Name), 1);
     Address.Port := 5876;
+    
+    if Argument_Count > 0 then
+        Address.Port := Port_Type'Value(Argument(1));
+    end if;
+    
     Create_Socket(Server);
     Set_Socket_Option(Server, Socket_Level, (Reuse_Address, True));
     Bind_Socket(Server, Address);
     Listen_Socket(Server);
 
+    Put_Line("Listening on " & Image(Address.Addr) & ":" & Trim(Address.Port'Image, Ada.Strings.Left));
+    
     -- Accept players
     for Index in Player_Index_t'First .. Player_Index_t'Last loop
         Put_Line("Waiting for player " & Index'Image);
-        AcceptPlayer(Color_t'Val(Index - 1), Server, Address, Players(Index));
+        AcceptPlayer(Index, Color_t'Val(Index - 1), Server, Address, Players(Index));
     end loop;
 
     -- Play
@@ -89,7 +111,7 @@ Game_Loop:
     while GameState = Playing or GameState = Check loop
         -- Change the current player
         CurrPlayer := Players(CurrPlayerIndex);
-        Put_Line("Waiting for " & CurrPlayer.Color'Image & " move");
+        Put_Line("Waiting for " & Image(CurrPlayer) & " move");
 
         -- Receive the move from the current player
         CurrMove := GetMove(CurrPlayer, String'Input(CurrPlayer.Channel));
@@ -99,13 +121,12 @@ Game_Loop:
         -- Decide what to do depending on the move
         case MoveResult is
             when Invalid_Move =>
-                Put_Line("Invalid move from " & CurrPlayer.Color'Image);
-                String'Output(CurrPlayer.Channel, "Invalid move from " & CurrPlayer.Color'Image);
+                Put_Line("Invalid move from " & Image(CurrPlayer));
+                String'Output(CurrPlayer.Channel, "Invalid move from " & Image(CurrPlayer));
                 -- TODO send error to current player
-                null;
-            when Success =>
+            when Valid_Move =>
                 Put_Line(CurrPlayer.Color'Image & " moved");
-                String'Output(CurrPlayer.Channel, CurrPlayer.Color'Image & " moved");
+                String'Output(CurrPlayer.Channel, Image(CurrPlayer) & " moved");
                 -- TODO broadcast move to the other player
                 CurrPlayerIndex := 3 - CurrPlayerIndex;
         end case;

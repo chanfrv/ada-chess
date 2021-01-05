@@ -1,9 +1,10 @@
 package board is
 
-    -- Board file
+    -- Board file.
     type File_t is (a, b, c, d, e, f, g, h);
-    -- Board rank
+    -- Board rank.
     subtype Rank_t is Positive range 1 .. 8;
+
 
     -- Coordinates on a board (ex: 'a5')
     type Coordinates_t(Undefined : Boolean := False) is
@@ -15,9 +16,9 @@ package board is
                File : File_t;
                Rank : Rank_t;
            end case;
-       end record;
+        end record;
 
-    -- Pair of coordinates describing a move from x to y
+    -- Pair of coordinates describing a move from x to y.
     type Move_t is
         record
             From : Coordinates_t;
@@ -25,15 +26,15 @@ package board is
         end record;
 
 
-    -- The piece colors
+    -- The piece colors.
     type Color_t is (White, Black);
-    -- The pieces
+    -- The pieces.
     type Piece_t is (King, Queen, Rook, Bishop, Knight, Pawn);
 
-    -- Record describing the pieces as they are present on a cell.
-    -- A cell is either Empty or not empty, in which case it is a
-    -- combination of the piece and its color.
-    type BoardPiece_t(IsEmpty : Boolean := True) is
+    -- Record describing the content of the board cells.
+    -- A cell is either Empty or not empty, the latter resulting in
+    -- a combination of the piece and its color.
+    type Cell_t(IsEmpty : Boolean := True) is
         record
             case IsEmpty is
                 when True =>
@@ -44,33 +45,34 @@ package board is
             end case;
         end record;
 
-    type Board_t is array (File_t, Rank_t) of BoardPiece_t;
+    -- The board is a 2 dimensional array of cells.
+    type Board_t is array (File_t, Rank_t) of Cell_t;
 
 
     -- Enumeration of the possible results after a move is given by
     -- a player. Used in the function Move().
     -- TODO add more errors
-    type MoveResult_t is (Success, Invalid_Move);
+    type MoveResult_t is (Valid_Move, Invalid_Move);
 
-    -- The differents outcomes of a game
+    -- The differents outcomes of a game.
     type GameResult_t is (Playing, Check, Checkmate, Resignation);
 
 
-    Empty   : constant BoardPiece_t := (IsEmpty => True);
+    Empty   : constant Cell_t := (IsEmpty => True);
 
-    BKing   : constant BoardPiece_t := (IsEmpty => False, Piece => King,   Color => Black);
-    BQueen  : constant BoardPiece_t := (IsEmpty => False, Piece => Queen,  Color => Black);
-    BRook   : constant BoardPiece_t := (IsEmpty => False, Piece => Rook,   Color => Black);
-    BBishop : constant BoardPiece_t := (IsEmpty => False, Piece => Bishop, Color => Black);
-    BKnight : constant BoardPiece_t := (IsEmpty => False, Piece => Knight, Color => Black);
-    BPawn   : constant BoardPiece_t := (IsEmpty => False, Piece => Pawn,   Color => Black);
+    BKing   : constant Cell_t := (IsEmpty => False, Piece => King,   Color => Black);
+    BQueen  : constant Cell_t := (IsEmpty => False, Piece => Queen,  Color => Black);
+    BRook   : constant Cell_t := (IsEmpty => False, Piece => Rook,   Color => Black);
+    BBishop : constant Cell_t := (IsEmpty => False, Piece => Bishop, Color => Black);
+    BKnight : constant Cell_t := (IsEmpty => False, Piece => Knight, Color => Black);
+    BPawn   : constant Cell_t := (IsEmpty => False, Piece => Pawn,   Color => Black);
 
-    WKing   : constant BoardPiece_t := (IsEmpty => False, Piece => King,   Color => White);
-    WQueen  : constant BoardPiece_t := (IsEmpty => False, Piece => Queen,  Color => White);
-    WRook   : constant BoardPiece_t := (IsEmpty => False, Piece => Rook,   Color => White);
-    WBishop : constant BoardPiece_t := (IsEmpty => False, Piece => Bishop, Color => White);
-    WKnight : constant BoardPiece_t := (IsEmpty => False, Piece => Knight, Color => White);
-    WPawn   : constant BoardPiece_t := (IsEmpty => False, Piece => Pawn,   Color => White);
+    WKing   : constant Cell_t := (IsEmpty => False, Piece => King,   Color => White);
+    WQueen  : constant Cell_t := (IsEmpty => False, Piece => Queen,  Color => White);
+    WRook   : constant Cell_t := (IsEmpty => False, Piece => Rook,   Color => White);
+    WBishop : constant Cell_t := (IsEmpty => False, Piece => Bishop, Color => White);
+    WKnight : constant Cell_t := (IsEmpty => False, Piece => Knight, Color => White);
+    WPawn   : constant Cell_t := (IsEmpty => False, Piece => Pawn,   Color => White);
 
 
     -- Default board, white being on the ranks 1-2 and black on the
