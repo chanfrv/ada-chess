@@ -84,7 +84,7 @@ package body Board is
         File_C := Move_Str(Move_Str'Last - 1);
         case File_C is
             when 'a'|'b'|'c'|'d'|'e'|'f'|'g'|'h' =>
-                Move.Destination.File := File_t'Value(File_C'Image);
+                Move.To.File := File_t'Value(File_C'Image);
             when others =>
                 Put_Line("Invalid destination file");
         end case;
@@ -92,7 +92,7 @@ package body Board is
         Rank_C := Move_Str(Move_Str'Last);
         case Rank_C is
             when '1'|'2'|'3'|'4'|'5'|'6'|'7'|'8' =>
-                Move.Destination.Rank := Rank_t'Value(Rank_C'Image);
+                Move.To.Rank := Rank_t'Value(Rank_C'Image);
             when others =>
                 Put_Line("Invalid destination rank");
         end case;
@@ -129,7 +129,7 @@ package body Board is
                                          GetCoordinates(FileInt - 1, RankInt),
                                          GetCoordinates(FileInt - 1, RankInt - 1)
                                         );
-        TmpPiece : BoardPiece_t;
+        TmpPiece : Cell_t;
     begin
         if ValidArr(1) /= (Undefined => True) then
             return Invalid_Move;
@@ -144,14 +144,14 @@ package body Board is
         end loop;
         for I in ValidArr'Range loop
             if ValidArr(I) = CurrMove.To then
-                return Success
+                return Valid_Move;
             end if;
         end loop;
         return Invalid_Move;
     end KingTest;
 
     function Move(Board : in out Board_t; CurrMove : in Move_t; CurrPlayerColor : in Color_t) return MoveResult_t is
-        BoardPiece: BoardPiece_t;
+        BoardPiece: Cell_t;
     begin
         BoardPiece := Board(CurrMove.From.File, CurrMove.From.Rank);
 
@@ -166,7 +166,7 @@ package body Board is
             when others =>
                 null;
         end case;
-        return Success;
+        return Valid_Move;
     end Move;
 
     function Game_Ended(Board : in Board_t) return GameResult_t is

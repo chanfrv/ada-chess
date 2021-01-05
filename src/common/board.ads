@@ -44,10 +44,10 @@ package Board is
     -- A move is described by a destination and a prefix.
     type Move_t is
         record
-            Piece       : Piece_t;
-            Capture     : Boolean;
-            From        : Coordinates_t;
-            Destination : Coordinates_t;
+            Piece   : Piece_t;
+            Capture : Boolean;
+            From    : Coordinates_t;
+            To      : Coordinates_t;
         end record;
 
 
