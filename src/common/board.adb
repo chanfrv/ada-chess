@@ -66,10 +66,10 @@ package body board is
         return Success;
     end Move;
 
-    function Game_Ended(Board : in Board_t) return Boolean is
+    function Game_Ended(Board : in Board_t) return GameResult_t is
     begin
         -- TODO
-        return False;
+        return Playing;
     end Game_Ended;
 
 end board;
