@@ -65,6 +65,8 @@ package board is
 	(WRook, WKnight, WBishop, WQueen, WKing, WBishop, WKnight, WRook));
 	
 	
-	function Move(Board : Board_t; CurrMove : Move_t) return MoveResult_t;
+	function Move(Board : in out Board_t; CurrMove : in Move_t) return MoveResult_t;
+	
+	function Game_Ended(Board : in Board_t) return Boolean;
 	
 end board;
