@@ -5,17 +5,26 @@ package Board is
     -- Board rank
     subtype Rank_t is Positive range 1 .. 8;
 
-
     -- Coordinates on a board (ex: 'a5')
-    type Coordinates_t(Undefined : Boolean := False) is
-       record
-           case Undefined is
-           when True =>
-               null;
-           when False =>
-               File : File_t;
-               Rank : Rank_t;
-           end case;
+    type Coordinates_t is
+        record
+            File : File_t;
+            Rank : Rank_t;
+        end record;
+
+    type Has_Coordinates_t is (Has_None, Has_File, Has_Rank, Has_Both);
+    type Opt_Coordinates_t(Has : Has_Coordinates_t := Has_Both) is
+        record
+            case Has is
+                when Has_None =>
+                    null;
+                when Has_File =>
+                    File : File_t;
+                when Has_Rank =>
+                    Rank : Rank_t;
+                when Has_Both =>
+                    Coordinates : Coordinates_t;
+            end case;
         end record;
 
 
@@ -46,7 +55,7 @@ package Board is
         record
             Piece   : Piece_t;
             Capture : Boolean;
-            From    : Coordinates_t;
+            From    : Opt_Coordinates_t;
             To      : Coordinates_t;
         end record;
 
@@ -93,7 +102,8 @@ package Board is
         (WRook,   WPawn, Empty, Empty, Empty, Empty, BPawn, BRook  )  -- h
     );
 
-
+    function Image(Coordinates : Coordinates_t) return String;
+    function Image(Coordinates : Opt_Coordinates_t) return String;
     -- Converts the coordinates pair to an algebraic notation.
     function Image(Move : Move_t) return String;
 

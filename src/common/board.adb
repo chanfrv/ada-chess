@@ -4,25 +4,49 @@ with Ada.Characters.Handling; use Ada.Characters.Handling;
 
 package body Board is
 
+    function Image(Coordinates : Coordinates_t) return String is
+    begin
+        return To_Lower(Coordinates.File'Image) & Coordinates.Rank'Image;
+    end Image;
+
+    function Image(Coordinates : Opt_Coordinates_t) return String is
+    begin
+        case Coordinates.Has is
+            when Has_None =>
+                return "";
+            when Has_File =>
+                return To_Lower(Coordinates.File'Image);
+            when Has_Rank =>
+                return Coordinates.Rank'Image;
+            when Has_Both =>
+                return Image(Coordinates.Coordinates);
+        end case;
+    end Image;
+
     function Image(Move : Move_t) return String is
     begin
-        -- TODO
-        return "a1";
+        return To_Lower(Move.Piece'Image) & (if Move.Capture then "x" else " ") & Image(Move.From) & Image(Move.To);
     end Image;
 
     procedure GetPieceDisambiguity(Move_Str : String; Move : in out Move_t) is
         Index : Positive;
         Curr : Character;
+
+        Has_Coords : Has_Coordinates_t := Has_None;
+        Rank : Rank_t;
+        File : File_t;
     begin
         Put_Line("Disambiguity substring: '" & Move_Str & "'");
 
         Index := Move_Str'Last;
         Curr := Move_Str(Index);
         Move.Piece := Pawn;
+        Move.From := (Has => Has_None);
 
         case Curr is
             when '1'|'2'|'3'|'4'|'5'|'6'|'7'|'8' =>
-                Move.From.Rank := Rank_t'Value("" & Curr);
+                Has_Coords := Has_Rank;
+                Rank := Rank_t'Value("" & Curr);
 
                 if Move_Str'Length > 1 then
                     Index := Index - 1;
@@ -35,7 +59,8 @@ package body Board is
 
         case Curr is
             when 'a'|'b'|'c'|'d'|'e'|'f'|'g'|'h' =>
-                Move.From.File := File_t'Value("" & Curr);
+                Has_Coords := (if Has_Coords = Has_Rank then Has_Both else Has_File);
+                File := File_t'Value("" & curr);
 
                 if Move_Str'Length > 1 then
                     Index := Index - 1;
@@ -44,6 +69,17 @@ package body Board is
 
             when others =>
                 null;
+        end case;
+
+        case Has_Coords is
+            when Has_None =>
+                Move.From := (Has => Has_None);
+            when Has_Rank =>
+                Move.From := (Has => Has_Rank, Rank => Rank);
+            when Has_File =>
+                Move.From := (Has => Has_File, File => File);
+            when Has_Both =>
+                Move.From := (Has => Has_Both, Coordinates => (Rank => Rank, File => File));
         end case;
 
         case Curr is
@@ -109,47 +145,47 @@ package body Board is
     end Value;
 
 
-    function GetCoordinates(File : Integer; Rank : Integer) return Coordinates_t is
+    function GetCoordinates(File : Integer; Rank : Integer) return Opt_Coordinates_t is
     begin
         if File > File_t'Pos(File_t'Last) or File < File_t'Pos(File_t'First) then
-            return (Undefined => True);
+            return (Has => Has_None);
         end if;
         if Rank > Rank_t'Pos(Rank_t'Last) or Rank < Rank_t'Pos(Rank_t'First) then
-            return (Undefined => True);
+            return (Has => Has_None);
         end if;
-        return (False, File_t'Val(File), Rank_t'Val(Rank));
+        return (Has_Both, (File_t'Val(File), Rank_t'Val(Rank)));
     end GetCoordinates;
 
 
     function KingTest(Board : in out Board_t; CurrMove : in Move_t; CurrPlayerColor : in Color_t) return MoveResult_t is
         FileInt : Integer := File_t'Pos(CurrMove.From.File);
         RankInt : Integer := Rank_t'Pos(CurrMove.From.Rank);
-        type Valid_Coord_Array is array (Integer) of Coordinates_t;
+        type Valid_Coord_Array is array (Integer) of Opt_Coordinates_t;
         ValidArr : Valid_Coord_Array := (
-                                         GetCoordinates(FileInt + 1, RankInt + 1),
-                                         GetCoordinates(FileInt + 1, RankInt),
-                                         GetCoordinates(FileInt + 1, RankInt - 1),
-                                         GetCoordinates(FileInt, RankInt + 1),
-                                         GetCoordinates(FileInt, RankInt - 1),
-                                         GetCoordinates(FileInt - 1, RankInt + 1),
-                                         GetCoordinates(FileInt - 1, RankInt),
-                                         GetCoordinates(FileInt - 1, RankInt - 1)
-                                        );
+            GetCoordinates(FileInt + 1, RankInt + 1),
+            GetCoordinates(FileInt + 1, RankInt),
+            GetCoordinates(FileInt + 1, RankInt - 1),
+            GetCoordinates(FileInt, RankInt + 1),
+            GetCoordinates(FileInt, RankInt - 1),
+            GetCoordinates(FileInt - 1, RankInt + 1),
+            GetCoordinates(FileInt - 1, RankInt),
+            GetCoordinates(FileInt - 1, RankInt - 1)
+            );
         TmpPiece : Cell_t;
     begin
-        if ValidArr(1) /= (Undefined => True) then
+        if ValidArr(1) /= (Has => Has_None) then
             return Invalid_Move;
         end if;
         for I in ValidArr'Range loop
-            if ValidArr(I) /= (Undefined => True) then
+            if ValidArr(I) /= (Has => Has_None) then
                 TmpPiece := Board(ValidArr(I).File, ValidArr(I).Rank);
                 if TmpPiece.Color = CurrPlayerColor then
-                    ValidArr(I) := (Undefined => True);
+                    ValidArr(I) := (Has => Has_None);
                 end if;
             end if;
         end loop;
         for I in ValidArr'Range loop
-            if ValidArr(I) = CurrMove.To then
+            if ValidArr(I).Coordinates = CurrMove.To then
                 return Valid_Move;
             end if;
         end loop;
