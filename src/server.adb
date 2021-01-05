@@ -75,9 +75,9 @@ procedure Server is
     GameState       : GameResult_t;
     Board           : Board_t;
     CurrPlayerIndex : Player_Index_t;
-    CurrMove        : Move_t;
     MoveResult      : MoveResult_t;
     CurrPlayer      : Player_t;
+    CurrMove        : Move_t;
 begin
     -- Connect
     Address.Addr := Addresses(Get_Host_By_Name(Host_Name), 1);

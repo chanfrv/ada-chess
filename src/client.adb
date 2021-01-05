@@ -5,7 +5,6 @@ with Ada.Command_Line; use Ada.Command_Line;
 with Ada.Characters.Handling; use Ada.Characters.Handling;
 with Ada.Strings.Fixed; use Ada.Strings.Fixed;
 with Board; use Board;
-with Communication; use Communication;
 
 
 procedure Client is
@@ -56,9 +55,9 @@ Game_Loop:
         if Str(1 .. Last) = "quit" then
             exit Game_Loop;
         elsif Str(1 .. Last) = "forfeit" then
-            Send(Channel, (Id => Forfeit));
+            null;
         elsif Match(Str(1 .. Last), Move_Regexp) = True then
-            Send(Channel, (Id => Move, Move => Value(Str(1 .. Last))));
+            null;
         else
             Put_Line("Invalid command: " & Str(1 .. Last));
         end if;

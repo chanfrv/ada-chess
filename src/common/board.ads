@@ -18,13 +18,6 @@ package Board is
            end case;
         end record;
 
-    -- Pair of coordinates describing a move from x to y
-    type Move_t is
-        record
-            From : Coordinates_t;
-            To   : Coordinates_t;
-        end record;
-
 
     -- The piece colors
     type Color_t is (White, Black);
@@ -46,6 +39,16 @@ package Board is
         end record;
 
     type Board_t is array (File_t, Rank_t) of Cell_t;
+
+
+    -- A move is described by a destination and a prefix.
+    type Move_t is
+        record
+            Piece       : Piece_t;
+            Capture     : Boolean;
+            From        : Coordinates_t;
+            Destination : Coordinates_t;
+        end record;
 
 
     -- Enumeration of the possible results after a move is given by
@@ -95,7 +98,7 @@ package Board is
     function Image(Move : Move_t) return String;
 
     -- Converts an algebraic string to a coordinates pair.
-    function Value(Move : String) return Move_t;
+    function Value(Move_Str : String) return Move_t;
 
 
     -- Move the piece on CurrMove.From to the position CurrMove.To
