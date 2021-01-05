@@ -23,6 +23,7 @@ procedure Server is
         Server  : in out Socket_Type;
         Address : in out Sock_Addr_Type;
         Player  : out Player_t) is
+        -- Local network info
         Socket  : Socket_Type;
         Channel : Stream_Access;
     begin
