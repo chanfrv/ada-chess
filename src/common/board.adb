@@ -2,13 +2,14 @@ with Ada.Text_IO; use Ada.Text_IO;
 with Ada.Characters.Handling; use Ada.Characters.Handling;
 with Ada.Containers; use Ada.Containers;
 with Ada.Containers.Vectors;
+with Ada.Strings.Fixed; use Ada.Strings.Fixed;
 
 
 package body Board is
 
     function Image(Coordinates : Coordinates_t) return String is
     begin
-        return To_Lower(Coordinates.File'Image) & Coordinates.Rank'Image;
+        return To_Lower(Coordinates.File'Image) & Trim(Coordinates.Rank'Image, Ada.Strings.Left);
     end Image;
 
     function Image(Coordinates : Disambiguating_Coordinates_t) return String is
@@ -19,7 +20,7 @@ package body Board is
             when Has_File =>
                 return To_Lower(Coordinates.File'Image);
             when Has_Rank =>
-                return Coordinates.Rank'Image;
+                return Trim(Coordinates.Rank'Image, Ada.Strings.Left);
             when Has_Both =>
                 return Image(Coordinates.Coordinates);
         end case;
@@ -27,7 +28,11 @@ package body Board is
 
     function Image(Move : Move_t) return String is
     begin
-        return To_Lower(Move.Piece'Image) & (if Move.Capture then "x" else " ") & Image(Move.From) & Image(Move.To);
+        return To_Lower(Move.Piece'Image)
+          & (if Move.Capture then " [capture]" else "")
+          & Image(Move.From)
+          & " "
+          & Image(Move.To);
     end Image;
 
     function Image(Cell : Cell_t) return String is
@@ -48,12 +53,8 @@ package body Board is
         Rank : Rank_t;
         File : File_t;
     begin
-        Put_Line("Disambiguity substring: '" & Move_Str & "'");
-
         Index := Move_Str'Last;
         Curr := Move_Str(Index);
-        Move.Piece := Pawn;
-        Move.From := (Has => Has_None);
 
         case Curr is
             when '1'|'2'|'3'|'4'|'5'|'6'|'7'|'8' =>
@@ -112,8 +113,6 @@ package body Board is
 
     procedure GetCapture(Move_Str : String; Move : in out Move_t) is
     begin
-        Put_Line("Capture substring: '" & Move_Str & "'");
-
         if Move_Str'Length = 0 then
             Move.Capture := False;
         elsif Move_Str(Move_Str'Last) = 'x' then
@@ -133,7 +132,12 @@ package body Board is
         File_C : Character;
         Rank_C : Character;
     begin
-        Put_Line("Movement string: '" & Move_Str & "'");
+        Put_Line("[PARSE] Value string: '" & Move_Str & "'");
+
+        -- Init
+        Move.Piece := Pawn;
+        Move.Capture := False;
+        Move.From := (Has => Has_None);
 
         File_C := Move_Str(Move_Str'Last - 1);
         case File_C is
@@ -207,7 +211,9 @@ package body Board is
 
     function HasValidMove(Board : in Board_t;
                           From  : in Coordinates_t;
-                          To    : in Coordinates_t) return Boolean is
+                          To    : in Coordinates_t) return Boolean
+    is
+        Cell  : constant Cell_t  := Board(From.File, From.Rank);
     begin
         -- TODO
         return True;
@@ -224,20 +230,26 @@ package body Board is
         use Integer_Vectors;
 
         Pieces   : Vector;
+        CurrCord : Coordinates_t;
         CurrCell : Cell_t;
     begin
         for File in a .. h loop
             for Rank in 1 .. 8 loop
+                CurrCord := (File, Rank);
                 CurrCell := Board(File, Rank);
 
-                if CurrCell.IsEmpty = False                          -- non empty cell
-                  and CurrCell.Color = CurrPlayerColor               -- player color
-                  and CurrCell.Piece = CurrMove.Piece                -- piece
-                  and HasValidMove(Board, (File, Rank), CurrMove.To) -- legal move
-                then
-                    Put_Line("Found candidate piece: " & Image(Board(File, Rank)));
-                    Pieces.Append((File, Rank));
-                end if;
+                case CurrCell.IsEmpty is
+                    when True =>
+                        null;
+                    when False =>                                            -- non empty cell
+                        if CurrCell.Color = CurrPlayerColor                  -- player color
+                          and CurrCell.Piece = CurrMove.Piece                -- piece
+                          and HasValidMove(Board, (File, Rank), CurrMove.To) -- legal move
+                        then
+                            Put_Line("Found candidate piece: " & Image(Board(File, Rank)) & " (" & Image(CurrCord) & ")");
+                            Pieces.Append((File, Rank));
+                        end if;
+                end case;
             end loop;
         end loop;
 
@@ -272,13 +284,18 @@ package body Board is
 
         BoardPiece := Board(FromCoords.File, FromCoords.Rank); -- get the piece at the given coords
 
-        case BoardPiece.Piece is
+        -- TODO now that the move is valid
+        -- 1. remove the captured pieces (! en passant)
+        -- 2. execute the move
+
+        case CurrMove.Piece is
             when King =>
                 return KingTest(Board, CurrMove, CurrPlayerColor);
 
             when others =>
                 null;
         end case;
+
         return Valid_Move;
     end Move;
 
