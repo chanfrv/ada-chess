@@ -54,13 +54,24 @@ package body Board is
     end IsKingCheck;
 
 
+    function IsCellAccessible(Board       : in Board_t;
+                              Cell        : in Cell_t;
+                              PlayerColor : in Color_t) return Boolean
+    is
+    begin
+        case Cell.IsEmpty is
+            when True =>
+                return True;
+            when False =>
+                return Cell.Color /= PlayerColor;
+        end case;
+    end IsCellAccessible;
+
+
     function IsValidMove_King(Board : in Board_t;
                               From  : in Coordinates_t;
                               To    : in Coordinates_t) return Boolean
     is
-        King_Color : Color_t := Board(From.File, From.Rank).Color;
-        Cell : Cell_t := Board(To.File, To.Rank);
-
         -- Gets the rectangle of dimension file and rank where the king is
         -- allowed to move without going out of bounds.
         Min_File : File_t := (if From.File > a then File_t'Pred(From.File) else From.File);
@@ -71,25 +82,88 @@ package body Board is
         -- The king move is valid if:
         -- + the file is inbound
         -- + the rank is inbound
-        -- + the cell is different from the origin
-        -- + either the cell is empty or it belongs to the opponent
         -- + the destination cell is not threatened
         return Min_File <= To.File and To.File <= Max_File
           and Min_Rank <= To.Rank and To.Rank <= Max_Rank
-          and (From.File /= To.File or From.Rank /= To.Rank)
-          and (case Cell.IsEmpty is when True => True, when False => Board(To.File, To.Rank).Color /= King_Color)
           and not IsKingCheckAt(Board, From, To);
     end IsValidMove_King;
+
+
+    function IsValidMove_Queen(Board : in Board_t;
+                               From  : in Coordinates_t;
+                               To    : in Coordinates_t) return Boolean
+    is
+    begin
+        return IsValidMove_Rook(Board, From, To)
+          or IsValidMove_Bishop(Board, From, To);
+    end IsValidMove_Queen;
+
+
+    function IsValidMove_Rook(Board : in Board_t;
+                              From  : in Coordinates_t;
+                              To    : in Coordinates_t) return Boolean
+    is
+        Min_File : File_t := (if From.File < To.File then From.File else To.File);
+        Max_File : File_t := (if From.File > To.File then From.File else To.File);
+        Min_Rank : Rank_t := (if From.Rank < To.Rank then From.Rank else To.Rank);
+        Max_Rank : Rank_t := (if From.Rank > To.Rank then From.Rank else To.Rank);
+
+        Cell : Cell_t;
+    begin
+        -- Same File
+        if From.File = To.File then
+            -- each cell between the pieces must be free
+            for Rank in Min_Rank + 1 .. Max_Rank - 1 loop
+                Cell := Board(From.File, Rank);
+                if not Cell.IsEmpty then
+                    return False;
+                end if;
+            end loop;
+        -- Same Rank
+        elsif From.Rank = To.Rank then
+            -- each cell between the pieces must be free
+            for File in File_t'Succ(Min_File) .. File_t'Pred(Max_File) loop
+                Cell := Board(File, From.Rank);
+                if not Cell.IsEmpty then
+                    return False;
+                end if;
+            end loop;
+        -- Neither same file nor rank, not a valid rook move
+        else
+            return False;
+        end if;
+
+        return True;
+    end IsValidMove_Rook;
+
+
+    function IsValidMove_Bishop(Board : in Board_t;
+                                From  : in Coordinates_t;
+                                To    : in Coordinates_t) return Boolean
+    is
+    begin
+        -- TODO
+        return False;
+    end IsValidMove_Bishop;
+
+
+    function IsValidMove_Knight(Board : in Board_t;
+                                From  : in Coordinates_t;
+                                To    : in Coordinates_t) return Boolean
+    is
+    begin
+        -- TODO
+        return False;
+    end IsValidMove_Knight;
 
 
     function IsValidMove_Pawn(Board : in Board_t;
                               From  : in Coordinates_t;
                               To    : in Coordinates_t) return Boolean
     is
-        Pawn_Color : Color_t := Board(From.File, From.Rank).Color;
     begin
         -- TODO
-        return True;
+        return False;
     end IsValidMove_Pawn;
 
 
@@ -97,18 +171,32 @@ package body Board is
                          From  : in Coordinates_t;
                          To    : in Coordinates_t) return Boolean
     is
-        Cell : constant Cell_t  := Board(From.File, From.Rank);
+        Cell_From : constant Cell_t := Board(From.File, From.Rank);
+        Cell_To   : constant Cell_t := Board(To.File, To.Rank);
     begin
-        -- TODO
-        -- Dispatch to the piece specific function
-        case Cell.Piece is
+        -- Rules common to every piece:
+        -- + the cell is different from the origin
+        -- + either the cell is empty or it belongs to the opponent
+        if (From.File /= To.File and From.Rank /= To.Rank)
+          or not IsCellAccessible(Board, Cell_To, Cell_From.Color)
+        then
+            return False;
+        end if;
+
+        -- Piece specific rules
+        case Cell_From.Piece is
             when King =>
                 return IsValidMove_King(Board, From, To);
+            when Queen =>
+                return IsValidMove_Queen(Board, From, To);
+            when Rook =>
+                return IsValidMove_Rook(Board, From, To);
+            when Bishop =>
+                return IsValidMove_Bishop(Board, From, To);
+            when Knight =>
+                return IsValidMove_Knight(Board, From, To);
             when Pawn =>
                 return IsValidMove_Pawn(Board, From, To);
-            when others =>
-                Put_Line("Move for piece " & Cell.Piece'Image & " not implemented");
-                return False;
         end case;
     end IsValidMove;
 
@@ -202,6 +290,7 @@ package body Board is
             Board(CurrMove.To.File, CurrMove.To.Rank) := Board(From.File, From.Rank);
             Board(From.File, From.Rank) := (IsEmpty => True);
             -- TODO en passant
+            -- TODO check ? checkmate ?
         end if;
 
         return MoveResult;

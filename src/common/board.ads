@@ -135,16 +135,35 @@ private
                          Pos   : in Coordinates_t;
                          Color : in Color_t) return Boolean;
 
+    -- Returns True if the cell is empty or belongs to an opponent
+    function IsCellAccessible(Board       : in Board_t;
+                              Cell        : in Cell_t;
+                              PlayerColor : in Color_t) return Boolean;
+
 
     function IsValidMove_King(Board : in Board_t;
                               From  : in Coordinates_t;
                               To    : in Coordinates_t) return Boolean;
 
-    function IsValidMove_Pawn(Board : in Board_t;
+    function IsValidMove_Queen(Board : in Board_t;
+                               From  : in Coordinates_t;
+                               To    : in Coordinates_t) return Boolean;
+
+    function IsValidMove_Rook(Board : in Board_t;
                               From  : in Coordinates_t;
                               To    : in Coordinates_t) return Boolean;
 
-    -- TODO IsValidMove_X
+    function IsValidMove_Bishop(Board : in Board_t;
+                                From  : in Coordinates_t;
+                                To    : in Coordinates_t) return Boolean;
+
+    function IsValidMove_Knight(Board : in Board_t;
+                                From  : in Coordinates_t;
+                                To    : in Coordinates_t) return Boolean;
+
+    function IsValidMove_Pawn(Board : in Board_t;
+                              From  : in Coordinates_t;
+                              To    : in Coordinates_t) return Boolean;
 
 
     -- Returns True if the piece on From is allowed to move on To.
