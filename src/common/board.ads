@@ -132,8 +132,7 @@ private
 
     -- Returns True if the King of color Color at position Pos is check.
     function IsKingCheck(Board : in Board_t;
-                         Pos   : in Coordinates_t;
-                         Color : in Color_t) return Boolean;
+                         Pos   : in Coordinates_t) return Boolean;
 
     -- Returns True if the cell is empty or belongs to an opponent
     function IsCellAccessible(Board       : in Board_t;

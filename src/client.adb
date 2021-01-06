@@ -49,14 +49,9 @@ Game_Loop:
         Put(To_lower(My_Color'Image) & "> ");
         Get_Line(Str, Last);
 
-        -- Exit on "quit" command
-        exit Game_Loop when Str(1 .. Last) = "quit";
-
         -- Send the move to the server
-        if Str(1 .. Last) = "quit" then
+        if Str(1 .. Last) = "resign" then
             exit Game_Loop;
-        elsif Str(1 .. Last) = "resign" then
-            null;
         elsif Match(Str(1 .. Last), Move_Regexp) = True then
             String'Output(Channel, Str(1 .. Last));
 
@@ -64,9 +59,10 @@ Game_Loop:
             Put_Line(String'Input(Channel));
             --GameState := GameResult_t'Value();
         else
-            Put_Line("Invalid command: '" & Str(1 .. Last)
-                     & "'. A move must follow the pattern '"
-                     & Move_String & "'");
+            Put_Line("Invalid command: '" & Str(1 .. Last) & "'.");
+            Put_Line("Commands:");
+            Put_Line("  resign -- Quit the game");
+            Put_Line("  " & Move_String & " -- Move a piece (ex: 'e4')");
         end if;
 
     end loop Game_Loop;

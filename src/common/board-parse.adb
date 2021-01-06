@@ -6,12 +6,12 @@ with Ada.Strings.Fixed; use Ada.Strings.Fixed;
 package body Board.Parse is
 
    
-    function Image(Coordinates : Coordinates_t) return String is
+    function Image(Coordinates : in Coordinates_t) return String is
     begin
         return To_Lower(Coordinates.File'Image) & Trim(Coordinates.Rank'Image, Ada.Strings.Left);
     end Image;
 
-    function Image(Coordinates : Disambiguating_Coordinates_t) return String is
+    function Image(Coordinates : in Disambiguating_Coordinates_t) return String is
     begin
         case Coordinates.Has is
             when Has_None =>
@@ -26,7 +26,7 @@ package body Board.Parse is
     end Image;
 
     
-    function Image(Move : Move_t) return String is
+    function Image(Move : in Move_t) return String is
     begin
         return To_Lower(Move.Piece'Image)
           & (if Move.Capture then " [capture]" else "")
@@ -34,20 +34,53 @@ package body Board.Parse is
           & " "
           & Image(Move.To);
     end Image;
+        
     
-    
-    function Image(Cell : Cell_t) return String is
+    function Image(Cell : in Cell_t) return String is
     begin
         case Cell.IsEmpty is
             when True =>
-                return "empty";
+                -- return "";
+                return "  ";
             when False =>
-                return To_Lower(Cell.Color'Image & " " & Cell.Piece'Image);
+                --return To_Lower(Cell.Color'Image & " " & Cell.Piece'Image);
+                return (case Cell.Color is
+                            when White => "W",
+                            when Black => "B")
+                      & (case Cell.Piece is
+                            when King => "K",
+                            when Queen => "Q",
+                            when Rook => "R",
+                            when Bishop => "B",
+                            when Knight => "N",
+                            when Pawn => "p");
         end case;
     end Image;
     
     
-    procedure GetPieceDisambiguity(Move_Str : String; Move : in out Move_t) is
+    procedure Pretty_Print(Board : in Board_t)
+    is
+        Cell : Cell_t;
+    begin
+        for File in a .. h loop
+            if File = a then
+                Put_Line("    1  2  3  4  5  6  7  8");
+            end if;
+            
+            for Rank in 1 .. 8 loop
+                if Rank = 1 then
+                    Put(To_Lower(File'Image) & "|");
+                end if;
+                
+                Cell := Board(File, Rank);
+                Put(" " & Image(Cell));
+            end loop;
+            New_Line;
+        end loop;
+    end Pretty_Print;
+    
+    
+    procedure GetPieceDisambiguity(Move_Str : in String; Move : in out Move_t) is
         Index : Positive;
         Curr : Character;
 
@@ -114,7 +147,7 @@ package body Board.Parse is
     end GetPieceDisambiguity;
 
     
-    procedure GetCapture(Move_Str : String; Move : in out Move_t) is
+    procedure GetCapture(Move_Str : in String; Move : in out Move_t) is
     begin        
         if Move_Str'Length = 0 then
             Move.Capture := False;
@@ -130,14 +163,12 @@ package body Board.Parse is
     end GetCapture;
 
     
-    function Value(Move_Str : String) return Move_t is
+    function Value(Move_Str : in String) return Move_t is
         Move : Move_t;
 
         File_C : Character;
         Rank_C : Character;
-    begin
-        Put_Line("[PARSE] Value string: '" & Move_Str & "'");
-        
+    begin        
         -- Init
         Move.Piece := Pawn;
         Move.Capture := False;

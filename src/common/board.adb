@@ -13,24 +13,22 @@ package body Board is
                            Origin    : in Coordinates_t;
                            Objective : in Coordinates_t) return Boolean
     is
-        Check     : Boolean;
         NewBoard  : Board_t := Board;
         King      : Cell_t := Board(Origin.File, Origin.Rank);
     begin
+        Put_Line("Checking if the king would be checked on " & Image(Objective));
+
         -- Move the King
         NewBoard(Objective.File, Objective.Rank) := King;
         NewBoard(Origin.File, Origin.Rank) := (IsEmpty => True);
 
         -- See if the king would be check at this position
-        Check := IsKingCheck(Board, Objective, King.Color);
-
-        return Check;
+        return IsKingCheck(NewBoard, Objective);
     end IsKingCheckAt;
 
 
     function IsKingCheck(Board : in Board_t;
-                         Pos   : in Coordinates_t;
-                         Color : in Color_t) return Boolean
+                         Pos   : in Coordinates_t) return Boolean
     is
         Cell : Cell_t;
     begin
@@ -83,9 +81,9 @@ package body Board is
         -- + the file is inbound
         -- + the rank is inbound
         -- + the destination cell is not threatened
-        return Min_File <= To.File and To.File <= Max_File
-          and Min_Rank <= To.Rank and To.Rank <= Max_Rank
-          and not IsKingCheckAt(Board, From, To);
+        return Min_File <= To.File and then To.File <= Max_File
+          and then Min_Rank <= To.Rank and then To.Rank <= Max_Rank
+          and then not IsKingCheckAt(Board, From, To);
     end IsValidMove_King;
 
 
@@ -147,30 +145,23 @@ package body Board is
         Max_File_Rank : Rank_t := (if From.File > To.File then From.Rank else To.Rank);
 
         Cell : Cell_t;
+
+        File : File_t := File_t'Succ(Min_File);
+        -- Ascending or descending diagnoal
+        Rank_It : Integer := (if Min_File_Rank < Max_File_Rank then 1 else -1);
+        Rank    : Rank_t := Min_File_Rank + Rank_It;
     begin
         -- Is a diagonal
-        if abs (File_t'Pos(Max_File) - File_t'Pos(Min_File)) = abs (Max_File_Rank - Min_File_Rank) then
+        if abs (File_t'Pos(From.File) - File_t'Pos(To.File)) = abs (From.Rank - To.Rank) then
             -- traverse the diagonal
-            for File in Min_File .. Max_File loop
-                -- Ascending diagnoal
-                if Min_File_Rank < Min_File_Rank then
-                    for Rank in Min_File_Rank .. Min_File_Rank loop
-                    -- Each cell on the diagonal must be free
-                        Cell := Board(File, Rank);
-                        if not Cell.IsEmpty then
-                            return False;
-                        end if;
-                    end loop;
-                -- Descending diagonal
-                else
-                    for Rank in reverse Min_File_Rank .. Min_File_Rank loop
-                    -- Each cell on the diagonal must be free
-                        Cell := Board(File, Rank);
-                        if not Cell.IsEmpty then
-                            return False;
-                        end if;
-                    end loop;
+            while File /= File_t'Pred(Max_File) and Rank /= Max_File_Rank - Rank_It loop
+                Cell := Board(File, Rank);
+                -- Each cell on the diagonal must be free
+                if not Cell.IsEmpty then
+                    return False;
                 end if;
+                File := File_t'Succ(File);
+                Rank := Rank + Rank_It;
             end loop;
         -- Not a diagonal
         else
@@ -186,8 +177,12 @@ package body Board is
                                 To    : in Coordinates_t) return Boolean
     is
     begin
-        -- TODO
-        return False;
+        -- Either moving 1 on the file, 2 on the rank; or 2 on the file, 1 on
+        -- the rank.
+        return (abs (File_t'Pos(From.File) - File_t'Pos(To.File)) = 1
+                and abs (From.Rank - To.Rank) = 2)
+            or (abs (File_t'Pos(From.File) - File_t'Pos(To.File)) = 2
+                and abs (From.Rank - To.Rank) = 1);
     end IsValidMove_Knight;
 
 
@@ -195,9 +190,66 @@ package body Board is
                               From  : in Coordinates_t;
                               To    : in Coordinates_t) return Boolean
     is
+        Cell_From  : constant Cell_t := Board(From.File, From.Rank);
+        Cell_To    : constant Cell_t := Board(To.File, To.Rank);
+        Pawn_Color : Color_t := Cell_From.Color;
+
+        Forward_Valid  : Boolean;
+        Diagonal_Valid : Boolean;
     begin
-        -- TODO
-        return False;
+        -- Moves reversed depending on the color
+        case Pawn_Color is
+            when White =>
+                -- Can only move forward
+                if From.Rank > To.Rank then
+                    return False;
+                end if;
+
+                -- Either we me forward 1 cell (or 2 if we are on the rank 2)
+                case Cell_To.IsEmpty is
+                    when True =>
+                        Forward_Valid := (From.File = To.File and abs (To.Rank - From.Rank) <= (if From.Rank = 2 then 2 else 1));
+                    when False =>
+                        Forward_Valid := False;
+                end case;
+
+                case Cell_To.IsEmpty is
+                    when True =>
+                        Diagonal_Valid := False;
+                    when False =>
+                        Diagonal_Valid :=
+                          -- Or we capture, one cell forward, one cell on the left (if it is inbounds)
+                          (if From.File > a then (File_t'Pos(From.File) - 1 = File_t'Pos(To.File) and From.Rank + 1 = To.Rank) else False)
+                          -- Or we capture, one cell forward, one cell on the right (if it is inbounds)
+                          or (if From.File < h then (File_t'Pos(From.File) + 1 = File_t'Pos(To.File) and From.Rank + 1 = To.Rank) else False);
+                end case;
+
+            when Black =>
+                -- Can only move forward (but the other way)
+                if From.Rank < To.Rank then
+                    return False;
+                end if;
+
+                case Cell_To.IsEmpty is
+                    when True =>
+                        Forward_Valid := (From.File = To.File and abs (To.Rank - From.Rank) <= (if From.Rank = 7 then 2 else 1));
+                    when False =>
+                        Forward_Valid := False;
+                end case;
+
+                case Cell_To.IsEmpty is
+                    when True =>
+                        Diagonal_Valid := False;
+                    when False =>
+                        Diagonal_Valid :=
+                          -- Or we capture, one cell forward, one cell on the left (if it is inbounds)
+                          (if From.File > a then (File_t'Pos(From.File) - 1 = File_t'Pos(To.File) and From.Rank - 1 = To.Rank) else False)
+                          -- Or we capture, one cell forward, one cell on the right (if it is inbounds)
+                          or (if From.File < h then (File_t'Pos(From.File) + 1 = File_t'Pos(To.File) and From.Rank - 1 = To.Rank) else False);
+                end case;
+        end case;
+
+        return Forward_Valid or Diagonal_Valid;
     end IsValidMove_Pawn;
 
 
@@ -208,10 +260,12 @@ package body Board is
         Cell_From : constant Cell_t := Board(From.File, From.Rank);
         Cell_To   : constant Cell_t := Board(To.File, To.Rank);
     begin
+        Put_Line("Checking piece " & Image(Board(From.File, From.Rank)) & " going from '" & Image(From) & "' to '" & Image(To) & "'");
+
         -- Rules common to every piece:
         -- + the cell is different from the origin
         -- + either the cell is empty or it belongs to the opponent
-        if (From.File /= To.File and From.Rank /= To.Rank)
+        if (From.File = To.File and From.Rank = To.Rank)
           or not IsCellAccessible(Board, Cell_To, Cell_From.Color)
         then
             return False;
@@ -263,6 +317,8 @@ package body Board is
         Min_Rank : Rank_t := (if From_Has_Rank then CurrMove.From.Rank else 1);
         Max_Rank : Rank_t := (if From_Has_Rank then CurrMove.From.Rank else 8);
     begin
+        Put_Line("Looking for a piece that can move to " & Image(CurrMove.To));
+
         for File in Min_File .. Max_File loop
             for Rank in Min_Rank .. Max_Rank loop
                 CurrCord := (File, Rank);
@@ -278,8 +334,8 @@ package body Board is
                         -- + the given piece type (ex: 'Be4' matches only bishops)
                         -- + the move is legal
                         if CurrCell.Color = CurrPlayerColor
-                          and CurrCell.Piece = CurrMove.Piece
-                          and IsValidMove(Board, (File, Rank), CurrMove.To)
+                          and then CurrCell.Piece = CurrMove.Piece
+                          and then IsValidMove(Board, (File, Rank), CurrMove.To)
                         then
                             -- The move is possible, we add the piece position
                             -- to the candidates
@@ -302,7 +358,7 @@ package body Board is
                 for Piece of Pieces loop
                     Put(" '" & Image(Piece) & "'");
                 end loop;
-                Put_Line("");
+                New_Line;
                 return Ambiguous_Move;
         end case;
     end FindPiece;
@@ -316,6 +372,8 @@ package body Board is
         BoardPiece : Cell_t;
         MoveResult : MoveResult_t;
     begin
+        Put_Line("Moving to " & Image(CurrMove.To));
+
         -- find the piece on the board
         MoveResult := FindPiece(Board, CurrMove, CurrPlayerColor, From);
 
@@ -324,6 +382,7 @@ package body Board is
             Board(CurrMove.To.File, CurrMove.To.Rank) := Board(From.File, From.Rank);
             Board(From.File, From.Rank) := (IsEmpty => True);
             -- TODO en passant
+            -- TODO castle
             -- TODO check ? checkmate ?
         end if;
 
