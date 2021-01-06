@@ -4,6 +4,7 @@ with Ada.Command_Line; use Ada.Command_Line;
 with Ada.Characters.Handling; use Ada.Characters.Handling;
 with Ada.Strings.Fixed; use Ada.Strings.Fixed;
 with Board; use Board;
+with Board.Parse; use Board.Parse;
 
 
 procedure Server is

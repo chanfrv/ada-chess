@@ -1,5 +1,6 @@
 package Board is
 
+
     -- Board file
     type File_t is (a, b, c, d, e, f, g, h);
     -- Board rank
@@ -101,15 +102,6 @@ package Board is
         (WRook,   WPawn, Empty, Empty, Empty, Empty, BPawn, BRook  )  -- h
     );
 
-    function Image(Coordinates : Coordinates_t) return String;
-    function Image(Coordinates : Disambiguating_Coordinates_t) return String;
-    -- Converts the coordinates pair to an algebraic notation.
-    function Image(Move : Move_t) return String;
-    function Image(Cell : Cell_t) return String;
-
-    -- Converts an algebraic string to a coordinates pair.
-    function Value(Move_Str : String) return Move_t;
-
 
     -- Move the piece on CurrMove.From to the position CurrMove.To
     -- on the given chess board Board.
@@ -118,5 +110,6 @@ package Board is
     -- Checks if the game has ended, either not, either someone wins
     -- or it is a tie.
     function Game_Ended(Board : in Board_t) return GameResult_t;
+
 
 end Board;
