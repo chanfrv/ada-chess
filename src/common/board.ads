@@ -3,6 +3,10 @@ package Board is
 
     -- Board file
     type File_t is (a, b, c, d, e, f, g, h);
+
+    for File_t use (a => 1, b => 2, c => 3, d => 4,
+                    e => 5, f => 6, g => 7, h => 8);
+
     -- Board rank
     subtype Rank_t is Positive range 1 .. 8;
 
