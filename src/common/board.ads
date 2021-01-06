@@ -13,7 +13,7 @@ package Board is
         end record;
 
     type Has_Coordinates_t is (Has_None, Has_File, Has_Rank, Has_Both);
-    type Opt_Coordinates_t(Has : Has_Coordinates_t := Has_Both) is
+    type Disambiguating_Coordinates_t(Has : Has_Coordinates_t := Has_Both) is
         record
             case Has is
                 when Has_None =>
@@ -55,15 +55,14 @@ package Board is
         record
             Piece   : Piece_t;
             Capture : Boolean;
-            From    : Opt_Coordinates_t;
+            From    : Disambiguating_Coordinates_t;
             To      : Coordinates_t;
         end record;
-
 
     -- Enumeration of the possible results after a move is given by
     -- a player. Used in the function Move().
     -- TODO add more errors
-    type MoveResult_t is (Valid_Move, Invalid_Move);
+    type MoveResult_t is (Valid_Move, Invalid_Move, Ambiguous_Move);
 
     -- The differents outcomes of a game
     type GameResult_t is (Playing, Check, Checkmate, Resignation);
@@ -103,9 +102,10 @@ package Board is
     );
 
     function Image(Coordinates : Coordinates_t) return String;
-    function Image(Coordinates : Opt_Coordinates_t) return String;
+    function Image(Coordinates : Disambiguating_Coordinates_t) return String;
     -- Converts the coordinates pair to an algebraic notation.
     function Image(Move : Move_t) return String;
+    function Image(Cell : Cell_t) return String;
 
     -- Converts an algebraic string to a coordinates pair.
     function Value(Move_Str : String) return Move_t;

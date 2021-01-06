@@ -1,5 +1,7 @@
 with Ada.Text_IO; use Ada.Text_IO;
 with Ada.Characters.Handling; use Ada.Characters.Handling;
+with Ada.Containers; use Ada.Containers;
+with Ada.Containers.Vectors;
 
 
 package body Board is
@@ -9,7 +11,7 @@ package body Board is
         return To_Lower(Coordinates.File'Image) & Coordinates.Rank'Image;
     end Image;
 
-    function Image(Coordinates : Opt_Coordinates_t) return String is
+    function Image(Coordinates : Disambiguating_Coordinates_t) return String is
     begin
         case Coordinates.Has is
             when Has_None =>
@@ -26,6 +28,16 @@ package body Board is
     function Image(Move : Move_t) return String is
     begin
         return To_Lower(Move.Piece'Image) & (if Move.Capture then "x" else " ") & Image(Move.From) & Image(Move.To);
+    end Image;
+
+    function Image(Cell : Cell_t) return String is
+    begin
+        case Cell.IsEmpty is
+            when True =>
+                return "empty";
+            when False =>
+                return To_Lower(Cell.Color'Image & " " & Cell.Piece'Image);
+        end case;
     end Image;
 
     procedure GetPieceDisambiguity(Move_Str : String; Move : in out Move_t) is
@@ -145,7 +157,7 @@ package body Board is
     end Value;
 
 
-    function GetCoordinates(File : Integer; Rank : Integer) return Opt_Coordinates_t is
+    function GetCoordinates(File : Integer; Rank : Integer) return Disambiguating_Coordinates_t is
     begin
         if File > File_t'Pos(File_t'Last) or File < File_t'Pos(File_t'First) then
             return (Has => Has_None);
@@ -160,7 +172,7 @@ package body Board is
     function KingTest(Board : in out Board_t; CurrMove : in Move_t; CurrPlayerColor : in Color_t) return MoveResult_t is
         FileInt : Integer := File_t'Pos(CurrMove.From.File);
         RankInt : Integer := Rank_t'Pos(CurrMove.From.Rank);
-        type Valid_Coord_Array is array (Integer) of Opt_Coordinates_t;
+        type Valid_Coord_Array is array (Integer) of Disambiguating_Coordinates_t;
         ValidArr : Valid_Coord_Array := (
             GetCoordinates(FileInt + 1, RankInt + 1),
             GetCoordinates(FileInt + 1, RankInt),
@@ -192,20 +204,73 @@ package body Board is
         return Invalid_Move;
     end KingTest;
 
-    function FindPiece(Board : in Board_t; Coordinates : in Opt_Coordinates_t) return Cell_t is
+
+    function HasValidMove(Board : in Board_t;
+                          From  : in Coordinates_t;
+                          To    : in Coordinates_t) return Boolean is
     begin
-        -- TODO find the piece from the algebraic info
-        return (False, Pawn, White);
+        -- TODO
+        return True;
+    end HasValidMove;
+
+    function FindPiece(Board           : in  Board_t;
+                       CurrMove        : in  Move_t;
+                       CurrPlayerColor : in  Color_t;
+                       From            : out Coordinates_t) return MoveResult_t
+    is
+        package Integer_Vectors is new Ada.Containers.Vectors
+            (Index_Type   => Positive,
+             Element_Type => Coordinates_t);
+        use Integer_Vectors;
+
+        Pieces   : Vector;
+        CurrCell : Cell_t;
+    begin
+        for File in a .. h loop
+            for Rank in 1 .. 8 loop
+                CurrCell := Board(File, Rank);
+
+                if CurrCell.IsEmpty = False                          -- non empty cell
+                  and CurrCell.Color = CurrPlayerColor               -- player color
+                  and CurrCell.Piece = CurrMove.Piece                -- piece
+                  and HasValidMove(Board, (File, Rank), CurrMove.To) -- legal move
+                then
+                    Put_Line("Found candidate piece: " & Image(Board(File, Rank)));
+                    Pieces.Append((File, Rank));
+                end if;
+            end loop;
+        end loop;
+
+        case Pieces.Length is
+            when 0 =>
+                Put_Line("No valid piece found");
+                return Invalid_Move;
+            when 1 =>
+                From := Pieces.First_Element;
+                return Valid_Move;
+            when others =>
+                Put("Unresolved ambiguity between the pieces:");
+                for Piece of Pieces loop
+                    Put(" '" & Image(Piece) & "'");
+                end loop;
+                Put_Line("");
+                return Ambiguous_Move;
+        end case;
     end FindPiece;
 
-    function Move(Board : in out Board_t; CurrMove : in Move_t; CurrPlayerColor : in Color_t) return MoveResult_t is
-        BoardPiece: Cell_t;
-    begin
-        BoardPiece := FindPiece(Board, CurrMove.From);
 
-        if BoardPiece.IsEmpty or BoardPiece.Color /= CurrPlayerColor then
-            return Invalid_Move;
+    function Move(Board : in out Board_t; CurrMove : in Move_t; CurrPlayerColor : in Color_t) return MoveResult_t is
+        FromCoords : Coordinates_t;
+        BoardPiece : Cell_t;
+        MoveResult : MoveResult_t;
+    begin
+        MoveResult := FindPiece(Board, CurrMove, CurrPlayerColor, FromCoords); -- find the piece on the board
+
+        if MoveResult /= Valid_Move then -- error if the piece was not found
+            return MoveResult;
         end if;
+
+        BoardPiece := Board(FromCoords.File, FromCoords.Rank); -- get the piece at the given coords
 
         case BoardPiece.Piece is
             when King =>
