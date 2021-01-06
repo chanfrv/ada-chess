@@ -120,8 +120,17 @@ package Board is
     -- or it is a tie.
     function Game_Ended(Board : in Board_t) return GameResult_t;
 
+
 private
 
+
+    -- Return True if the King at position Origin would be check at position
+    -- Objective.
+    function IsKingCheckAt(Board     : in Board_t;
+                           Origin    : in Coordinates_t;
+                           Objective : in Coordinates_t) return Boolean;
+
+    -- Returns True if the King of color Color at position Pos is check.
     function IsKingCheck(Board : in Board_t;
                          Pos   : in Coordinates_t;
                          Color : in Color_t) return Boolean;
@@ -138,11 +147,14 @@ private
     -- TODO IsValidMove_X
 
 
+    -- Returns True if the piece on From is allowed to move on To.
     function IsValidMove(Board : in Board_t;
                          From  : in Coordinates_t;
                          To    : in Coordinates_t) return Boolean;
 
 
+    -- Find a piece which fulfills the requirements from the given algebraic
+    -- notation. If found the From coordinate will contain its location.
     function FindPiece(Board           : in  Board_t;
                        CurrMove        : in  Move_t;
                        CurrPlayerColor : in  Color_t;

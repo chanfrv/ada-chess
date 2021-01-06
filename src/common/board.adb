@@ -9,11 +9,32 @@ with Board.Parse; use Board.Parse;
 package body Board is
 
 
+    function IsKingCheckAt(Board     : in Board_t;
+                           Origin    : in Coordinates_t;
+                           Objective : in Coordinates_t) return Boolean
+    is
+        Check     : Boolean;
+        NewBoard  : Board_t := Board;
+        King      : Cell_t := Board(Origin.File, Origin.Rank);
+    begin
+        -- Move the King
+        NewBoard(Objective.File, Objective.Rank) := King;
+        NewBoard(Origin.File, Origin.Rank) := (IsEmpty => True);
+
+        -- See if the king would be check at this position
+        Check := IsKingCheck(Board, Objective, King.Color);
+
+        return Check;
+    end IsKingCheckAt;
+
+
     function IsKingCheck(Board : in Board_t;
                          Pos   : in Coordinates_t;
-                         Color : in Color_t) return Boolean is
+                         Color : in Color_t) return Boolean
+    is
         Cell : Cell_t;
     begin
+        -- Find an opponent piece threatening it
         for File in a .. h loop
             for Rank in 1 .. 8 loop
                 Cell := Board(File, Rank);
@@ -57,7 +78,7 @@ package body Board is
           and Min_Rank <= To.Rank and To.Rank <= Max_Rank
           and (From.File /= To.File or From.Rank /= To.Rank)
           and (case Cell.IsEmpty is when True => True, when False => Board(To.File, To.Rank).Color /= King_Color)
-          and not IsKingCheck(Board, To, King_Color);
+          and not IsKingCheckAt(Board, From, To);
     end IsValidMove_King;
 
 
