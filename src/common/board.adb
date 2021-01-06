@@ -141,9 +141,43 @@ package body Board is
                                 From  : in Coordinates_t;
                                 To    : in Coordinates_t) return Boolean
     is
+        Min_File : File_t := (if From.File < To.File then From.File else To.File);
+        Max_File : File_t := (if From.File > To.File then From.File else To.File);
+        Min_File_Rank : Rank_t := (if From.File < To.File then From.Rank else To.Rank);
+        Max_File_Rank : Rank_t := (if From.File > To.File then From.Rank else To.Rank);
+
+        Cell : Cell_t;
     begin
-        -- TODO
-        return False;
+        -- Is a diagonal
+        if abs (File_t'Pos(Max_File) - File_t'Pos(Min_File)) = abs (Max_File_Rank - Min_File_Rank) then
+            -- traverse the diagonal
+            for File in Min_File .. Max_File loop
+                -- Ascending diagnoal
+                if Min_File_Rank < Min_File_Rank then
+                    for Rank in Min_File_Rank .. Min_File_Rank loop
+                    -- Each cell on the diagonal must be free
+                        Cell := Board(File, Rank);
+                        if not Cell.IsEmpty then
+                            return False;
+                        end if;
+                    end loop;
+                -- Descending diagonal
+                else
+                    for Rank in reverse Min_File_Rank .. Min_File_Rank loop
+                    -- Each cell on the diagonal must be free
+                        Cell := Board(File, Rank);
+                        if not Cell.IsEmpty then
+                            return False;
+                        end if;
+                    end loop;
+                end if;
+            end loop;
+        -- Not a diagonal
+        else
+            return False;
+        end if;
+
+        return True;
     end IsValidMove_Bishop;
 
 
