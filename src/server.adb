@@ -119,15 +119,15 @@ Game_Loop:
 
         -- Decide what to do depending on the move
         case MoveResult is
-            when Invalid_Move =>
-                Put_Line("Invalid move from " & Image(CurrPlayer));
-                String'Output(CurrPlayer.Channel, "Invalid move from " & Image(CurrPlayer));
-                -- TODO send error to current player
             when Valid_Move =>
                 Put_Line(CurrPlayer.Color'Image & " moved");
                 String'Output(CurrPlayer.Channel, Image(CurrPlayer) & " moved");
                 -- TODO broadcast move to the other player
                 CurrPlayerIndex := 3 - CurrPlayerIndex;
+            when Invalid_Move | Ambiguous_Move =>
+                Put_Line("Invalid move from " & Image(CurrPlayer));
+                String'Output(CurrPlayer.Channel, "Invalid move from " & Image(CurrPlayer));
+                -- TODO send error to current player
         end case;
 
         -- Check if the game ended
