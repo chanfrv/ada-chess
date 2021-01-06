@@ -40,6 +40,17 @@ package body Board is
     end IsValidMove_King;
 
 
+    function IsValidMove_Pawn(Board : in Board_t;
+                              From  : in Coordinates_t;
+                              To    : in Coordinates_t) return Boolean
+    is
+        Pawn_Color : Color_t := Board(From.File, From.Rank).Color;
+    begin
+        -- TODO
+        return True;
+    end IsValidMove_Pawn;
+
+
     function IsValidMove(Board : in Board_t;
                          From  : in Coordinates_t;
                          To    : in Coordinates_t) return Boolean
@@ -50,8 +61,10 @@ package body Board is
         case Cell.Piece is
             when King =>
                 return IsValidMove_King(Board, From, To);
+            when Pawn =>
+                return IsValidMove_Pawn(Board, From, To);
             when others =>
-                Put_Line("Move for piece not implemented");
+                Put_Line("Move for piece " & Cell.Piece'Image & " not implemented");
                 return False;
         end case;
     end IsValidMove;
@@ -123,17 +136,15 @@ package body Board is
     begin
         MoveResult := FindPiece(Board, CurrMove, CurrPlayerColor, FromCoords); -- find the piece on the board
 
-        if MoveResult /= Valid_Move then -- error if the piece was not found
-            return MoveResult;
+        if MoveResult = Valid_Move then
+            BoardPiece := Board(FromCoords.File, FromCoords.Rank); -- get the piece at the given coords
+
+            -- TODO now that the move is valid
+            -- 1) remove the captured pieces (! en passant)
+            -- 2) execute the move
         end if;
 
-        BoardPiece := Board(FromCoords.File, FromCoords.Rank); -- get the piece at the given coords
-
-        -- TODO now that the move is valid
-        -- 1) remove the captured pieces (! en passant)
-        -- 2) execute the move
-
-        return Valid_Move;
+        return MoveResult;
     end Move;
 
     function Game_Ended(Board : in Board_t) return GameResult_t is
