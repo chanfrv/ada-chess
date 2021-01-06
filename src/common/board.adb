@@ -28,16 +28,24 @@ package body Board is
         King_Color : Color_t := Board(From.File, From.Rank).Color;
         Cell : Cell_t := Board(To.File, To.Rank);
 
+        -- Gets the rectangle of dimension file and rank where the king is
+        -- allowed to move without going out of bounds.
         Min_File : File_t := (if From.File > a then File_t'Pred(From.File) else From.File);
         Max_File : File_t := (if From.File < h then File_t'Succ(From.File) else From.File);
         Min_Rank : Rank_t := (if From.Rank > 1 then From.Rank - 1 else From.Rank);
         Max_Rank : Rank_t := (if From.Rank < 8 then From.Rank + 1 else From.Rank);
     begin
-        return Min_File <= To.File and To.File <= Max_File -- file inbound
-          and Min_Rank <= To.Rank and To.Rank <= Max_Rank -- rank inbound
-          and (From.File /= To.File or From.Rank /= To.Rank) -- cannot stay on the same cell
-          and (case Cell.IsEmpty is when True => True, when False => Board(To.File, To.Rank).Color /= King_Color) -- either empty cell or opponent
-          and not IsKingCheck(Board, To, King_Color); -- cannot move on a threatened cell
+        -- The king move is valid if:
+        -- + the file is inbound
+        -- + the rank is inbound
+        -- + the cell is different from the origin
+        -- + either the cell is empty or it belongs to the opponent
+        -- + the destination cell is not threatened
+        return Min_File <= To.File and To.File <= Max_File
+          and Min_Rank <= To.Rank and To.Rank <= Max_Rank
+          and (From.File /= To.File or From.Rank /= To.Rank)
+          and (case Cell.IsEmpty is when True => True, when False => Board(To.File, To.Rank).Color /= King_Color)
+          and not IsKingCheck(Board, To, King_Color);
     end IsValidMove_King;
 
 
@@ -59,6 +67,7 @@ package body Board is
         Cell : constant Cell_t  := Board(From.File, From.Rank);
     begin
         -- TODO
+        -- Dispatch to the piece specific function
         case Cell.Piece is
             when King =>
                 return IsValidMove_King(Board, From, To);
@@ -85,9 +94,15 @@ package body Board is
         CurrCord : Coordinates_t;
         CurrCell : Cell_t;
 
+        -- The move contains the origin file or rank information
         From_Has_File : Boolean := CurrMove.From.Has = Has_File or CurrMove.From.Has = Has_Both;
         From_Has_Rank : Boolean := CurrMove.From.Has = Has_Rank or CurrMove.From.Has = Has_Both;
 
+        -- Decide of the bounds where to search the piece. If a player inputs
+        -- 'e4' neither the origin file nor the ranks are given so the piece
+        -- will be searched on both (a .. h) and (1 .. 8). If a player inputs
+        -- 'exd4' the file 'e' is given so the search will be restricted to the
+        -- pieces from the file range (e .. e).
         Min_File : File_t := (if From_Has_File then CurrMove.From.File else a);
         Max_File : File_t := (if From_Has_File then CurrMove.From.File else h);
         Min_Rank : Rank_t := (if From_Has_Rank then CurrMove.From.Rank else 1);
@@ -100,12 +115,20 @@ package body Board is
 
                 case CurrCell.IsEmpty is
                     when True =>
+                        -- The cell is empty
                         null;
-                    when False =>                                           -- non empty cell
-                        if CurrCell.Color = CurrPlayerColor                 -- player color
-                          and CurrCell.Piece = CurrMove.Piece               -- piece
-                          and IsValidMove(Board, (File, Rank), CurrMove.To) -- legal move
+                    when False =>
+                        -- the cell is not empty, the move must validate:
+                        -- + the player color
+                        -- + the given piece (ex 'Be4' matches only bishops)
+                        -- + the move is legal
+                        if CurrCell.Color = CurrPlayerColor
+                          and CurrCell.Piece = CurrMove.Piece
+                          and IsValidMove(Board, (File, Rank), CurrMove.To)
                         then
+                            -- The move is possible, we add the piece position
+                            -- to the candidates
+                            Put_Line("Found candidate '" & Image(CurrCord) & "'");
                             Pieces.Append((File, Rank));
                         end if;
                 end case;
@@ -113,13 +136,13 @@ package body Board is
         end loop;
 
         case Pieces.Length is
-            when 0 =>
+            when 0 => -- no piece found: invalid move
                 Put_Line("No valid piece found");
                 return Invalid_Move;
-            when 1 =>
+            when 1 => -- one piece found
                 From := Pieces.First_Element;
                 return Valid_Move;
-            when others =>
+            when others => -- more than one piece found: ambiguity
                 Put("Unresolved ambiguity between the pieces:");
                 for Piece of Pieces loop
                     Put(" '" & Image(Piece) & "'");
@@ -130,14 +153,19 @@ package body Board is
     end FindPiece;
 
 
-    function Move(Board : in out Board_t; CurrMove : in Move_t; CurrPlayerColor : in Color_t) return MoveResult_t is
+    function Move(Board           : in out Board_t;
+                  CurrMove        : in Move_t;
+                  CurrPlayerColor : in Color_t) return MoveResult_t
+    is
         From : Coordinates_t;
         BoardPiece : Cell_t;
         MoveResult : MoveResult_t;
     begin
-        MoveResult := FindPiece(Board, CurrMove, CurrPlayerColor, From); -- find the piece on the board
+        -- find the piece on the board
+        MoveResult := FindPiece(Board, CurrMove, CurrPlayerColor, From);
 
         if MoveResult = Valid_Move then
+            -- if the move is valid, move the piece
             Board(CurrMove.To.File, CurrMove.To.Rank) := Board(From.File, From.Rank);
             Board(From.File, From.Rank) := (IsEmpty => True);
             -- TODO en passant
