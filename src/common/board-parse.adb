@@ -47,13 +47,13 @@ package body Board.Parse is
                 return (case Cell.Color is
                             when White => "W",
                             when Black => "B")
-                      & (case Cell.Piece is
-                            when King => "K",
-                            when Queen => "Q",
-                            when Rook => "R",
+                     & (case Cell.Piece is
+                            when King   => "K",
+                            when Queen  => "Q",
+                            when Rook   => "R",
                             when Bishop => "B",
                             when Knight => "N",
-                            when Pawn => "p");
+                            when Pawn   => "p");
         end case;
     end Image;
     
@@ -91,6 +91,7 @@ package body Board.Parse is
         Index := Move_Str'Last;
         Curr := Move_Str(Index);
 
+        -- Origin rank
         case Curr is
             when '1'|'2'|'3'|'4'|'5'|'6'|'7'|'8' =>
                 Has_Coords := Has_Rank;
@@ -105,6 +106,7 @@ package body Board.Parse is
                 null;
         end case;
 
+        -- Origin file
         case Curr is
             when 'a'|'b'|'c'|'d'|'e'|'f'|'g'|'h' =>
                 Has_Coords := (if Has_Coords = Has_Rank then Has_Both else Has_File);
@@ -119,6 +121,7 @@ package body Board.Parse is
                 null;
         end case;
 
+        -- Build the disambiguity coordinates
         case Has_Coords is
             when Has_None =>
                 Move.From := (Has => Has_None);
@@ -130,6 +133,7 @@ package body Board.Parse is
                 Move.From := (Has => Has_Both, Coordinates => (Rank => Rank, File => File));
         end case;
 
+        -- Get the piece
         case Curr is
             when 'K' =>
                 Move.Piece := King;
@@ -148,32 +152,29 @@ package body Board.Parse is
 
     
     procedure GetCapture(Move_Str : in String; Move : in out Move_t) is
-    begin        
+    begin
+        -- No more info
         if Move_Str'Length = 0 then
             Move.Capture := False;
+        -- Capture
         elsif Move_Str(Move_Str'Last) = 'x' then
             Move.Capture := True;
+            -- Disambiguity
             if Move_Str'Length > 1 then
                 GetPieceDisambiguity(Move_Str(Move_Str'First .. Move_Str'Last - 1), move);
             end if;
+        -- Disambiguity
         else
             Move.Capture := False;
             GetPieceDisambiguity(Move_Str, move);
         end if;
     end GetCapture;
-
     
-    function Value(Move_Str : in String) return Move_t is
-        Move : Move_t;
-
+    procedure GetPosition(Move_Str : in String; Move : in out Move_t) is
         File_C : Character;
         Rank_C : Character;
-    begin        
-        -- Init
-        Move.Piece := Pawn;
-        Move.Capture := False;
-        Move.From := (Has => Has_None);
-        
+    begin
+        -- File
         File_C := Move_Str(Move_Str'Last - 1);
         case File_C is
             when 'a'|'b'|'c'|'d'|'e'|'f'|'g'|'h' =>
@@ -182,6 +183,7 @@ package body Board.Parse is
                 Put_Line("Invalid destination file");
         end case;
 
+        -- Rank
         Rank_C := Move_Str(Move_Str'Last);
         case Rank_C is
             when '1'|'2'|'3'|'4'|'5'|'6'|'7'|'8' =>
@@ -190,8 +192,45 @@ package body Board.Parse is
                 Put_Line("Invalid destination rank");
         end case;
         
+        -- Capture, piece and disambiguity
         GetCapture(Move_Str(Move_Str'First .. Move_Str'Last - 2), Move);
-
+    
+    end GetPosition;
+    
+    
+    function Value(Move_Str : in String) return Move_t is
+        Move : Move_t;
+        
+        Char  : Character := Move_Str(Move_Str'Last);
+    begin        
+        -- Init
+        Move.Piece := Pawn;
+        Move.Capture := False;
+        Move.From := (Has => Has_None);
+        Move.Promotion := Pawn;
+        
+        -- Promotion handling
+        case Char is
+            when 'Q'|'R'|'B'|'N' =>
+                case Char is
+                    when 'Q' =>
+                        Move.Promotion := Queen;
+                    when 'R' =>
+                        Move.Promotion := Rook;
+                    when 'B' =>
+                        Move.Promotion := Bishop;
+                    when 'N' =>
+                        Move.Promotion := Knight;
+                    when others =>
+                        null;
+                end case;
+                -- Has promotion
+                GetPosition(Move_Str(Move_Str'First .. Move_Str'Last - 1), Move);
+            when others =>
+                -- No promotion
+                GetPosition(Move_Str(Move_Str'First .. Move_Str'Last), Move);
+        end case;
+        
         return Move;
     end Value;
 

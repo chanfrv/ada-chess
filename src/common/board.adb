@@ -371,8 +371,12 @@ package body Board is
         From : Coordinates_t;
         BoardPiece : Cell_t;
         MoveResult : MoveResult_t;
+        Cell_To : Cell_t;
+        Promoted : Cell_t;
     begin
         Put_Line("Moving to " & Image(CurrMove.To));
+
+        -- TODO castling
 
         -- find the piece on the board
         MoveResult := FindPiece(Board, CurrMove, CurrPlayerColor, From);
@@ -381,9 +385,19 @@ package body Board is
             -- if the move is valid, move the piece
             Board(CurrMove.To.File, CurrMove.To.Rank) := Board(From.File, From.Rank);
             Board(From.File, From.Rank) := (IsEmpty => True);
+
+            Cell_To := Board(CurrMove.To.File, CurrMove.To.Rank);
+
+            -- Promotion
+            if Cell_To.Piece = Pawn and (
+                    (Cell_To.Color = White and CurrMove.To.Rank = 8)
+                 or (Cell_To.Color = Black and CurrMove.To.Rank = 1))
+            then
+                Promoted := (IsEmpty => False, Piece => CurrMove.Promotion, Color => Cell_To.Color);
+                Board(CurrMove.To.File, CurrMove.To.Rank) := Promoted;
+            end if;
+
             -- TODO en passant
-            -- TODO castle
-            -- TODO check ? checkmate ?
         end if;
 
         return MoveResult;

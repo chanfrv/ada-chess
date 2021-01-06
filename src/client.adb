@@ -20,7 +20,7 @@ procedure Client is
     My_Color    : Color_t;
 
     -- TODO put the complete algebraic notation regex
-    Move_String : constant String := "[KQRBN]?([a-h]|[1-8]|[a-h][1-8])?x?[a-h][1-8]";
+    Move_String : constant String := "[KQRBN]?([a-h]|[1-8]|[a-h][1-8])?x?[a-h][1-8][QRBN]?";
     Move_Regexp : constant Regexp := Compile(Move_String);
 begin
     -- Connect
