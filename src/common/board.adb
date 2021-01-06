@@ -12,11 +12,23 @@ package body Board is
     function IsKingCheck(Board : in Board_t;
                          Pos   : in Coordinates_t;
                          Color : in Color_t) return Boolean is
+        Cell : Cell_t;
     begin
-        -- TODO
-        -- 1) build a vector with all the opponent pieces
-        -- 2) keep all the pieces with a valid move to the king
-        -- 3) return list not empty
+        for File in a .. h loop
+            for Rank in 1 .. 8 loop
+                Cell := Board(File, Rank);
+
+                case Cell.IsEmpty is
+                    when True =>
+                        null;
+                    when False =>
+                        if IsValidMove(Board, (File, Rank), Pos) then
+                            return True;
+                        end if;
+                end case;
+            end loop;
+        end loop;
+
         return False;
     end IsKingCheck;
 
@@ -119,8 +131,8 @@ package body Board is
                         null;
                     when False =>
                         -- the cell is not empty, the move must validate:
-                        -- + the player color
-                        -- + the given piece (ex 'Be4' matches only bishops)
+                        -- + the piece belongs to the player
+                        -- + the given piece type (ex: 'Be4' matches only bishops)
                         -- + the move is legal
                         if CurrCell.Color = CurrPlayerColor
                           and CurrCell.Piece = CurrMove.Piece

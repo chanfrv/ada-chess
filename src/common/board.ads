@@ -112,11 +112,40 @@ package Board is
 
     -- Move the piece on CurrMove.From to the position CurrMove.To
     -- on the given chess board Board.
-    function Move(Board : in out Board_t; CurrMove : in Move_t; CurrPlayerColor : in Color_t) return MoveResult_t;
+    function Move(Board           : in out Board_t;
+                  CurrMove        : in Move_t;
+                  CurrPlayerColor : in Color_t) return MoveResult_t;
 
     -- Checks if the game has ended, either not, either someone wins
     -- or it is a tie.
     function Game_Ended(Board : in Board_t) return GameResult_t;
 
+private
+
+    function IsKingCheck(Board : in Board_t;
+                         Pos   : in Coordinates_t;
+                         Color : in Color_t) return Boolean;
+
+
+    function IsValidMove_King(Board : in Board_t;
+                              From  : in Coordinates_t;
+                              To    : in Coordinates_t) return Boolean;
+
+    function IsValidMove_Pawn(Board : in Board_t;
+                              From  : in Coordinates_t;
+                              To    : in Coordinates_t) return Boolean;
+
+    -- TODO IsValidMove_X
+
+
+    function IsValidMove(Board : in Board_t;
+                         From  : in Coordinates_t;
+                         To    : in Coordinates_t) return Boolean;
+
+
+    function FindPiece(Board           : in  Board_t;
+                       CurrMove        : in  Move_t;
+                       CurrPlayerColor : in  Color_t;
+                       From            : out Coordinates_t) return MoveResult_t;
 
 end Board;
