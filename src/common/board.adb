@@ -26,6 +26,7 @@ package body Board is
                               To    : in Coordinates_t) return Boolean
     is
         King_Color : Color_t := Board(From.File, From.Rank).Color;
+        Cell : Cell_t := Board(To.File, To.Rank);
 
         Min_File : File_t := (if From.File > a then File_t'Pred(From.File) else From.File);
         Max_File : File_t := (if From.File < h then File_t'Succ(From.File) else From.File);
@@ -35,7 +36,7 @@ package body Board is
         return Min_File <= To.File and To.File <= Max_File -- file inbound
           and Min_Rank <= To.Rank and To.Rank <= Max_Rank -- rank inbound
           and (From.File /= To.File or From.Rank /= To.Rank) -- cannot stay on the same cell
-          and (Board(To.File, To.Rank).IsEmpty = True or Board(To.File, To.Rank).Color /= King_Color) -- either empty cell or opponent
+          and (case Cell.IsEmpty is when True => True, when False => Board(To.File, To.Rank).Color /= King_Color) -- either empty cell or opponent
           and not IsKingCheck(Board, To, King_Color); -- cannot move on a threatened cell
     end IsValidMove_King;
 
@@ -55,7 +56,7 @@ package body Board is
                          From  : in Coordinates_t;
                          To    : in Coordinates_t) return Boolean
     is
-        Cell  : constant Cell_t  := Board(From.File, From.Rank);
+        Cell : constant Cell_t  := Board(From.File, From.Rank);
     begin
         -- TODO
         case Cell.Piece is
@@ -130,18 +131,16 @@ package body Board is
 
 
     function Move(Board : in out Board_t; CurrMove : in Move_t; CurrPlayerColor : in Color_t) return MoveResult_t is
-        FromCoords : Coordinates_t;
+        From : Coordinates_t;
         BoardPiece : Cell_t;
         MoveResult : MoveResult_t;
     begin
-        MoveResult := FindPiece(Board, CurrMove, CurrPlayerColor, FromCoords); -- find the piece on the board
+        MoveResult := FindPiece(Board, CurrMove, CurrPlayerColor, From); -- find the piece on the board
 
         if MoveResult = Valid_Move then
-            BoardPiece := Board(FromCoords.File, FromCoords.Rank); -- get the piece at the given coords
-
-            -- TODO now that the move is valid
-            -- 1) remove the captured pieces (! en passant)
-            -- 2) execute the move
+            Board(CurrMove.To.File, CurrMove.To.Rank) := Board(From.File, From.Rank);
+            Board(From.File, From.Rank) := (IsEmpty => True);
+            -- TODO en passant
         end if;
 
         return MoveResult;

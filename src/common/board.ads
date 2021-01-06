@@ -70,17 +70,13 @@ package Board is
     type MoveResult_t is (Valid_Move, Invalid_Move, Ambiguous_Move);
 
     -- The differents outcomes of a game
-    type GameResult_t is (Playing, Check, Checkmate, Resignation);
+    type GameResult_t is (Playing,
+                          Check_White, Check_Black,
+                          Checkmate_White, Checkmate_Black,
+                          Resignation_White, Resignation_Black);
 
 
     Empty   : constant Cell_t := (IsEmpty => True);
-
-    BKing   : constant Cell_t := (IsEmpty => False, Piece => King,   Color => Black);
-    BQueen  : constant Cell_t := (IsEmpty => False, Piece => Queen,  Color => Black);
-    BRook   : constant Cell_t := (IsEmpty => False, Piece => Rook,   Color => Black);
-    BBishop : constant Cell_t := (IsEmpty => False, Piece => Bishop, Color => Black);
-    BKnight : constant Cell_t := (IsEmpty => False, Piece => Knight, Color => Black);
-    BPawn   : constant Cell_t := (IsEmpty => False, Piece => Pawn,   Color => Black);
 
     WKing   : constant Cell_t := (IsEmpty => False, Piece => King,   Color => White);
     WQueen  : constant Cell_t := (IsEmpty => False, Piece => Queen,  Color => White);
@@ -88,6 +84,13 @@ package Board is
     WBishop : constant Cell_t := (IsEmpty => False, Piece => Bishop, Color => White);
     WKnight : constant Cell_t := (IsEmpty => False, Piece => Knight, Color => White);
     WPawn   : constant Cell_t := (IsEmpty => False, Piece => Pawn,   Color => White);
+
+    BKing   : constant Cell_t := (IsEmpty => False, Piece => King,   Color => Black);
+    BQueen  : constant Cell_t := (IsEmpty => False, Piece => Queen,  Color => Black);
+    BRook   : constant Cell_t := (IsEmpty => False, Piece => Rook,   Color => Black);
+    BBishop : constant Cell_t := (IsEmpty => False, Piece => Bishop, Color => Black);
+    BKnight : constant Cell_t := (IsEmpty => False, Piece => Knight, Color => Black);
+    BPawn   : constant Cell_t := (IsEmpty => False, Piece => Pawn,   Color => Black);
 
 
     -- Default board, white being on the ranks 1-2 and black on the

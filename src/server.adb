@@ -107,7 +107,7 @@ begin
     CurrPlayerIndex := GetWhitePlayer(Players);
 
 Game_Loop:
-    while GameState = Playing or GameState = Check loop
+    while GameState = Playing or GameState = Check_White or GameState = Check_Black loop
         -- Change the current player
         CurrPlayer := Players(CurrPlayerIndex);
         Put_Line("Waiting for " & Image(CurrPlayer) & " move");

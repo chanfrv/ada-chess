@@ -43,7 +43,7 @@ begin
     GameState := Playing;
 
 Game_Loop:
-    while GameState = Playing or GameState = Check loop
+    while GameState = Playing or GameState = Check_White or GameState = Check_Black loop
         -- Get and send move
         Str := (others => Character'Val(0));
         Put(To_lower(My_Color'Image) & "> ");
@@ -55,7 +55,7 @@ Game_Loop:
         -- Send the move to the server
         if Str(1 .. Last) = "quit" then
             exit Game_Loop;
-        elsif Str(1 .. Last) = "forfeit" then
+        elsif Str(1 .. Last) = "resign" then
             null;
         elsif Match(Str(1 .. Last), Move_Regexp) = True then
             String'Output(Channel, Str(1 .. Last));
