@@ -17,6 +17,10 @@ package Board is
             Rank : Rank_t;
         end record;
 
+    -- Algebraic coordinates provides either no, only the file, only
+    -- the rank or both coordinates of the moving piece to solve
+    -- ambiguities between multiple pieces allowed to move to the
+    -- destination cell.
     type Has_Coordinates_t is (Has_None, Has_File, Has_Rank, Has_Both);
     type Disambiguating_Coordinates_t(Has : Has_Coordinates_t := Has_Both) is
         record
@@ -32,6 +36,21 @@ package Board is
             end case;
         end record;
 
+    -- Optional coordinates, if set then a pawn moving to To will capture
+    -- the piece on Target.
+    type EnPassant_Coordinates_t(IsEnPassant : Boolean := False) is
+        record
+            case IsEnPassant is
+                when True =>
+                    To     : Coordinates_t;
+                    Target : Coordinates_t;
+                when False =>
+                    null;
+            end case;
+        end record;
+
+    EnPassant : EnPassant_Coordinates_t := (IsEnPassant => False);
+
 
     -- The piece colors
     type Color_t is (White, Black);
@@ -41,7 +60,7 @@ package Board is
     -- Record describing the pieces as they are present on a cell.
     -- A cell is either Empty or not empty, in which case it is a
     -- combination of the piece and its color.
-    type Cell_t(IsEmpty : Boolean := True) is
+    type Cell_t(IsEmpty : Boolean := False) is
         record
             case IsEmpty is
                 when True =>
@@ -55,14 +74,21 @@ package Board is
     type Board_t is array (File_t, Rank_t) of Cell_t;
 
 
+    type Castling_t is (None, Kingside, Queenside);
+
     -- A move is described by a destination and a prefix.
-    type Move_t is
+    type Move_t(Castling : Castling_t := None) is
         record
-            Piece     : Piece_t;
-            Capture   : Boolean;
-            From      : Disambiguating_Coordinates_t;
-            To        : Coordinates_t;
-            Promotion : Piece_t;
+            case Castling is
+                when None =>
+                    Piece     : Piece_t;
+                    Capture   : Boolean;
+                    From      : Disambiguating_Coordinates_t;
+                    To        : Coordinates_t;
+                    Promotion : Piece_t;
+                when others =>
+                    null;
+            end case;
         end record;
 
     -- Enumeration of the possible results after a move is given by
@@ -136,8 +162,7 @@ private
                          Pos   : in Coordinates_t) return Boolean;
 
     -- Returns True if the cell is empty or belongs to an opponent
-    function IsCellAccessible(Board       : in Board_t;
-                              Cell        : in Cell_t;
+    function IsCellAccessible(Cell        : in Cell_t;
                               PlayerColor : in Color_t) return Boolean;
 
 
