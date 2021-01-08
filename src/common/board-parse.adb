@@ -40,10 +40,8 @@ package body Board.Parse is
     begin
         case Cell.IsEmpty is
             when True =>
-                -- return "";
                 return "  ";
             when False =>
-                --return To_Lower(Cell.Color'Image & " " & Cell.Piece'Image);
                 return (case Cell.Color is
                             when White => "W",
                             when Black => "B")
@@ -62,14 +60,14 @@ package body Board.Parse is
     is
         Cell : Cell_t;
     begin
-        for File in a .. h loop
-            if File = a then
-                Put_Line("    1  2  3  4  5  6  7  8");
+        for Rank in reverse 1 .. 8 loop
+            if Rank = 8 then
+                Put_Line("    a  b  c  d  e  f  g  h");
             end if;
             
-            for Rank in 1 .. 8 loop
-                if Rank = 1 then
-                    Put(To_Lower(File'Image) & "|");
+            for File in a .. h loop
+                if File = a then
+                    Put(To_Lower(Rank'Image) & "|");
                 end if;
                 
                 Cell := Board(File, Rank);
