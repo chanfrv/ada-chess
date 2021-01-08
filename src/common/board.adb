@@ -4,6 +4,8 @@ with Ada.Containers; use Ada.Containers;
 with Ada.Containers.Vectors;
 with Ada.Strings.Fixed; use Ada.Strings.Fixed;
 with Board.Parse; use Board.Parse;
+with Board.Castling; use Board.Castling;
+with Board.EnPassant; use Board.EnPassant;
 
 
 package body Board is
@@ -186,7 +188,7 @@ package body Board is
         Diagonal_Valid : Boolean;
 
         Moving_Forward : Boolean := (if Pawn_Color = White then From.Rank < To.Rank else From.Rank > To.Rank);
-        Start_Rank     : Rank_t  := (if Pawn_Color = White then 2 else 7);
+        Pawn_Rank      : Rank_t  := (if Pawn_Color = White then 2 else 7);
         Next_Rank      : Rank_t  := (if Pawn_Color = White then From.Rank + 1 else From.Rank - 1);
     begin
 
@@ -199,21 +201,21 @@ package body Board is
         Forward_Valid := Cell_To.IsEmpty
           and then (
              From.File = To.File
-             and abs (To.Rank - From.Rank) <= (if From.Rank = Start_Rank then 2 else 1));
+             and abs (To.Rank - From.Rank) <= (if From.Rank = Pawn_Rank then 2 else 1));
 
         -- ...Or we capture on a diagnoal
         Diagonal_Valid :=
           -- The cell is not empty or empty and marked as en passant
-          (not Cell_To.IsEmpty or (EnPassant.IsEnPassant and then To = EnPassant.To))
+          (not Cell_To.IsEmpty or (EnPassant_Coords.IsEnPassant and then To = EnPassant_Coords.To))
           and then
             -- Or we capture, one cell forward, one cell on the left (if it is inbounds)
             ((if From.File > a then
                  (File_t'Pos(From.File) - 1 = File_t'Pos(To.File) and Next_Rank = To.Rank)
-               else False)
+              else False)
             -- Or we capture, one cell forward, one cell on the right (if it is inbounds)
           or (if From.File < h then
                  (File_t'Pos(From.File) + 1 = File_t'Pos(To.File) and Next_Rank = To.Rank)
-               else False));
+              else False));
 
         return Forward_Valid or Diagonal_Valid;
     end IsValidMove_Pawn;
@@ -338,11 +340,9 @@ package body Board is
 
         case CurrMove.Castling is
             when Kingside =>
-                -- TODO
-                null;
+                Kingside_Castling(Board, CurrPlayerColor);
             when Queenside =>
-                -- TODO
-                null;
+                Queenside_Castling(Board, CurrPlayerColor);
             -- Normal move
             when None =>
                 -- find the piece on the board
@@ -353,23 +353,13 @@ package body Board is
                     Board(CurrMove.To.File, CurrMove.To.Rank) := Board(From.File, From.Rank);
                     Board(From.File, From.Rank) := (IsEmpty => True);
 
-                    -- Execute en passant from the last move
-                    if CurrMove.Piece = Pawn and CurrMove.Capture = True
-                      and (EnPassant.IsEnPassant and then CurrMove.To = EnPassant.To) then
-                        Put_Line("En passant on " & Image(EnPassant.Target) & " pawn");
-                        Board(EnPassant.Target.File, EnPassant.Target.Rank) := (IsEmpty => True);
-                    end if;
-
-                    EnPassant := (IsEnPassant => False);
-                    -- Register the pawn for en passant
-                    if CurrMove.Piece = Pawn and abs (From.Rank - CurrMove.To.Rank) = 2 then
-                        case CurrPlayerColor is
-                        when White =>
-                            EnPassant := (True, (From.File, 3), CurrMove.To);
-                        when Black =>
-                            EnPassant := (True, (From.File, 6), CurrMove.To);
-                        end case;
-                    end if;
+                    -- En passant handling
+                    EnPassant_Coords := EnPassant_Handler(Board,
+                                                          CurrMove.Piece,
+                                                          CurrPlayerColor,
+                                                          CurrMove.Capture,
+                                                          From,
+                                                          CurrMove.To);
 
                     -- Promotion
                     Cell_To := Board(CurrMove.To.File, CurrMove.To.Rank);

@@ -36,21 +36,6 @@ package Board is
             end case;
         end record;
 
-    -- Optional coordinates, if set then a pawn moving to To will capture
-    -- the piece on Target.
-    type EnPassant_Coordinates_t(IsEnPassant : Boolean := False) is
-        record
-            case IsEnPassant is
-                when True =>
-                    To     : Coordinates_t;
-                    Target : Coordinates_t;
-                when False =>
-                    null;
-            end case;
-        end record;
-
-    EnPassant : EnPassant_Coordinates_t := (IsEnPassant => False);
-
 
     -- The piece colors
     type Color_t is (White, Black);
@@ -71,10 +56,13 @@ package Board is
             end case;
         end record;
 
+    -- Board type, a 2-dimensional array of cells
     type Board_t is array (File_t, Rank_t) of Cell_t;
 
 
+    -- Castling state
     type Castling_t is (None, Kingside, Queenside);
+
 
     -- A move is described by a destination and a prefix.
     type Move_t(Castling : Castling_t := None) is
