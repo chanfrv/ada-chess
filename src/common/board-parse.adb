@@ -78,7 +78,9 @@ package body Board.Parse is
     end Pretty_Print;
     
     
-    procedure GetPieceDisambiguity(Move_Str : in String; Move : in out Move_t) is
+    procedure GetPieceDisambiguity(Move_Str : in String; Move : in out Move_t)
+      with Pre => Move_Str'Length >= 1
+    is
         Index : Positive;
         Curr : Character;
 
@@ -91,13 +93,13 @@ package body Board.Parse is
 
         -- Origin rank
         case Curr is
-            when '1'|'2'|'3'|'4'|'5'|'6'|'7'|'8' =>
+            when '1' .. '8' =>
                 Has_Coords := Has_Rank;
                 Rank := Rank_t'Value("" & Curr);
 
                 if Move_Str'Length > 1 then
                     Index := Index - 1;
-                    Curr := Move_Str(Move_Str'Last - 1);
+                    Curr := Move_Str(Index);
                 end if;
 
             when others =>
@@ -106,13 +108,13 @@ package body Board.Parse is
 
         -- Origin file
         case Curr is
-            when 'a'|'b'|'c'|'d'|'e'|'f'|'g'|'h' =>
+            when 'a' .. 'h' =>
                 Has_Coords := (if Has_Coords = Has_Rank then Has_Both else Has_File);
                 File := File_t'Value("" & curr);
 
                 if Move_Str'Length > 1 then
                     Index := Index - 1;
-                    Curr := Move_Str(Move_Str'Last - 1);
+                    Curr := Move_Str(Index);
                 end if;
 
             when others =>
@@ -168,14 +170,16 @@ package body Board.Parse is
         end if;
     end GetCapture;
     
-    procedure GetPosition(Move_Str : in String; Move : in out Move_t) is
+    procedure GetPosition(Move_Str : in String; Move : in out Move_t)
+      with Pre => Move_Str'Length >= 2
+    is
         File_C : Character;
         Rank_C : Character;
     begin
         -- File
         File_C := Move_Str(Move_Str'Last - 1);
         case File_C is
-            when 'a'|'b'|'c'|'d'|'e'|'f'|'g'|'h' =>
+            when 'a' .. 'h' =>
                 Move.To.File := File_t'Value("" & File_C);
             when others =>
                 Put_Line("Invalid destination file");
@@ -184,7 +188,7 @@ package body Board.Parse is
         -- Rank
         Rank_C := Move_Str(Move_Str'Last);
         case Rank_C is
-            when '1'|'2'|'3'|'4'|'5'|'6'|'7'|'8' =>
+            when '1' .. '8' =>
                 Move.To.Rank := Rank_t'Value("" & Rank_C);
             when others =>
                 Put_Line("Invalid destination rank");
@@ -232,6 +236,7 @@ package body Board.Parse is
                 elsif Move_Str'Length = 5 and then Move_Str(Move_Str'First .. Move_Str'First + 5) = "0-0-0" then
                     Move := (Castling => Queenside);
                 else
+                    -- TODO parse error
                     null;
                 end if;
                 
