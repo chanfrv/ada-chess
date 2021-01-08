@@ -151,15 +151,17 @@ package Board is
 private
 
 
-    -- Return True if the King at position Origin would be check at position
-    -- Objective.
-    function IsKingCheckAt(Board     : in Board_t;
-                           Origin    : in Coordinates_t;
-                           Objective : in Coordinates_t) return Boolean;
+    -- Return True if the King at position From would be check at position
+    -- To.
+    function IsKingCheckAt(Board : in Board_t;
+                           From  : in Coordinates_t;
+                           To    : in Coordinates_t) return Boolean
+      with Pre => (not Board(From.File, From.Rank).IsEmpty
+                   and then Board(From.File, From.Rank).Piece = King);
 
-    -- Returns True if the King of color Color at position Pos is check.
+    -- Returns True if the King of color Color at position To is check.
     function IsKingCheck(Board : in Board_t;
-                         Pos   : in Coordinates_t) return Boolean;
+                         To    : in Coordinates_t) return Boolean;
 
     -- Returns True if the cell is empty or belongs to an opponent
     function IsCellAccessible(Cell        : in Cell_t;
@@ -168,33 +170,46 @@ private
 
     function IsValidMove_King(Board : in Board_t;
                               From  : in Coordinates_t;
-                              To    : in Coordinates_t) return Boolean;
+                              To    : in Coordinates_t) return Boolean
+      with Pre => (not Board(From.File, From.Rank).IsEmpty
+                   and then Board(From.File, From.Rank).Piece = King);
 
     function IsValidMove_Queen(Board : in Board_t;
                                From  : in Coordinates_t;
-                               To    : in Coordinates_t) return Boolean;
+                               To    : in Coordinates_t) return Boolean
+      with Pre => (not Board(From.File, From.Rank).IsEmpty
+                   and then Board(From.File, From.Rank).Piece = Queen);
 
     function IsValidMove_Rook(Board : in Board_t;
                               From  : in Coordinates_t;
-                              To    : in Coordinates_t) return Boolean;
+                              To    : in Coordinates_t) return Boolean
+      with Pre => (not Board(From.File, From.Rank).IsEmpty
+                   and then Board(From.File, From.Rank).Piece = Rook);
 
     function IsValidMove_Bishop(Board : in Board_t;
                                 From  : in Coordinates_t;
-                                To    : in Coordinates_t) return Boolean;
+                                To    : in Coordinates_t) return Boolean
+      with Pre => (not Board(From.File, From.Rank).IsEmpty
+                   and then Board(From.File, From.Rank).Piece = Bishop);
 
     function IsValidMove_Knight(Board : in Board_t;
                                 From  : in Coordinates_t;
-                                To    : in Coordinates_t) return Boolean;
+                                To    : in Coordinates_t) return Boolean
+      with Pre => (not Board(From.File, From.Rank).IsEmpty
+                   and then Board(From.File, From.Rank).Piece = Knight);
 
     function IsValidMove_Pawn(Board : in Board_t;
                               From  : in Coordinates_t;
-                              To    : in Coordinates_t) return Boolean;
+                              To    : in Coordinates_t) return Boolean
+      with Pre => (not Board(From.File, From.Rank).IsEmpty
+                   and then Board(From.File, From.Rank).Piece = Pawn);
 
 
     -- Returns True if the piece on From is allowed to move on To.
     function IsValidMove(Board : in Board_t;
                          From  : in Coordinates_t;
-                         To    : in Coordinates_t) return Boolean;
+                         To    : in Coordinates_t) return Boolean
+      with Pre => not Board(From.File, From.Rank).IsEmpty;
 
 
     -- Find a piece which fulfills the requirements from the given algebraic

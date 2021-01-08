@@ -9,26 +9,26 @@ with Board.Parse; use Board.Parse;
 package body Board is
 
 
-    function IsKingCheckAt(Board     : in Board_t;
-                           Origin    : in Coordinates_t;
-                           Objective : in Coordinates_t) return Boolean
+    function IsKingCheckAt(Board : in Board_t;
+                           From  : in Coordinates_t;
+                           To    : in Coordinates_t) return Boolean
     is
         NewBoard  : Board_t := Board;
-        King      : Cell_t := Board(Origin.File, Origin.Rank);
+        King      : Cell_t := Board(From.File, From.Rank);
     begin
-        Put_Line("Checking if the king would be checked on " & Image(Objective));
+        Put_Line("Checking if the king would be checked on " & Image(To));
 
         -- Move the King
-        NewBoard(Objective.File, Objective.Rank) := King;
-        NewBoard(Origin.File, Origin.Rank) := (IsEmpty => True);
+        NewBoard(To.File, To.Rank) := King;
+        NewBoard(From.File, From.Rank) := (IsEmpty => True);
 
         -- See if the king would be check at this position
-        return IsKingCheck(NewBoard, Objective);
+        return IsKingCheck(NewBoard, To);
     end IsKingCheckAt;
 
 
     function IsKingCheck(Board : in Board_t;
-                         Pos   : in Coordinates_t) return Boolean
+                         To    : in Coordinates_t) return Boolean
     is
         Cell : Cell_t;
     begin
@@ -36,7 +36,7 @@ package body Board is
         for File in a .. h loop
             for Rank in 1 .. 8 loop
                 Cell := Board(File, Rank);
-                if not Cell.IsEmpty and then IsValidMove(Board, (File, Rank), Pos) then
+                if not Cell.IsEmpty and then IsValidMove(Board, (File, Rank), To) then
                     return True;
                 end if;
             end loop;
