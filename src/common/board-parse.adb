@@ -207,8 +207,8 @@ package body Board.Parse is
         Move.From := (Has => Has_None);
         Move.Promotion := Pawn;
         
-        -- Promotion handling
         case Char is
+            -- Promotion handling
             when 'Q'|'R'|'B'|'N' =>
                 case Char is
                     when 'Q' =>
@@ -224,11 +224,22 @@ package body Board.Parse is
                 end case;
                 -- Has promotion
                 GetPosition(Move_Str(Move_Str'First .. Move_Str'Last - 1), Move);
+                
+            -- Castling handling
+            when '0' =>
+                if Move_Str'Length = 3 and then Move_Str(Move_Str'First .. Move_Str'First + 3) = "0-0" then
+                    Move := (Castling => Kingside);
+                elsif Move_Str'Length = 5 and then Move_Str(Move_Str'First .. Move_Str'First + 5) = "0-0-0" then
+                    Move := (Castling => Queenside);
+                else
+                    null;
+                end if;
+                
+            -- No promotion or castling
             when others =>
-                -- No promotion
                 GetPosition(Move_Str(Move_Str'First .. Move_Str'Last), Move);
         end case;
-        
+                
         return Move;
     end Value;
 

@@ -15,7 +15,8 @@ package Board.Parse is
 
     
     -- Converts an algebraic string to a coordinates pair.
-    function Value(Move_Str : in String) return Move_t;
-
+    function Value(Move_Str : in String) return Move_t
+      with Pre => Move_Str'Length >= 1;
+    
 
 end Board.Parse;

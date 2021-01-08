@@ -336,44 +336,52 @@ package body Board is
     begin
         Put_Line("Moving to " & Image(CurrMove.To));
 
-        -- TODO castling
+        case CurrMove.Castling is
+            when Kingside =>
+                -- TODO
+                null;
+            when Queenside =>
+                -- TODO
+                null;
+            -- Normal move
+            when None =>
+                -- find the piece on the board
+                MoveResult := FindPiece(Board, CurrMove, CurrPlayerColor, From);
 
-        -- find the piece on the board
-        MoveResult := FindPiece(Board, CurrMove, CurrPlayerColor, From);
+                if MoveResult = Valid_Move then
+                    -- if the move is valid, move the piece
+                    Board(CurrMove.To.File, CurrMove.To.Rank) := Board(From.File, From.Rank);
+                    Board(From.File, From.Rank) := (IsEmpty => True);
 
-        if MoveResult = Valid_Move then
-            -- if the move is valid, move the piece
-            Board(CurrMove.To.File, CurrMove.To.Rank) := Board(From.File, From.Rank);
-            Board(From.File, From.Rank) := (IsEmpty => True);
+                    -- Execute en passant from the last move
+                    if CurrMove.Piece = Pawn and CurrMove.Capture = True
+                      and (EnPassant.IsEnPassant and then CurrMove.To = EnPassant.To) then
+                        Put_Line("En passant on " & Image(EnPassant.Target) & " pawn");
+                        Board(EnPassant.Target.File, EnPassant.Target.Rank) := (IsEmpty => True);
+                    end if;
 
-            -- Execute en passant from the last move
-            if CurrMove.Piece = Pawn and CurrMove.Capture = True
-              and (EnPassant.IsEnPassant and then CurrMove.To = EnPassant.To) then
-                Put_Line("En passant on " & Image(EnPassant.Target) & " pawn");
-                Board(EnPassant.Target.File, EnPassant.Target.Rank) := (IsEmpty => True);
-            end if;
+                    EnPassant := (IsEnPassant => False);
+                    -- Register the pawn for en passant
+                    if CurrMove.Piece = Pawn and abs (From.Rank - CurrMove.To.Rank) = 2 then
+                        case CurrPlayerColor is
+                        when White =>
+                            EnPassant := (True, (From.File, 3), CurrMove.To);
+                        when Black =>
+                            EnPassant := (True, (From.File, 6), CurrMove.To);
+                        end case;
+                    end if;
 
-            EnPassant := (IsEnPassant => False);
-            -- Register the pawn for en passant
-            if CurrMove.Piece = Pawn and abs (From.Rank - CurrMove.To.Rank) = 2 then
-                case CurrPlayerColor is
-                    when White =>
-                        EnPassant := (True, (From.File, 3), CurrMove.To);
-                    when Black =>
-                        EnPassant := (True, (From.File, 6), CurrMove.To);
-                end case;
-            end if;
-
-            -- Promotion
-            Cell_To := Board(CurrMove.To.File, CurrMove.To.Rank);
-            if Cell_To.Piece = Pawn and (
-                    (Cell_To.Color = White and CurrMove.To.Rank = 8)
-                 or (Cell_To.Color = Black and CurrMove.To.Rank = 1))
-            then
-                Promoted := (IsEmpty => False, Piece => CurrMove.Promotion, Color => Cell_To.Color);
-                Board(CurrMove.To.File, CurrMove.To.Rank) := Promoted;
-            end if;
-        end if;
+                    -- Promotion
+                    Cell_To := Board(CurrMove.To.File, CurrMove.To.Rank);
+                    if Cell_To.Piece = Pawn
+                      and ((Cell_To.Color = White and CurrMove.To.Rank = 8)
+                            or (Cell_To.Color = Black and CurrMove.To.Rank = 1))
+                    then
+                        Promoted := (IsEmpty => False, Piece => CurrMove.Promotion, Color => Cell_To.Color);
+                        Board(CurrMove.To.File, CurrMove.To.Rank) := Promoted;
+                    end if;
+                end if;
+        end case;
 
         return MoveResult;
     end Move;
