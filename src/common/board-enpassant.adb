@@ -12,6 +12,7 @@ package body Board.EnPassant is
                                From    : in Coordinates_t;
                                To      : in Coordinates_t) return EnPassant_Coordinates_t
     is
+        Pawn_Rank : Rank_t := (if Color = White then 3 else 6);
     begin        
         -- Execute en passant from the last move
         if Piece = Pawn and Capture = True
@@ -21,15 +22,12 @@ package body Board.EnPassant is
             Board(EnPassant_Coords.Target.File, EnPassant_Coords.Target.Rank) := (IsEmpty => True);
         end if;
 
+        -- Remove en passant from last move
         EnPassant_Coords := (IsEnPassant => False);
+        
         -- Register the pawn for en passant
         if Piece = Pawn and abs (From.Rank - To.Rank) = 2 then
-            case Color is
-                when White =>
-                    EnPassant_Coords := (True, (From.File, 3), To);
-                when Black =>
-                    EnPassant_Coords := (True, (From.File, 6), To);
-            end case;
+            EnPassant_Coords := (True, (From.File, Pawn_Rank), To);
         end if;
         
         return EnPassant_Coords;

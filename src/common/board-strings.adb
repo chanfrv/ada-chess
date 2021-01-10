@@ -58,42 +58,59 @@ package body Board.Strings is
     
     function Image(Cell : in Cell_t) return String is
     begin
-        case Cell.IsEmpty is
-            when True =>
-                return "  ";
-            when False =>
-                return (case Cell.Color is
-                            when White => "W",
-                            when Black => "B")
-                     & (case Cell.Piece is
-                            when King   => "K",
-                            when Queen  => "Q",
-                            when Rook   => "R",
-                            when Bishop => "B",
-                            when Knight => "N",
-                            when Pawn   => "p");
-        end case;
+        return (if    Cell = WKing   then "♔"
+                elsif Cell = WQueen  then "♕"
+                elsif Cell = WRook   then "♖"
+                elsif Cell = WBishop then "♗"
+                elsif Cell = WKnight then "♘"
+                elsif Cell = WPawn   then "♙"
+                elsif Cell = BKing   then "♚"
+                elsif Cell = BQueen  then "♛"
+                elsif Cell = BRook   then "♜"
+                elsif Cell = BBishop then "♝"
+                elsif Cell = BKnight then "♞"
+                elsif Cell = BPawn   then "♟︎"
+                else " ");
     end Image;
     
     
     procedure Pretty_Print(Board : in Board_t)
     is
         Cell : Cell_t;
+        
+        Square_White : aliased String := ASCII.ESC & "[47m" & ASCII.ESC & "[1;30m";
+        Square_Black : aliased String := ASCII.ESC & "[40m" & ASCII.ESC & "[1;37m";
+        Square_Curr  : access  String;
     begin
-        for Rank in reverse 1 .. 8 loop
+        for Rank in reverse 1 .. 8 loop            
             if Rank = 8 then
-                Put_Line("    a  b  c  d  e  f  g  h");
+                Put_Line("    a  b  c  d  e  f  g  h ");
             end if;
-            
+              
             for File in a .. h loop
                 if File = a then
-                    Put(To_Lower(Rank'Image) & "|");
+                    Put(" " & Trim(Rank'Image, Ada.Strings.Left) & " ");
+                end if;
+                
+                if (Rank + File_t'Pos(File) + 1) mod 2 = 0 then
+                    Square_Curr := Square_White'Access;
+                else
+                    Square_Curr := Square_Black'Access;
                 end if;
                 
                 Cell := Board(File, Rank);
-                Put(" " & Image(Cell));
+                Put(Square_Curr.all & " " & Image(Cell) & " ");
+                
+                if File = h then
+                    Put(ASCII.ESC & "[0m " & Trim(Rank'Image, Ada.Strings.Left));
+                end if;                
             end loop;
+            
             New_Line;
+            
+            if Rank = 1 then
+                Put_Line("    a  b  c  d  e  f  g  h ");
+            end if;
         end loop;
     end Pretty_Print;
     
@@ -250,11 +267,13 @@ package body Board.Strings is
                 
             when others =>
                 -- Kingside castling handling
-                if Move_Str'Length = 3 and then Move_Str(Move_Str'First .. Move_Str'First + 3) = "0-0" then
+                if Move_Str'Length = 3
+                  and then Move_Str(Move_Str'First .. Move_Str'First + 3) = "0-0" then
                     Move := (Castling => Kingside);
                     
                 -- Queenside castling handling
-                elsif Move_Str'Length = 5 and then Move_Str(Move_Str'First .. Move_Str'First + 5) = "0-0-0" then
+                elsif Move_Str'Length = 5
+                  and then Move_Str(Move_Str'First .. Move_Str'First + 5) = "0-0-0" then
                     Move := (Castling => Queenside);
                     
                 -- No promotion or castling

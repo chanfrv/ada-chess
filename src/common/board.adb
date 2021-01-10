@@ -16,6 +16,7 @@ package body Board is
                               Capture     : Boolean) return Boolean
     is
     begin
+        -- TODO: breaks en passant
         case Capture is
             when True =>
                 return not Cell.IsEmpty and then Cell.Color /= PlayerColor;
@@ -205,8 +206,7 @@ package body Board is
 
         -- Either we move forward 1 cell (or 2 if we are on the rank 2)...
         Forward_Valid := Cell_To.IsEmpty
-          and then (
-                     From.File = To.File
+          and then (From.File = To.File
                      and (case abs (To.Rank - From.Rank) is
                                when 1 => True,
                                when 2 => Board(From.File, Next_Rank).IsEmpty,
@@ -296,7 +296,7 @@ package body Board is
         Min_Rank : Rank_t := (if From_Has_Rank then CurrMove.From.Rank else 1);
         Max_Rank : Rank_t := (if From_Has_Rank then CurrMove.From.Rank else 8);
     begin
-        Put_Line("Looking for a piece that can move to " & Image(CurrMove.To));
+        --Put_Line("Looking for a piece that can move to " & Image(CurrMove.To));
 
         for File in Min_File .. Max_File loop
             for Rank in Min_Rank .. Max_Rank loop
@@ -393,7 +393,7 @@ package body Board is
     function Game_Ended(Board           : in Board_t;
                         CurrPlayerColor : in Color_t) return GameResult_t
     is
-        Opponent : Color_t      := Color_t'Succ(CurrPlayerColor);
+        Opponent : Color_t      := (if CurrPlayerColor = White then Black else White);
         King     : Cell_t       := (if Opponent = White then WKing else BKing);
         Check    : GameResult_t := (if Opponent = White then Check_White else Check_Black);
     begin
