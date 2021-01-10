@@ -80,37 +80,70 @@ package body Board.Strings is
         
         Square_White : aliased String := ASCII.ESC & "[47m" & ASCII.ESC & "[1;30m";
         Square_Black : aliased String := ASCII.ESC & "[40m" & ASCII.ESC & "[1;37m";
-        Square_Curr  : access  String;
-    begin
-        for Rank in reverse 1 .. 8 loop            
+        Background   : access  String;
+        
+        procedure Print_Ranks_Top(Rank : Rank_t) is
+        begin
             if Rank = 8 then
                 Put_Line("    a  b  c  d  e  f  g  h ");
             end if;
-              
-            for File in a .. h loop
-                if File = a then
-                    Put(" " & Trim(Rank'Image, Ada.Strings.Left) & " ");
-                end if;
-                
-                if (Rank + File_t'Pos(File) + 1) mod 2 = 0 then
-                    Square_Curr := Square_White'Access;
-                else
-                    Square_Curr := Square_Black'Access;
-                end if;
-                
-                Cell := Board(File, Rank);
-                Put(Square_Curr.all & " " & Image(Cell) & " ");
-                
-                if File = h then
-                    Put(ASCII.ESC & "[0m " & Trim(Rank'Image, Ada.Strings.Left));
-                end if;                
-            end loop;
-            
-            New_Line;
-            
+        end Print_Ranks_Top;
+        
+        procedure Print_Ranks_Bottom(Rank : Rank_t) is
+        begin
             if Rank = 1 then
                 Put_Line("    a  b  c  d  e  f  g  h ");
             end if;
+        end Print_Ranks_Bottom;
+        
+        procedure Print_Files_Left(File : File_t; Rank : Rank_t) is
+        begin
+            if File = a then
+                Put(" " & Trim(Rank'Image, Ada.Strings.Left) & " ");
+            end if;
+        end Print_Files_Left;
+        
+        procedure Print_Files_Right(File : File_t; Rank : Rank_t) is
+        begin
+            if File = h then
+                Put(ASCII.ESC & "[0m " & Trim(Rank'Image, Ada.Strings.Left));
+            end if;
+        end Print_Files_Right;
+        
+        function Get_Square(File : File_t; Rank : Rank_t) return access String is
+        begin
+            return (if (Rank + File_t'Pos(File) + 1) mod 2 = 0 then
+                Square_White'Access
+            else
+                Square_Black'Access);
+        end Get_Square;
+        
+    begin
+        for Rank in reverse 1 .. 8 loop     
+            -- Top ranks
+            Print_Ranks_Top(Rank);
+              
+            for File in a .. h loop
+                -- Left files
+                Print_Files_Left(File, Rank);
+                
+                -- Background color
+                Background := Get_Square(File, Rank);  
+                
+                -- Foreground symbol
+                Cell := Board(File, Rank);
+                
+                -- Print the cell
+                Put(Background.all & " " & Image(Cell) & " ");
+                
+                -- Right files
+                Print_Files_Right(File, Rank);
+            end loop;
+            
+            New_Line;
+                        
+            -- Bottom ranks 'a b c ...'
+            Print_Ranks_Bottom(Rank);
         end loop;
     end Pretty_Print;
     
