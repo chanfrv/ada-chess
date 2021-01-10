@@ -119,7 +119,7 @@ package body Board.Strings is
         end Get_Square;
         
     begin
-        for Rank in reverse 1 .. 8 loop     
+        for Rank in reverse 1 .. 8 loop
             -- Top ranks
             Print_Ranks_Top(Rank);
               
@@ -128,7 +128,7 @@ package body Board.Strings is
                 Print_Files_Left(File, Rank);
                 
                 -- Background color
-                Background := Get_Square(File, Rank);  
+                Background := Get_Square(File, Rank);
                 
                 -- Foreground symbol
                 Cell := Board(File, Rank);
@@ -142,7 +142,7 @@ package body Board.Strings is
             
             New_Line;
                         
-            -- Bottom ranks 'a b c ...'
+            -- Bottom ranks
             Print_Ranks_Bottom(Rank);
         end loop;
     end Pretty_Print;
@@ -301,12 +301,12 @@ package body Board.Strings is
             when others =>
                 -- Kingside castling handling
                 if Move_Str'Length = 3
-                  and then Move_Str(Move_Str'First .. Move_Str'First + 3) = "0-0" then
+                  and then Move_Str(Move_Str'First .. Move_Str'Last) = "0-0" then
                     Move := (Castling => Kingside);
                     
                 -- Queenside castling handling
                 elsif Move_Str'Length = 5
-                  and then Move_Str(Move_Str'First .. Move_Str'First + 5) = "0-0-0" then
+                  and then Move_Str(Move_Str'First .. Move_Str'Last) = "0-0-0" then
                     Move := (Castling => Queenside);
                     
                 -- No promotion or castling
