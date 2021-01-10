@@ -27,9 +27,9 @@ package body Board.Strings is
             when Has_None =>
                 return "";
             when Has_File =>
-                return To_Lower(Coordinates.File'Image);
+                return Image(Coordinates.File);
             when Has_Rank =>
-                return Trim(Coordinates.Rank'Image, Ada.Strings.Left);
+                return Image(Coordinates.Rank);
             when Has_Both =>
                 return Image(Coordinates.Coordinates);
         end case;
