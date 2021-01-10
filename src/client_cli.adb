@@ -7,7 +7,7 @@ with Ada.Strings.Fixed; use Ada.Strings.Fixed;
 with Board; use Board;
 
 
-procedure Client is
+procedure Client_CLI is
     -- Network information
     Address     : Sock_Addr_Type;
     Socket      : Socket_Type;
@@ -77,4 +77,4 @@ Game_Loop:
 
     -- Disconnect
     Close_Socket(Socket);
-end Client;
+end Client_CLI;
