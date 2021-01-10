@@ -135,7 +135,7 @@ Game_Loop:
         end case;
 
         -- Check if the game ended
-        GameState := Game_Ended(Board);
+        GameState := Game_Ended(Board, CurrPlayer.Color);
     end loop Game_Loop;
 
     -- Close

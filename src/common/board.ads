@@ -99,6 +99,7 @@ package Board is
 
     -- The differents outcomes of a game
     type GameResult_t is (Playing,
+                          Draw,
                           Check_White, Check_Black,
                           Checkmate_White, Checkmate_Black,
                           Resignation_White, Resignation_Black);
@@ -146,7 +147,8 @@ package Board is
 
     -- Checks if the game has ended, either not, either someone wins
     -- or it is a tie.
-    function Game_Ended(Board : in Board_t) return GameResult_t;
+    function Game_Ended(Board           : in Board_t;
+                        CurrPlayerColor : in Color_t) return GameResult_t;
 
 
 private

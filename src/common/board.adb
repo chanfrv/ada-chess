@@ -350,15 +350,18 @@ package body Board is
 
         case CurrMove.Castling is
             when Kingside =>
-                Kingside_Castling(Board, CurrPlayerColor);
+                Castling_Kingside(Board, CurrPlayerColor);
             when Queenside =>
-                Queenside_Castling(Board, CurrPlayerColor);
+                Castling_Queenside(Board, CurrPlayerColor);
             -- Normal move
             when None =>
                 -- find the piece on the board
                 MoveResult := FindPiece(Board, CurrMove, CurrPlayerColor, From);
 
                 if MoveResult = Valid_Move then
+                    -- if the piece is a king or rook, unregister the piece for castling
+                    Castling_Unregister(Board, From);
+
                     -- if the move is valid, move the piece
                     Board(CurrMove.To.File, CurrMove.To.Rank) := Board(From.File, From.Rank);
                     Board(From.File, From.Rank) := (IsEmpty => True);
@@ -386,9 +389,27 @@ package body Board is
         return MoveResult;
     end Move;
 
-    function Game_Ended(Board : in Board_t) return GameResult_t is
+
+    function Game_Ended(Board           : in Board_t;
+                        CurrPlayerColor : in Color_t) return GameResult_t
+    is
+        Opponent : Color_t      := Color_t'Succ(CurrPlayerColor);
+        King     : Cell_t       := (if Opponent = White then WKing else BKing);
+        Check    : GameResult_t := (if Opponent = White then Check_White else Check_Black);
     begin
-        -- TODO
+        for File in a .. h loop
+            for Rank in 1 .. 8 loop
+                if Board(File, Rank) = King then
+                    -- Is the king check ?
+                    if IsKingCheck(Board, (File, Rank)) then
+                        return Check;
+                    end if;
+                    -- the king is not check
+                    exit;
+                end if;
+            end loop;
+        end loop;
+
         return Playing;
     end Game_Ended;
 
