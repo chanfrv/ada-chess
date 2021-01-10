@@ -4,7 +4,7 @@ with Ada.Command_Line; use Ada.Command_Line;
 with Ada.Characters.Handling; use Ada.Characters.Handling;
 with Ada.Strings.Fixed; use Ada.Strings.Fixed;
 with Board; use Board;
-with Board.Parse; use Board.Parse;
+with Board.Strings; use Board.Strings;
 
 
 procedure Server is
@@ -116,7 +116,7 @@ Game_Loop:
         Put_Line("Waiting for " & Image(CurrPlayer) & " move");
 
         -- Receive the move from the current player
-        CurrMove := Value(String'Input(CurrPlayer.Channel));
+        CurrMove := Parse(String'Input(CurrPlayer.Channel));
         Put_Line("Move string parsed as '" & Image(CurrMove) & "'");
         -- Play the move
         MoveResult := Move(Board, CurrMove, CurrPlayer.Color);

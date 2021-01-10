@@ -3,12 +3,22 @@ with Ada.Characters.Handling; use Ada.Characters.Handling;
 with Ada.Strings.Fixed; use Ada.Strings.Fixed;
 
 
-package body Board.Parse is
+package body Board.Strings is
 
    
+    function Image(File : File_t) return String is
+    begin
+        return To_Lower(File'Image);
+    end Image;
+    
+    function Image(Rank : Rank_t) return String is
+    begin
+        return Trim(Rank'Image, Ada.Strings.Left);
+    end Image;
+    
     function Image(Coordinates : in Coordinates_t) return String is
     begin
-        return To_Lower(Coordinates.File'Image) & Trim(Coordinates.Rank'Image, Ada.Strings.Left);
+        return Image(Coordinates.File) & Image(Coordinates.Rank);
     end Image;
 
     function Image(Coordinates : in Disambiguating_Coordinates_t) return String is
@@ -25,14 +35,24 @@ package body Board.Parse is
         end case;
     end Image;
 
-    
+    function Image(Piece : Piece_t) return String is
+    begin
+        return (case Piece is
+                    when King   => "K",
+                    when Queen  => "Q",
+                    when Rook   => "R",
+                    when Bishop => "B",
+                    when Knight => "N",
+                    when Pawn   => "");        
+    end Image;
+        
     function Image(Move : in Move_t) return String is
     begin
-        return To_Lower(Move.Piece'Image)
-          & (if Move.Capture then " [capture]" else "")
+        return Image(Move.Piece)
           & Image(Move.From)
-          & " "
-          & Image(Move.To);
+          & (if Move.Capture then "x" else "")
+          & Image(Move.To)
+          & (if Move.Promotion /= Pawn then Image(Move.Promotion) else "");
     end Image;
         
     
@@ -200,17 +220,16 @@ package body Board.Parse is
     end GetPosition;
     
     
-    function Value(Move_Str : in String) return Move_t is
-        Move : Move_t;
+    function Parse(Move_Str : in String) return Move_t is
+        Move : Move_t := (Castling  => None,
+                          Piece     => Pawn,
+                          From      => (Has => Has_None),
+                          Capture   => False,
+                          To        => (a, 1),
+                          Promotion => Pawn);
         
-        Char  : Character := Move_Str(Move_Str'Last);
-    begin        
-        -- Init
-        Move.Piece := Pawn;
-        Move.Capture := False;
-        Move.From := (Has => Has_None);
-        Move.Promotion := Pawn;
-        
+        Char : Character := Move_Str(Move_Str'Last);
+    begin
         case Char is
             -- Promotion handling
             when 'Q'|'R'|'B'|'N' =>
@@ -229,24 +248,23 @@ package body Board.Parse is
                 -- Has promotion
                 GetPosition(Move_Str(Move_Str'First .. Move_Str'Last - 1), Move);
                 
-            -- Castling handling
-            when '0' =>
+            when others =>
+                -- Kingside castling handling
                 if Move_Str'Length = 3 and then Move_Str(Move_Str'First .. Move_Str'First + 3) = "0-0" then
                     Move := (Castling => Kingside);
+                    
+                -- Queenside castling handling
                 elsif Move_Str'Length = 5 and then Move_Str(Move_Str'First .. Move_Str'First + 5) = "0-0-0" then
                     Move := (Castling => Queenside);
+                    
+                -- No promotion or castling
                 else
-                    -- TODO parse error
-                    null;
+                    GetPosition(Move_Str(Move_Str'First .. Move_Str'Last), Move);
                 end if;
-                
-            -- No promotion or castling
-            when others =>
-                GetPosition(Move_Str(Move_Str'First .. Move_Str'Last), Move);
         end case;
-                
+
         return Move;
-    end Value;
+    end Parse;
 
 
-end Board.Parse;
+end Board.Strings;

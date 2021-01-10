@@ -3,12 +3,26 @@ with Ada.Characters.Handling; use Ada.Characters.Handling;
 with Ada.Containers; use Ada.Containers;
 with Ada.Containers.Vectors;
 with Ada.Strings.Fixed; use Ada.Strings.Fixed;
-with Board.Parse; use Board.Parse;
+with Board.Strings; use Board.Strings;
 with Board.Castling; use Board.Castling;
 with Board.EnPassant; use Board.EnPassant;
 
 
 package body Board is
+
+
+    function IsCellAccessible(Cell        : in Cell_t;
+                              PlayerColor : in Color_t;
+                              Capture     : Boolean) return Boolean
+    is
+    begin
+        case Capture is
+            when True =>
+                return not Cell.IsEmpty and then Cell.Color /= PlayerColor;
+            when False =>
+                return Cell.IsEmpty;
+        end case;
+    end IsCellAccessible;
 
 
     function IsKingCheckAt(Board : in Board_t;
@@ -38,7 +52,7 @@ package body Board is
         for File in a .. h loop
             for Rank in 1 .. 8 loop
                 Cell := Board(File, Rank);
-                if not Cell.IsEmpty and then IsValidMove(Board, (File, Rank), To) then
+                if not Cell.IsEmpty and then IsValidMove(Board, (File, Rank), To, True) then
                     return True;
                 end if;
             end loop;
@@ -46,14 +60,6 @@ package body Board is
 
         return False;
     end IsKingCheck;
-
-
-    function IsCellAccessible(Cell        : in Cell_t;
-                              PlayerColor : in Color_t) return Boolean
-    is
-    begin
-        return Cell.IsEmpty or else Cell.Color /= PlayerColor;
-    end IsCellAccessible;
 
 
     function IsValidMove_King(Board : in Board_t;
@@ -200,8 +206,11 @@ package body Board is
         -- Either we move forward 1 cell (or 2 if we are on the rank 2)...
         Forward_Valid := Cell_To.IsEmpty
           and then (
-             From.File = To.File
-             and abs (To.Rank - From.Rank) <= (if From.Rank = Pawn_Rank then 2 else 1));
+                     From.File = To.File
+                     and (case abs (To.Rank - From.Rank) is
+                               when 1 => True,
+                               when 2 => Board(From.File, Next_Rank).IsEmpty,
+                               when others => False));
 
         -- ...Or we capture on a diagnoal
         Diagonal_Valid :=
@@ -221,9 +230,10 @@ package body Board is
     end IsValidMove_Pawn;
 
 
-    function IsValidMove(Board : in Board_t;
-                         From  : in Coordinates_t;
-                         To    : in Coordinates_t) return Boolean
+    function IsValidMove(Board   : in Board_t;
+                         From    : in Coordinates_t;
+                         To      : in Coordinates_t;
+                         Capture : in Boolean) return Boolean
     is
         Cell_From : constant Cell_t := Board(From.File, From.Rank);
         Cell_To   : constant Cell_t := Board(To.File, To.Rank);
@@ -235,7 +245,7 @@ package body Board is
         -- + the cell is different from the origin
         -- + either the cell is empty or it belongs to the opponent
         if (From.File = To.File and From.Rank = To.Rank)
-          or not IsCellAccessible(Cell_To, Cell_From.Color)
+          or not IsCellAccessible(Cell_To, Cell_From.Color, Capture)
         then
             return False;
         end if;
@@ -297,9 +307,9 @@ package body Board is
                 -- + the piece belongs to the player
                 -- + the given piece type (ex: 'Be4' matches only bishops)
                 -- + the move is legal
-                if not CurrCell.IsEmpty and then
-                  (CurrCell.Color = CurrPlayerColor and CurrCell.Piece = CurrMove.Piece)
-                  and then IsValidMove(Board, (File, Rank), CurrMove.To)
+                if not CurrCell.IsEmpty
+                  and then (CurrCell.Color = CurrPlayerColor and CurrCell.Piece = CurrMove.Piece)
+                  and then IsValidMove(Board, (File, Rank), CurrMove.To, CurrMove.Capture)
                 then
                     -- The move is possible, we add the piece position
                     -- to the candidates

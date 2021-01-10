@@ -1,5 +1,5 @@
 with Ada.Text_IO; use Ada.Text_IO;
-with Board.Parse; use Board.Parse;
+with Board.Strings; use Board.Strings;
 
 
 package body Board.EnPassant is

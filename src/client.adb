@@ -20,7 +20,7 @@ procedure Client is
     My_Color    : Color_t;
 
     -- TODO put the complete algebraic notation regex
-    Move_String : constant String := "[KQRBN]?([a-h]|[1-8]|[a-h][1-8])?x?[a-h][1-8][QRBN]?";
+    Move_String : constant String := "[KQRBN]?[a-h]?[1-8]?x?[a-h][1-8][QRBN]?";
     Move_Regexp : constant Regexp := Compile(Move_String);
 begin
     -- Connect
@@ -52,17 +52,25 @@ Game_Loop:
         -- Send the move to the server
         if Str(1 .. Last) = "resign" then
             exit Game_Loop;
+
+        elsif Str(1 .. Last) = "0-0" then
+            String'Output(Channel, "0-0");
+
+        elsif Str(1 .. Last) = "0-0-0" then
+            String'Output(Channel, "0-0-0");
+
         elsif Match(Str(1 .. Last), Move_Regexp) = True then
             String'Output(Channel, Str(1 .. Last));
 
             -- Receive response (success, error, you win...)
             Put_Line(String'Input(Channel));
             --GameState := GameResult_t'Value();
+
         else
             Put_Line("Invalid command: '" & Str(1 .. Last) & "'.");
             Put_Line("Commands:");
             Put_Line("  resign -- Quit the game");
-            Put_Line("  " & Move_String & " -- Move a piece (ex: 'e4')");
+            Put_Line("  [move] -- Follows algebraic notation eg. 'e4'");
         end if;
 
     end loop Game_Loop;

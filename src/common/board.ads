@@ -65,13 +65,26 @@ package Board is
 
 
     -- A move is described by a destination and a prefix.
+    -- The move in algebraic notation is described by the grammar:
+    --
+    -- Move ::= Prefix <To : Coordinates_t> Suffix
+    --
+    -- <To : Coordinates_t> ::= <File : File_t> <Rank : Rank_t>
+    --
+    -- Prefix ::= From | From <Capture : Boolean>
+    -- From ::= Piece | Piece <From : Disambiguating_Coordinates_t>
+    -- <From : Disambiguating_Coordinates_t> ::=
+    --   <File : File_t> | <Rank : Rank_t> | <Coords : Coordinates_t>
+    -- Piece ::= Empty | <Piece : Piece_t>
+    --
+    -- Suffix ::= Empty | <Promotion : Piece_t>
     type Move_t(Castling : Castling_t := None) is
         record
             case Castling is
                 when None =>
                     Piece     : Piece_t;
-                    Capture   : Boolean;
                     From      : Disambiguating_Coordinates_t;
+                    Capture   : Boolean;
                     To        : Coordinates_t;
                     Promotion : Piece_t;
                 when others =>
@@ -139,6 +152,11 @@ package Board is
 private
 
 
+    -- Returns True if the cell is empty or belongs to an opponent
+    function IsCellAccessible(Cell        : in Cell_t;
+                              PlayerColor : in Color_t;
+                              Capture     : Boolean) return Boolean;
+
     -- Return True if the King at position From would be check at position
     -- To.
     function IsKingCheckAt(Board : in Board_t;
@@ -150,10 +168,6 @@ private
     -- Returns True if the King of color Color at position To is check.
     function IsKingCheck(Board : in Board_t;
                          To    : in Coordinates_t) return Boolean;
-
-    -- Returns True if the cell is empty or belongs to an opponent
-    function IsCellAccessible(Cell        : in Cell_t;
-                              PlayerColor : in Color_t) return Boolean;
 
 
     function IsValidMove_King(Board : in Board_t;
@@ -194,9 +208,10 @@ private
 
 
     -- Returns True if the piece on From is allowed to move on To.
-    function IsValidMove(Board : in Board_t;
-                         From  : in Coordinates_t;
-                         To    : in Coordinates_t) return Boolean
+    function IsValidMove(Board   : in Board_t;
+                         From    : in Coordinates_t;
+                         To      : in Coordinates_t;
+                         Capture : in Boolean) return Boolean
       with Pre => not Board(From.File, From.Rank).IsEmpty;
 
 
