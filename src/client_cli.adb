@@ -5,9 +5,11 @@ with Ada.Command_Line; use Ada.Command_Line;
 with Ada.Characters.Handling; use Ada.Characters.Handling;
 with Ada.Strings.Fixed; use Ada.Strings.Fixed;
 with Board; use Board;
+with Board.Strings; use Board.Strings;
 
 
 procedure Client_CLI is
+
     -- Network information
     Address     : Sock_Addr_Type;
     Socket      : Socket_Type;
@@ -77,4 +79,5 @@ Game_Loop:
 
     -- Disconnect
     Close_Socket(Socket);
+
 end Client_CLI;

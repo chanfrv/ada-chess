@@ -16,10 +16,10 @@ package body Board is
                               Capture     : Boolean) return Boolean
     is
     begin
-        -- TODO: breaks en passant
         case Capture is
             when True =>
-                return not Cell.IsEmpty and then Cell.Color /= PlayerColor;
+                return (not Cell.IsEmpty and then Cell.Color /= PlayerColor)
+                  or EnPassant_Coords.IsEnPassant;
             when False =>
                 return Cell.IsEmpty;
         end case;
@@ -141,15 +141,18 @@ package body Board is
         Min_File_Rank : Rank_t := (if From.File < To.File then From.Rank else To.Rank);
         Max_File_Rank : Rank_t := (if From.File > To.File then From.Rank else To.Rank);
 
-        Cell : Cell_t;
-
-        File : File_t := File_t'Succ(Min_File);
-        -- Ascending or descending diagnoal
-        Rank_It : Integer := (if Min_File_Rank < Max_File_Rank then 1 else -1);
-        Rank    : Rank_t := Min_File_Rank + Rank_It;
+        Cell    : Cell_t;
+        File    : File_t;
+        Rank    : Rank_t;
+        -- Ascending or descending diagnoal iteratior
+        Rank_It : Integer;
     begin
         -- Is a diagonal
         if abs (File_t'Pos(From.File) - File_t'Pos(To.File)) = abs (From.Rank - To.Rank) then
+            File    := File_t'Succ(Min_File);
+            Rank_It := (if Min_File_Rank < Max_File_Rank then 1 else -1);
+            Rank    := Min_File_Rank + Rank_It;
+
             -- traverse the diagonal
             while File /= File_t'Pred(Max_File) and Rank /= Max_File_Rank - Rank_It loop
                 Cell := Board(File, Rank);
@@ -194,7 +197,8 @@ package body Board is
         Forward_Valid  : Boolean;
         Diagonal_Valid : Boolean;
 
-        Moving_Forward : Boolean := (if Pawn_Color = White then From.Rank < To.Rank else From.Rank > To.Rank);
+        Moving_Forward : Boolean := (if Pawn_Color = White then
+                                         From.Rank < To.Rank else From.Rank > To.Rank);
         Pawn_Rank      : Rank_t  := (if Pawn_Color = White then 2 else 7);
         Next_Rank      : Rank_t  := (if Pawn_Color = White then From.Rank + 1 else From.Rank - 1);
     begin
@@ -359,6 +363,9 @@ package body Board is
                 MoveResult := FindPiece(Board, CurrMove, CurrPlayerColor, From);
 
                 if MoveResult = Valid_Move then
+                    Put_Line("Found piece " & Image(Board(From.File, From.Rank))
+                             & " on '" & Image(From) & "'");
+
                     -- if the piece is a king or rook, unregister the piece for castling
                     Castling_Unregister(Board, From);
 
@@ -402,6 +409,7 @@ package body Board is
                 if Board(File, Rank) = King then
                     -- Is the king check ?
                     if IsKingCheck(Board, (File, Rank)) then
+                        -- TODO checkmate ?
                         return Check;
                     end if;
                     -- the king is not check
@@ -412,5 +420,6 @@ package body Board is
 
         return Playing;
     end Game_Ended;
+
 
 end Board;

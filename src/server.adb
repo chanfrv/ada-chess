@@ -108,13 +108,13 @@ begin
 
 Game_Loop:
     while GameState = Playing or GameState = Check_White or GameState = Check_Black loop
-        -- pretty print
-        Pretty_Print(Board);
-        
         -- Change the current player
         CurrPlayer := Players(CurrPlayerIndex);
         Put_Line("Waiting for " & Image(CurrPlayer) & " move");
-
+        
+        -- pretty print
+        Pretty_Print(Board, CurrPlayer.Color);
+        
         -- Receive the move from the current player
         CurrMove := Parse(String'Input(CurrPlayer.Channel));
         Put_Line("Move string parsed as '" & Image(CurrMove) & "'");
@@ -142,4 +142,5 @@ Game_Loop:
     Close_Socket(Server);
     Close_Socket(Players(1).Socket);
     Close_Socket(Players(2).Socket);
+    
 end Server;

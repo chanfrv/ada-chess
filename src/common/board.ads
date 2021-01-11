@@ -56,6 +56,7 @@ package Board is
             end case;
         end record;
 
+
     -- Board type, a 2-dimensional array of cells
     type Board_t is array (File_t, Rank_t) of Cell_t;
 

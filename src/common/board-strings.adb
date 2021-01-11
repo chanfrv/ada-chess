@@ -34,7 +34,7 @@ package body Board.Strings is
                 return Image(Coordinates.Coordinates);
         end case;
     end Image;
-
+    
     function Image(Piece : Piece_t) return String is
     begin
         return (case Piece is
@@ -74,50 +74,60 @@ package body Board.Strings is
     end Image;
     
     
-    procedure Pretty_Print(Board : in Board_t)
-    is
+    procedure Pretty_Print(Board : in Board_t; CurrPlayer : in Color_t)
+    is        
         Cell : Cell_t;
         
         Square_White : aliased String := ASCII.ESC & "[47m" & ASCII.ESC & "[1;30m";
         Square_Black : aliased String := ASCII.ESC & "[40m" & ASCII.ESC & "[1;37m";
         Background   : access  String;
         
-        procedure Print_Ranks_Top(Rank : Rank_t) is
+        procedure Print_Ranks_Top(Rank : in Rank_t) is
         begin
             if Rank = 8 then
-                Put_Line("    a  b  c  d  e  f  g  h ");
+                Put_Line("    a  b  c  d  e  f  g  h");
             end if;
         end Print_Ranks_Top;
         
-        procedure Print_Ranks_Bottom(Rank : Rank_t) is
+        procedure Print_Ranks_Bottom(Rank : in Rank_t) is
         begin
             if Rank = 1 then
-                Put_Line("    a  b  c  d  e  f  g  h ");
+                Put_Line("    a  b  c  d  e  f  g  h");
             end if;
         end Print_Ranks_Bottom;
         
-        procedure Print_Files_Left(File : File_t; Rank : Rank_t) is
+        procedure Print_Files_Left(File : in File_t; Rank : in Rank_t) is
         begin
             if File = a then
                 Put(" " & Trim(Rank'Image, Ada.Strings.Left) & " ");
             end if;
         end Print_Files_Left;
         
-        procedure Print_Files_Right(File : File_t; Rank : Rank_t) is
+        procedure Print_Files_Right(File       : in File_t;
+                                    Rank       : in Rank_t;
+                                    CurrPlayer : in Color_t)
+        is
+            Token_White : String := (if CurrPlayer = White then "➤" else " ");
+            Token_Black : String := (if CurrPlayer = Black then "➤" else " ");
         begin
             if File = h then
                 Put(ASCII.ESC & "[0m " & Trim(Rank'Image, Ada.Strings.Left));
+                
+                case Rank is
+                    when 2 => Put("    " & Token_White & " White");
+                    when 7 => Put("    " & Token_Black & " Black");
+                    when others => null;
+                end case;                
             end if;
         end Print_Files_Right;
         
-        function Get_Square(File : File_t; Rank : Rank_t) return access String is
+        function Get_Square(File : in File_t; Rank : in Rank_t) return access String is
         begin
             return (if (Rank + File_t'Pos(File) + 1) mod 2 = 0 then
                 Square_White'Access
             else
                 Square_Black'Access);
-        end Get_Square;
-        
+        end Get_Square;                
     begin
         for Rank in reverse 1 .. 8 loop
             -- Top ranks
@@ -137,7 +147,7 @@ package body Board.Strings is
                 Put(Background.all & " " & Image(Cell) & " ");
                 
                 -- Right files
-                Print_Files_Right(File, Rank);
+                Print_Files_Right(File, Rank, CurrPlayer);
             end loop;
             
             New_Line;
