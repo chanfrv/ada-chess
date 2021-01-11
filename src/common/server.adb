@@ -1,14 +1,14 @@
-with GNAT.Sockets; use GNAT.Sockets;
-with Ada.Text_IO; use Ada.Text_IO;
-with Ada.Command_Line; use Ada.Command_Line;
 with Ada.Characters.Handling; use Ada.Characters.Handling;
 with Ada.Strings.Fixed; use Ada.Strings.Fixed;
+with Ada.Text_IO; use Ada.Text_IO;
+
 with Board; use Board;
 with Board.Strings; use Board.Strings;
 
 
-procedure Server is
-
+package body Server is
+    
+    
     -- Index type in the player array
     subtype Player_Index_t is Natural range 1 .. 2;
     -- Record associating a player color and its network identity
@@ -55,7 +55,7 @@ procedure Server is
     function GetWhitePlayer(Players : in Players_t) return Natural is
         WhiteIndex : Natural := 0;
     begin
-    White_Loop:
+        White_Loop:
         for Index in Players'First .. Players'Last loop
             if Players(Index).Color = White then
                 WhiteIndex := Index;
@@ -67,62 +67,61 @@ procedure Server is
     end GetWhitePlayer;
 
     
-    -- Server network information
-    Address         : Sock_Addr_Type;
-    Server          : Socket_Type;
-    Players         : Players_t;
-
-    -- Game information
-    GameState       : GameResult_t;
-    Board           : Board_t;
-    CurrPlayerIndex : Player_Index_t;
-    MoveResult      : MoveResult_t;
-    CurrPlayer      : Player_t;
-    CurrMove        : Move_t;
-begin
-    -- Connect
-    Address.Addr := Addresses(Get_Host_By_Name(Host_Name), 1);
-    Address.Port := 5876;
     
-    if Argument_Count > 0 then
-        Address.Port := Port_Type'Value(Argument(1));
-    end if;
+    procedure Launch(Port : Port_Type)
+    is
+        -- Server network information
+        Address         : Sock_Addr_Type;
+        Server          : Socket_Type;
+        Players         : Players_t;
+
+        -- Game information
+        GameState       : GameResult_t;
+        Board           : Board_t;
+        CurrPlayerIndex : Player_Index_t;
+        MoveResult      : MoveResult_t;
+        CurrPlayer      : Player_t;
+        CurrMove        : Move_t;
+    begin
+        -- Connect
+        Address.Addr := Addresses(Get_Host_By_Name(Host_Name), 1);
+        Address.Port := Port;
     
-    Create_Socket(Server);
-    Set_Socket_Option(Server, Socket_Level, (Reuse_Address, True));
-    Bind_Socket(Server, Address);
-    Listen_Socket(Server);
+        Create_Socket(Server);
+        Set_Socket_Option(Server, Socket_Level, (Reuse_Address, True));
+        Bind_Socket(Server, Address);
+        Listen_Socket(Server);
 
-    Put_Line("Listening on " & Image(Address));
+        Put_Line("Listening on " & Image(Address));
 
-    -- Accept players
-    for Index in Player_Index_t'First .. Player_Index_t'Last loop
-        Put_Line("Waiting for player " & Trim(Index'Image, Ada.Strings.Left));
-        AcceptPlayer(Index, Color_t'Val(Index - 1), Server, Address, Players(Index));
-    end loop;
+        -- Accept players
+        for Index in Player_Index_t'First .. Player_Index_t'Last loop
+            Put_Line("Waiting for player " & Trim(Index'Image, Ada.Strings.Left));
+            AcceptPlayer(Index, Color_t'Val(Index - 1), Server, Address, Players(Index));
+        end loop;
 
-    -- Play
-    Board := StartBoard;
-    GameState := Playing;
-    CurrPlayerIndex := GetWhitePlayer(Players);
+        -- Play
+        Board := StartBoard;
+        GameState := Playing;
+        CurrPlayerIndex := GetWhitePlayer(Players);
 
-Game_Loop:
-    while GameState = Playing or GameState = Check_White or GameState = Check_Black loop
-        -- Change the current player
-        CurrPlayer := Players(CurrPlayerIndex);
-        Put_Line("Waiting for " & Image(CurrPlayer) & " move");
+        Game_Loop:
+        while GameState = Playing or GameState = Check_White or GameState = Check_Black loop
+            -- Change the current player
+            CurrPlayer := Players(CurrPlayerIndex);
+            Put_Line("Waiting for " & Image(CurrPlayer) & " move");
         
-        -- pretty print
-        Pretty_Print(Board, CurrPlayer.Color);
+            -- pretty print
+            Pretty_Print(Board, CurrPlayer.Color);
         
-        -- Receive the move from the current player
-        CurrMove := Parse(String'Input(CurrPlayer.Channel));
-        Put_Line("Move string parsed as '" & Image(CurrMove) & "'");
-        -- Play the move
-        MoveResult := Move(Board, CurrMove, CurrPlayer.Color);
+            -- Receive the move from the current player
+            CurrMove := Parse(String'Input(CurrPlayer.Channel));
+            Put_Line("Move string parsed as '" & Image(CurrMove) & "'");
+            -- Play the move
+            MoveResult := Move(Board, CurrMove, CurrPlayer.Color);
 
-        -- Decide what to do depending on the move
-        case MoveResult is
+            -- Decide what to do depending on the move
+            case MoveResult is
             when Valid_Move =>
                 Put_Line(CurrPlayer.Color'Image & " moved");
                 String'Output(CurrPlayer.Channel, Image(CurrPlayer) & " moved");
@@ -132,15 +131,18 @@ Game_Loop:
                 Put_Line("Invalid move from " & Image(CurrPlayer));
                 String'Output(CurrPlayer.Channel, "Invalid move from " & Image(CurrPlayer));
                 -- TODO send error to current player
-        end case;
+            end case;
 
-        -- Check if the game ended
-        GameState := Game_Ended(Board, CurrPlayer.Color);
-    end loop Game_Loop;
+            -- Check if the game ended
+            GameState := Game_Ended(Board, CurrPlayer.Color);
+        end loop Game_Loop;
 
-    -- Close
-    Close_Socket(Server);
-    Close_Socket(Players(1).Socket);
-    Close_Socket(Players(2).Socket);
+        -- Close
+        Close_Socket(Server);
+        Close_Socket(Players(1).Socket);
+        Close_Socket(Players(2).Socket);
+    
+    end Launch;
+    
     
 end Server;
