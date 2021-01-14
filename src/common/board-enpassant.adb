@@ -15,9 +15,7 @@ package body Board.EnPassant is
         Pawn_Rank : Rank_t := (if Color = White then 3 else 6);
     begin        
         -- Execute en passant from the last move
-        if Piece = Pawn and Capture = True
-          and (EnPassant_Coords.IsEnPassant and then To = EnPassant_Coords.To)
-        then
+        if Piece = Pawn and Capture = True then
             Put_Line("En passant on " & Image(EnPassant_Coords.Target) & " pawn");
             Board(EnPassant_Coords.Target.File, EnPassant_Coords.Target.Rank) := (IsEmpty => True);
         end if;

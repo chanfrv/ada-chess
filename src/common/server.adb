@@ -107,34 +107,34 @@ package body Server is
 
         Game_Loop:
         while GameState = Playing or GameState = Check_White or GameState = Check_Black loop
-            -- Change the current player
+            -- Get the current player info
             CurrPlayer := Players(CurrPlayerIndex);
-            Put_Line("Waiting for " & Image(CurrPlayer) & " move");
-        
+            
             -- pretty print
             Pretty_Print(Board, CurrPlayer.Color);
-        
+                
             -- Receive the move from the current player
             CurrMove := Parse(String'Input(CurrPlayer.Channel));
             Put_Line("Move string parsed as '" & Image(CurrMove) & "'");
+            
             -- Play the move
             MoveResult := Move(Board, CurrMove, CurrPlayer.Color);
 
             -- Decide what to do depending on the move
             case MoveResult is
             when Valid_Move =>
-                Put_Line(CurrPlayer.Color'Image & " moved");
+                Put_Line(Image(CurrPlayer) & " moved");
                 String'Output(CurrPlayer.Channel, Image(CurrPlayer) & " moved");
-                -- TODO broadcast move to the other player
+                -- Check if the game ended
+                GameState := Game_Ended(Board, CurrPlayer.Color);
+                Put_Line("Game state: " & GameState'Image);
+                -- change current player
                 CurrPlayerIndex := 3 - CurrPlayerIndex;
             when Invalid_Move | Ambiguous_Move =>
                 Put_Line("Invalid move from " & Image(CurrPlayer));
                 String'Output(CurrPlayer.Channel, "Invalid move from " & Image(CurrPlayer));
-                -- TODO send error to current player
             end case;
 
-            -- Check if the game ended
-            GameState := Game_Ended(Board, CurrPlayer.Color);
         end loop Game_Loop;
 
         -- Close

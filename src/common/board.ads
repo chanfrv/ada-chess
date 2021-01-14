@@ -156,7 +156,8 @@ private
 
 
     -- Returns True if the cell is empty or belongs to an opponent
-    function IsCellAccessible(Cell        : in Cell_t;
+    function IsCellAccessible(Board       : in Board_t;
+                              To          : in Coordinates_t;
                               PlayerColor : in Color_t;
                               Capture     : Boolean) return Boolean;
 
