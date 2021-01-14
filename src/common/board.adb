@@ -1,7 +1,5 @@
 with Ada.Text_IO; use Ada.Text_IO;
 with Ada.Characters.Handling; use Ada.Characters.Handling;
-with Ada.Containers; use Ada.Containers;
-with Ada.Containers.Vectors;
 with Ada.Strings.Fixed; use Ada.Strings.Fixed;
 with Ada.Exceptions; use Ada.Exceptions;
 
@@ -363,14 +361,10 @@ package body Board is
                        CurrPlayerColor : in  Color_t;
                        From            : out Coordinates_t) return MoveResult_t
     is
-        package Coordinate_Vector is new Ada.Containers.Vectors
-          (Index_Type   => Positive,
-           Element_Type => Coordinates_t);
-        use Coordinate_Vector;
-
-        Pieces   : Vector;
         CurrCord : Coordinates_t;
         CurrCell : Cell_t;
+
+        Found : Boolean := False;
 
         -- The move contains the origin file or rank information
         From_Has_File : Boolean := CurrMove.From.Has = Has_File or CurrMove.From.Has = Has_Both;
@@ -401,28 +395,25 @@ package body Board is
                   and then (CurrCell.Color = CurrPlayerColor and CurrCell.Piece = CurrMove.Piece)
                   and then IsValidMove(Board, (File, Rank), CurrMove.To, CurrMove.Capture)
                 then
-                    -- The move is possible, we add the piece position
-                    -- to the candidates
+                    -- The move is possible
                     Put_Line("Found candidate '" & Image(CurrCord) & "'");
-                    Pieces.Append((File, Rank));
+                    if Found = True then
+                        Put("Unresolved ambiguity with " & Image(CurrCord));
+                        return Ambiguous_Move;
+                    else
+                        From := (File, Rank);
+                        Found := True;
+                    end if;
                 end if;
             end loop;
         end loop;
 
-        case Pieces.Length is
-            when 0 => -- no piece found: invalid move
+        case Found is
+            when True  => -- one piece found
+                return Valid_Move;
+            when False => -- no piece found: invalid move
                 Put_Line("No valid piece found");
                 return Invalid_Move;
-            when 1 => -- one piece found
-                From := Pieces.First_Element;
-                return Valid_Move;
-            when others => -- more than one piece found: ambiguity
-                Put("Unresolved ambiguity between the pieces:");
-                for Piece of Pieces loop
-                    Put(" '" & Image(Piece) & "'");
-                end loop;
-                New_Line;
-                return Ambiguous_Move;
         end case;
     end FindPiece;
 
