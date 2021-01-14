@@ -45,7 +45,7 @@ package body Server is
         Accept_Socket(Server, Socket, Address);
         Channel := Stream(Socket);
         -- TODO Authenticate, assign color...
-        Put_Line("Assigned color " & Color'Image);
+        Put_Line(">>> Assigned color " & Color'Image);
         String'Output(Channel, Color'Image);
         Player := (Id => Id, Color => Color, Socket => Socket, Channel => Channel);
     end AcceptPlayer;
@@ -92,11 +92,11 @@ package body Server is
         Bind_Socket(Server, Address);
         Listen_Socket(Server);
 
-        Put_Line("Listening on " & Image(Address));
+        Put_Line(">>> Listening on " & Image(Address));
 
         -- Accept players
         for Index in Player_Index_t'First .. Player_Index_t'Last loop
-            Put_Line("Waiting for player " & Trim(Index'Image, Ada.Strings.Left));
+            Put_Line(">>> Waiting for player " & Trim(Index'Image, Ada.Strings.Left));
             AcceptPlayer(Index, Color_t'Val(Index - 1), Server, Address, Players(Index));
         end loop;
 
@@ -115,7 +115,7 @@ package body Server is
                 
             -- Receive the move from the current player
             CurrMove := Parse(String'Input(CurrPlayer.Channel));
-            Put_Line("Move string parsed as '" & Image(CurrMove) & "'");
+            Put_Line(">>> Move string parsed as '" & Image(CurrMove) & "'");
             
             -- Play the move
             MoveResult := Move(Board, CurrMove, CurrPlayer.Color);
@@ -123,15 +123,15 @@ package body Server is
             -- Decide what to do depending on the move
             case MoveResult is
             when Valid_Move =>
-                Put_Line(Image(CurrPlayer) & " moved");
+                Put_Line(">>> " & Image(CurrPlayer) & " moved");
                 String'Output(CurrPlayer.Channel, Image(CurrPlayer) & " moved");
                 -- Check if the game ended
                 GameState := Game_Ended(Board, CurrPlayer.Color);
-                Put_Line("Game state: " & GameState'Image);
+                Put_Line(">>> Game state: " & GameState'Image);
                 -- change current player
                 CurrPlayerIndex := 3 - CurrPlayerIndex;
             when Invalid_Move | Ambiguous_Move =>
-                Put_Line("Invalid move from " & Image(CurrPlayer));
+                Put_Line(">>> Invalid move from " & Image(CurrPlayer));
                 String'Output(CurrPlayer.Channel, "Invalid move from " & Image(CurrPlayer));
             end case;
 

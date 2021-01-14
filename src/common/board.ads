@@ -161,17 +161,22 @@ private
                               PlayerColor : in Color_t;
                               Capture     : Boolean) return Boolean;
 
-    -- Return True if the King at position From would be check at position
-    -- To.
+    -- Return True if the King at position From would be check at position To.
     function IsKingCheckAt(Board : in Board_t;
                            From  : in Coordinates_t;
                            To    : in Coordinates_t) return Boolean
       with Pre => (not Board(From.File, From.Rank).IsEmpty
                    and then Board(From.File, From.Rank).Piece = King);
 
-    -- Returns True if the King of color Color at position To is check.
     function IsKingCheck(Board : in Board_t;
-                         To    : in Coordinates_t) return Boolean;
+                         To    : in Coordinates_t) return Boolean
+      with Pre => (not Board(To.File, To.Rank).IsEmpty
+                   and then Board(To.File, To.Rank).Piece = King);
+
+    function IsKingCheckmate(Board : in Board_t;
+                             To    : in Coordinates_t) return Boolean
+      with Pre => (not Board(To.File, To.Rank).IsEmpty
+                   and then Board(To.File, To.Rank).Piece = King);
 
 
     function IsValidMove_King(Board : in Board_t;

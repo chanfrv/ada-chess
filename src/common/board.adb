@@ -52,19 +52,22 @@ package body Board is
                          To    : in Coordinates_t) return Boolean
     is
         Cell : Cell_t;
+        From : Coordinates_t;
     begin
-        Pretty_Print(Board, White);
-        Put_Line("Determining if king is check");
+        Put_Line("=> Determining if king is check...");
         -- Find an opponent piece threatening it
         for File in a .. h loop
             for Rank in 1 .. 8 loop
                 Cell := Board(File, Rank);
-                if not Cell.IsEmpty and then IsValidMove(Board, (File, Rank), To, True) then
+                From := (file, Rank);
+                if not Cell.IsEmpty and then IsValidMove(Board, From, To, True) then
+                    Put_Line("King is check by " & Image(Cell) & " (" & Image(From) & ")");
                     return True;
                 end if;
             end loop;
         end loop;
 
+        Put_Line("King is not check");
         return False;
     end IsKingCheck;
 
@@ -79,6 +82,7 @@ package body Board is
         From_Coords : Coordinates_t;
         To_Coords   : Coordinates_t;
     begin
+        Put_Line("=> Determining if king is checkmate...");
         -- Iterate on all the allied pieces
         for File_From in a .. h loop
             for Rank_From in 1 .. 8 loop
@@ -89,6 +93,7 @@ package body Board is
                 if not From_Cell.IsEmpty and then From_Cell.Color = King.Color then
                     -- Try to move the piece everywhere and check if the king is
                     -- not checked
+                    Put_Line("Trying to move piece " & Image(From_Cell));
                     for File_To in a .. h loop
                         for Rank_To in 1 ..8 loop
 
@@ -96,6 +101,7 @@ package body Board is
 
                             if (IsValidMove(Board, From_Coords, To_Coords, False)
                                  or IsValidMove(Board, From_Coords, To_Coords, True)) then
+                                Put_Line("King is not checkmate");
                                 return False;
                             end if;
 
@@ -106,7 +112,7 @@ package body Board is
 
             end loop;
         end loop;
-
+        Put_Line("King is checkmate");
         return True;
     end IsKingCheckmate;
 
@@ -312,12 +318,15 @@ package body Board is
         -- Rules common to every piece:
         -- + the cell is different from the origin
         -- + either the cell is empty or it belongs to the opponent
+        Put_Line("Checking common rules");
         if (From.File = To.File and From.Rank = To.Rank)
           or not IsCellAccessible(Board, To, Cell_From.Color, Capture)
         then
+            Put_Line("Cell not accessible because of common rules");
             return False;
         end if;
 
+        Put_Line("Checking piece specific rules");
         -- Piece specific rules
         if not (case Cell_From.Piece is
                      when King   => IsValidMove_King  (Board, From, To),
@@ -326,15 +335,26 @@ package body Board is
                      when Bishop => IsValidMove_Bishop(Board, From, To),
                      when Knight => IsValidMove_Knight(Board, From, To),
                      when Pawn   => IsValidMove_Pawn  (Board, From, To)) then
+            Put_Line("Cell not accessible because of piece specific rules");
             return False;
         end if;
 
         -- Is King check with this move ?
         TmpBoard := Board;
-        TmpKing := GetKing(TmpBoard, Cell_From.Color);
+        Put_Line("Checking if the " & Cell_From.Color'Image & " king would be check");
+
         TmpBoard(To.File, To.Rank) := TmpBoard(From.File, From.Rank);
         TmpBoard(From.File, From.Rank) := Empty;
-        return not IsKingCheck(TmpBoard, TmpKing);
+
+        TmpKing := GetKing(TmpBoard, Cell_From.Color);
+
+        if IsKingCheck(TmpBoard, TmpKing) then
+            Put_Line("This move would make the allied king check");
+            return False;
+        else
+            return True;
+        end if;
+
     end IsValidMove;
 
 
@@ -420,22 +440,23 @@ package body Board is
 
         case CurrMove.Castling is
             when Kingside =>
+                Put_Line("Trying kingside castling");
                 Castling_Kingside(Board, CurrPlayerColor);
             when Queenside =>
+                Put_Line("Trying queenside castling");
                 Castling_Queenside(Board, CurrPlayerColor);
             -- Normal move
             when None =>
+                Put_Line("Normal move, looking for a valid piece");
                 -- find the piece on the board
                 MoveResult := FindPiece(Board, CurrMove, CurrPlayerColor, From);
 
                 if MoveResult = Valid_Move then
-                    Put_Line("Found piece " & Image(Board(From.File, From.Rank))
-                             & " on '" & Image(From) & "'");
-
                     -- if the piece is a king or rook, unregister the piece for castling
                     Castling_Unregister(Board, From);
 
                     -- if the move is valid, move the piece
+                    Put_Line("Found piece " & Image(Board(From.File, From.Rank)) & " on '" & Image(From) & "'");
                     Board(CurrMove.To.File, CurrMove.To.Rank) := Board(From.File, From.Rank);
                     Board(From.File, From.Rank) := (IsEmpty => True);
 
@@ -481,14 +502,15 @@ package body Board is
                     -- Is the king check ?
                     King_Coords := (File, Rank);
                     if IsKingCheck(Board, King_Coords) then
+                        Put_Line("Check, is it checkmate?");
                         -- Checkmate ?
-                        --if IsKingCheckmate(Board, King_Coords) then
-                        --    Put_Line("Checkmate");
-                        --    return Checkmate;
-                        --else
+                        if IsKingCheckmate(Board, King_Coords) then
+                            Put_Line("Checkmate");
+                            return Checkmate;
+                        else
                             Put_Line("Check");
                             return Check;
-                        --end if;
+                        end if;
                     end if;
                     -- the king is not check
                     exit;

@@ -9,7 +9,7 @@ procedure Test is
       (--    1        2      3      4      5      6      7      8
         (Empty, Empty, Empty, Empty, Empty, Empty, Empty, Empty), -- a
         (Empty, Empty, Empty, Empty, Empty, Empty, Empty, Empty), -- b
-        (Empty, Empty, Empty, BBishop, Empty, Empty, Empty, Empty), -- c
+        (Empty, Empty, Empty, Empty, Empty, Empty, Empty, Empty), -- c
         (Empty, Empty, Empty, Empty, Empty, Empty, Empty, Empty), -- d
         (WKing, BQueen, Empty, Empty, Empty, Empty, Empty, BKing), -- e
         (Empty, Empty, Empty, Empty, Empty, Empty, Empty, Empty), -- f
