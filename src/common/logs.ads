@@ -16,7 +16,7 @@ private
     Level_Image : constant array (1 .. 3) of String(1 .. 14) :=
     (
         ASCII.ESC & "[31mERROR" & ASCII.ESC & "[0m",
-        ASCII.ESC & "[00mINFO " & ASCII.ESC & "[0m",
+        ASCII.ESC & "[00mINFO-" & ASCII.ESC & "[0m",
         ASCII.ESC & "[33mDEBUG" & ASCII.ESC & "[0m"
     );
     

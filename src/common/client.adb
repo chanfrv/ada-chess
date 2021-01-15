@@ -29,6 +29,9 @@ package body Client is
         Move_Regexp : constant Regexp := Compile(Move_String);
     
     begin
+        -- Setup logger
+        Logs.Set_Level(Logs.Debug);
+        
         -- Connect
         Address.Addr := Addr;
         Address.Port := Port;
@@ -66,7 +69,6 @@ package body Client is
 
                 -- Receive response (success, error, you win...)
                 Logs.Info(String'Input(Channel));
-                --GameState := GameResult_t'Value();
 
             else
                 Logs.Error("Invalid command: '" & Str(1 .. Last) & "'.");

@@ -6,6 +6,12 @@ with Ada.Calendar.Formatting;
 package body Logs is
     
     
+    procedure Set_Level(Level : Level_t) is
+    begin
+        Logs.Level := Level;
+    end Set_Level;
+    
+    
     procedure Error(Item : String) is
     begin
         if Level >= Error then
@@ -27,18 +33,13 @@ package body Logs is
         end if;
     end Debug;
     
-    procedure Set_Level(Level : Level_t) is
-    begin
-        Logs.Level := Level;
-    end Set_Level;
-    
     
     procedure Log(Level : Level_t; Item : String)
     is
-        Clock_Colored : String := Formatting.Image(Clock);
-        Level_Colored : String := Level_Image(Level_t'Pos(Level) + 1);
+        Clock_Format : String := Formatting.Image(Clock);
+        Level_Format : String := Level_Image(Level_t'Pos(Level) + 1);
     begin
-        Put_Line("[" & Clock_Colored & "][" & Level_Colored & "] " & Item);
+        Put_Line("[" & Clock_Format & "][" & Level_Format & "] " & Item);
     end Log;
     
     

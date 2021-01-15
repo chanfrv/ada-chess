@@ -42,9 +42,6 @@ package body Server is
         Socket  : Socket_Type;
         Channel : Stream_Access;
     begin
-        -- Setup logger
-        Logs.Set_Level(Logs.Debug);
-        
         Accept_Socket(Server, Socket, Address);
         Channel := Stream(Socket);
         -- TODO Authenticate, assign color...
@@ -86,6 +83,9 @@ package body Server is
         CurrPlayer      : Player_t;
         CurrMove        : Move_t;
     begin
+        -- Setup logger
+        Logs.Set_Level(Logs.Debug);
+        
         -- Connect
         Address.Addr := Addresses(Get_Host_By_Name(Host_Name), 1);
         Address.Port := Port;
