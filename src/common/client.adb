@@ -5,6 +5,7 @@ with Ada.Text_IO; use Ada.Text_IO;
 
 with Board; use Board;
 with Board.Strings; use Board.Strings;
+with Logs;
 
 
 package body Client is
@@ -37,7 +38,7 @@ package body Client is
         Connect_Socket(Socket, Address);
         Channel := Stream(Socket);
 
-        Put_Line("Connecting to " & Image(Address));
+        Logs.Info("Connecting to " & Image(Address));
 
         -- Play
         My_Color := Color_t'Value(String'Input(Channel));
@@ -64,14 +65,11 @@ package body Client is
                 String'Output(Channel, Str(1 .. Last));
 
                 -- Receive response (success, error, you win...)
-                Put_Line(String'Input(Channel));
+                Logs.Info(String'Input(Channel));
                 --GameState := GameResult_t'Value();
 
             else
-                Put_Line("Invalid command: '" & Str(1 .. Last) & "'.");
-                Put_Line("Commands:");
-                Put_Line("  resign -- Quit the game");
-                Put_Line("  [move] -- Follows algebraic notation eg. 'e4'");
+                Logs.Error("Invalid command: '" & Str(1 .. Last) & "'.");
             end if;
 
         end loop Game_Loop;

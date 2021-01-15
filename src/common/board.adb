@@ -1,4 +1,3 @@
-with Ada.Text_IO; use Ada.Text_IO;
 with Ada.Characters.Handling; use Ada.Characters.Handling;
 with Ada.Strings.Fixed; use Ada.Strings.Fixed;
 with Ada.Exceptions; use Ada.Exceptions;
@@ -6,6 +5,7 @@ with Ada.Exceptions; use Ada.Exceptions;
 with Board.Strings; use Board.Strings;
 with Board.Castling; use Board.Castling;
 with Board.EnPassant; use Board.EnPassant;
+with Logs;
 
 
 package body Board is
@@ -35,7 +35,7 @@ package body Board is
         NewBoard  : Board_t := Board;
         King      : Cell_t := Board(From.File, From.Rank);
     begin
-        Put_Line("Checking if the king would be checked on " & Image(To));
+        Logs.Debug("Checking if the king would be checked on " & Image(To));
 
         -- Move the King
         NewBoard(To.File, To.Rank) := King;
@@ -52,20 +52,20 @@ package body Board is
         Cell : Cell_t;
         From : Coordinates_t;
     begin
-        Put_Line("=> Determining if king is check...");
+        Logs.Debug("Determining if king is check...");
         -- Find an opponent piece threatening it
         for File in a .. h loop
             for Rank in 1 .. 8 loop
                 Cell := Board(File, Rank);
                 From := (file, Rank);
                 if not Cell.IsEmpty and then IsValidMove(Board, From, To, True) then
-                    Put_Line("King is check by " & Image(Cell) & " (" & Image(From) & ")");
+                    Logs.Debug("King is check by " & Image(Cell) & " (" & Image(From) & ")");
                     return True;
                 end if;
             end loop;
         end loop;
 
-        Put_Line("King is not check");
+        Logs.Debug("King is not check");
         return False;
     end IsKingCheck;
 
@@ -80,7 +80,7 @@ package body Board is
         From_Coords : Coordinates_t;
         To_Coords   : Coordinates_t;
     begin
-        Put_Line("=> Determining if king is checkmate...");
+        Logs.Debug("Determining if king is checkmate...");
         -- Iterate on all the allied pieces
         for File_From in a .. h loop
             for Rank_From in 1 .. 8 loop
@@ -91,7 +91,7 @@ package body Board is
                 if not From_Cell.IsEmpty and then From_Cell.Color = King.Color then
                     -- Try to move the piece everywhere and check if the king is
                     -- not checked
-                    Put_Line("Trying to move piece " & Image(From_Cell));
+                    Logs.Debug("Trying to move piece " & Image(From_Cell));
                     for File_To in a .. h loop
                         for Rank_To in 1 ..8 loop
 
@@ -99,7 +99,7 @@ package body Board is
 
                             if (IsValidMove(Board, From_Coords, To_Coords, False)
                                  or IsValidMove(Board, From_Coords, To_Coords, True)) then
-                                Put_Line("King is not checkmate");
+                                Logs.Debug("King is not checkmate");
                                 return False;
                             end if;
 
@@ -110,7 +110,7 @@ package body Board is
 
             end loop;
         end loop;
-        Put_Line("King is checkmate");
+        Logs.Debug("King is checkmate");
         return True;
     end IsKingCheckmate;
 
@@ -310,21 +310,21 @@ package body Board is
         TmpBoard  : Board_t;
         TmpKing   : Coordinates_t;
     begin
-        Put_Line("Checking piece " & Image(Board(From.File, From.Rank))
-                 & " going from '" & Image(From) & "' to '" & Image(To) & "'");
+        Logs.Debug("Checking piece " & Image(Board(From.File, From.Rank))
+                   & " going from '" & Image(From) & "' to '" & Image(To) & "'");
 
         -- Rules common to every piece:
         -- + the cell is different from the origin
         -- + either the cell is empty or it belongs to the opponent
-        Put_Line("Checking common rules");
+        Logs.Debug("Checking common rules");
         if (From.File = To.File and From.Rank = To.Rank)
           or not IsCellAccessible(Board, To, Cell_From.Color, Capture)
         then
-            Put_Line("Cell not accessible because of common rules");
+            Logs.Debug("Cell not accessible because of common rules");
             return False;
         end if;
 
-        Put_Line("Checking piece specific rules");
+        Logs.Debug("Checking piece specific rules");
         -- Piece specific rules
         if not (case Cell_From.Piece is
                      when King   => IsValidMove_King  (Board, From, To),
@@ -333,13 +333,13 @@ package body Board is
                      when Bishop => IsValidMove_Bishop(Board, From, To),
                      when Knight => IsValidMove_Knight(Board, From, To),
                      when Pawn   => IsValidMove_Pawn  (Board, From, To)) then
-            Put_Line("Cell not accessible because of piece specific rules");
+            Logs.Debug("Cell not accessible because of piece specific rules");
             return False;
         end if;
 
         -- Is King check with this move ?
         TmpBoard := Board;
-        Put_Line("Checking if the " & Cell_From.Color'Image & " king would be check");
+        Logs.Debug("Checking if the " & Cell_From.Color'Image & " king would be check");
 
         TmpBoard(To.File, To.Rank) := TmpBoard(From.File, From.Rank);
         TmpBoard(From.File, From.Rank) := Empty;
@@ -347,7 +347,7 @@ package body Board is
         TmpKing := GetKing(TmpBoard, Cell_From.Color);
 
         if IsKingCheck(TmpBoard, TmpKing) then
-            Put_Line("This move would make the allied king check");
+            Logs.Debug("This move would make the allied king check");
             return False;
         else
             return True;
@@ -380,7 +380,7 @@ package body Board is
         Min_Rank : Rank_t := (if From_Has_Rank then CurrMove.From.Rank else 1);
         Max_Rank : Rank_t := (if From_Has_Rank then CurrMove.From.Rank else 8);
     begin
-        Put_Line("Looking for a piece that can move to " & Image(CurrMove.To));
+        Logs.Debug("Looking for a piece that can move to " & Image(CurrMove.To));
 
         for File in Min_File .. Max_File loop
             for Rank in Min_Rank .. Max_Rank loop
@@ -396,9 +396,9 @@ package body Board is
                   and then IsValidMove(Board, (File, Rank), CurrMove.To, CurrMove.Capture)
                 then
                     -- The move is possible
-                    Put_Line("Found candidate '" & Image(CurrCord) & "'");
+                    Logs.Debug("Found candidate '" & Image(CurrCord) & "'");
                     if Found = True then
-                        Put("Unresolved ambiguity with " & Image(CurrCord));
+                        Logs.Debug("Unresolved ambiguity with " & Image(CurrCord));
                         return Ambiguous_Move;
                     else
                         From := (File, Rank);
@@ -412,7 +412,7 @@ package body Board is
             when True  => -- one piece found
                 return Valid_Move;
             when False => -- no piece found: invalid move
-                Put_Line("No valid piece found");
+                Logs.Debug("No valid piece found");
                 return Invalid_Move;
         end case;
     end FindPiece;
@@ -427,18 +427,18 @@ package body Board is
         Cell_To    : Cell_t;
         Promoted   : Cell_t;
     begin
-        Put_Line("Moving to " & Image(CurrMove.To));
+        Logs.Debug("Moving to " & Image(CurrMove.To));
 
         case CurrMove.Castling is
             when Kingside =>
-                Put_Line("Trying kingside castling");
+                Logs.Debug("Trying kingside castling");
                 Castling_Kingside(Board, CurrPlayerColor);
             when Queenside =>
-                Put_Line("Trying queenside castling");
+                Logs.Debug("Trying queenside castling");
                 Castling_Queenside(Board, CurrPlayerColor);
             -- Normal move
             when None =>
-                Put_Line("Normal move, looking for a valid piece");
+                Logs.Debug("Normal move, looking for a valid piece");
                 -- find the piece on the board
                 MoveResult := FindPiece(Board, CurrMove, CurrPlayerColor, From);
 
@@ -447,7 +447,7 @@ package body Board is
                     Castling_Unregister(Board, From);
 
                     -- if the move is valid, move the piece
-                    Put_Line("Found piece " & Image(Board(From.File, From.Rank)) & " on '" & Image(From) & "'");
+                    Logs.Debug("Found piece " & Image(Board(From.File, From.Rank)) & " on '" & Image(From) & "'");
                     Board(CurrMove.To.File, CurrMove.To.Rank) := Board(From.File, From.Rank);
                     Board(From.File, From.Rank) := (IsEmpty => True);
 
@@ -485,7 +485,7 @@ package body Board is
 
         King_Coords : Coordinates_t;
     begin
-        Put_Line("Processing game status");
+        Logs.Debug("Processing game status");
         for File in a .. h loop
             for Rank in 1 .. 8 loop
 
@@ -493,13 +493,13 @@ package body Board is
                     -- Is the king check ?
                     King_Coords := (File, Rank);
                     if IsKingCheck(Board, King_Coords) then
-                        Put_Line("Check, is it checkmate?");
+                        Logs.Debug("Check, is it checkmate?");
                         -- Checkmate ?
                         if IsKingCheckmate(Board, King_Coords) then
-                            Put_Line("Checkmate");
+                            Logs.Debug("Checkmate");
                             return Checkmate;
                         else
-                            Put_Line("Check");
+                            Logs.Debug("Check");
                             return Check;
                         end if;
                     end if;

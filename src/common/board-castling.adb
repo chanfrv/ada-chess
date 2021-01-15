@@ -1,4 +1,4 @@
-with Ada.Text_IO; use Ada.Text_IO;
+with Logs;
 
 
 package body Board.Castling is
@@ -79,7 +79,7 @@ package body Board.Castling is
             Board(g, Rank) := King;
             Board(h, Rank) := Empty;
         else
-            Put_Line("Invalid castling");
+            Logs.Debug("Invalid castling");
         end if;
     end Castling_Kingside;
     
@@ -126,7 +126,7 @@ package body Board.Castling is
             Board(d, Rank) := Empty;
             Board(e, Rank) := Empty;
         else
-            Put_Line("Invalid castling");
+            Logs.Debug("Invalid castling");
         end if;
     end Castling_Queenside;
     

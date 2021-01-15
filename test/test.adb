@@ -2,6 +2,7 @@ with Ada.Text_IO; use Ada.Text_IO;
 
 with Board; use Board;
 with Board.Strings; use Board.Strings;
+with Logs;
 
 
 procedure Test is
@@ -19,5 +20,7 @@ procedure Test is
     GameState : GameResult_t := Game_Ended(Board, Black);
 begin
     --Pretty_Print(Board, White);
-    Put_Line("Game state: " & GameState'Image);
+    Logs.Error("Game state: " & GameState'Image);
+    Logs.Info("Game state: " & GameState'Image);
+    Logs.Debug("Game state: " & GameState'Image);
 end Test;

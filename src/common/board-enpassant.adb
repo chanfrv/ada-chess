@@ -1,5 +1,6 @@
-with Ada.Text_IO; use Ada.Text_IO;
 with Board.Strings; use Board.Strings;
+
+with Logs;
 
 
 package body Board.EnPassant is
@@ -16,7 +17,7 @@ package body Board.EnPassant is
     begin        
         -- Execute en passant from the last move
         if Piece = Pawn and Capture = True then
-            Put_Line("En passant on " & Image(EnPassant_Coords.Target) & " pawn");
+            Logs.Debug("En passant on " & Image(EnPassant_Coords.Target) & " pawn");
             Board(EnPassant_Coords.Target.File, EnPassant_Coords.Target.Rank) := (IsEmpty => True);
         end if;
 

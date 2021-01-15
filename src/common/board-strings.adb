@@ -2,6 +2,8 @@ with Ada.Text_IO; use Ada.Text_IO;
 with Ada.Characters.Handling; use Ada.Characters.Handling;
 with Ada.Strings.Fixed; use Ada.Strings.Fixed;
 
+with Logs;
+
 
 package body Board.Strings is
 
@@ -262,7 +264,7 @@ package body Board.Strings is
             when 'a' .. 'h' =>
                 Move.To.File := File_t'Value("" & File_C);
             when others =>
-                Put_Line("Invalid destination file");
+                Logs.Debug("Invalid destination file");
         end case;
 
         -- Rank
@@ -271,7 +273,7 @@ package body Board.Strings is
             when '1' .. '8' =>
                 Move.To.Rank := Rank_t'Value("" & Rank_C);
             when others =>
-                Put_Line("Invalid destination rank");
+                Logs.Debug("Invalid destination rank");
         end case;
         
         -- Capture, piece and disambiguity
