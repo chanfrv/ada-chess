@@ -2,6 +2,7 @@ with Ada.Text_IO; use Ada.Text_IO;
 
 with Board; use Board;
 with Board.Strings; use Board.Strings;
+with Board.Strings.Pretty; use Board.Strings.Pretty;
 with Logs;
 
 
@@ -11,16 +12,21 @@ procedure Test is
         (Empty, Empty, Empty, Empty, Empty, Empty, Empty, Empty), -- a
         (Empty, Empty, Empty, Empty, Empty, Empty, Empty, Empty), -- b
         (Empty, Empty, Empty, Empty, Empty, Empty, Empty, Empty), -- c
-        (Empty, Empty, Empty, Empty, Empty, Empty, Empty, Empty), -- d
+        (Empty, Empty, Empty, BKnight, Empty, Empty, Empty, Empty), -- d
         (WKing, BQueen, Empty, Empty, Empty, Empty, Empty, BKing), -- e
         (Empty, Empty, Empty, Empty, Empty, Empty, Empty, Empty), -- f
-        (Empty, Empty, Empty, Empty, Empty, Empty, Empty, Empty), -- g
+        (Empty, Empty, Empty, WBishop, Empty, Empty, Empty, Empty), -- g
         (Empty, Empty, Empty, Empty, Empty, Empty, Empty, Empty)  -- h
       );
-    GameState : GameResult_t := Game_Ended(Board, Black);
+    GameState : GameResult_t;
 begin
+    logs.Set_Level(Logs.Debug);
+
+    Pretty_Print(Board);
+
+    GameState := Game_Ended(Board, Black);
+
     --Pretty_Print(Board, White);
-    Logs.Error("Game state: " & GameState'Image);
-    Logs.Info("Game state: " & GameState'Image);
     Logs.Debug("Game state: " & GameState'Image);
+
 end Test;

@@ -3,6 +3,7 @@ with Ada.Strings.Fixed; use Ada.Strings.Fixed;
 
 with Board; use Board;
 with Board.Strings; use Board.Strings;
+with Board.Strings.Pretty; use Board.Strings.Pretty;
 with Logs;
 
 

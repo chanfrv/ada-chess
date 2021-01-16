@@ -11,30 +11,30 @@ package body Board.Castling is
     begin
         -- White king
         if Cell = WKing then               
-            Castling_Validity.White_King_Moved := True;
+            White_King_Moved := True;
         
         -- White rook
         elsif Cell = WRook then
             -- Queenside rook
             if Side = Queenside then
-                Castling_Validity.White_Rook_Queenside_Moved := True;
+                White_Rook_Queenside_Moved := True;
             -- Kingside rook
             else
-                Castling_Validity.White_Rook_Kingside_Moved := True;
+                White_Rook_Kingside_Moved := True;
             end if;
         
         -- Black king
         elsif Cell = BKing then
-            Castling_Validity.Black_King_Moved := True;
+            Black_King_Moved := True;
         
         -- Black rook
         elsif Cell = BRook then
             -- Queenside rook
             if Side = Queenside then
-                Castling_Validity.Black_Rook_Queenside_Moved := True;
+                Black_Rook_Queenside_Moved := True;
             -- Kingside rook
             else
-                Castling_Validity.Black_Rook_Kingside_Moved := True;
+                Black_Rook_Kingside_Moved := True;
             end if;
         end if;
     end Castling_Unregister;
@@ -59,13 +59,12 @@ package body Board.Castling is
         Rook : Cell_t := (if Color = White then WRook else BRook);
         
         King_Moved : Boolean := (if Color = White then
-                                     Castling_Validity.White_King_Moved
+                                     White_King_Moved
                                  else
-                                     Castling_Validity.Black_King_Moved);
-        Rook_Moved : Boolean := (if Color = White then
-                                     Castling_Validity.White_Rook_Kingside_Moved
-                                 else
-                                     Castling_Validity.Black_Rook_Kingside_Moved);        
+                                     Black_King_Moved);
+        Rook_Moved : Boolean := (if Color = White
+                                 then White_Rook_Kingside_Moved
+                                 else Black_Rook_Kingside_Moved);        
     begin
         if (not King_Moved and not Rook_Moved
              and Board(e, Rank) = King
@@ -103,14 +102,12 @@ package body Board.Castling is
         King : Cell_t := (if Color = White then WKing else BKing);
         Rook : Cell_t := (if Color = White then WRook else BRook);
         
-        King_Moved : Boolean := (if Color = White then
-                                     Castling_Validity.White_King_Moved
-                                 else
-                                     Castling_Validity.Black_King_Moved);
-        Rook_Moved : Boolean := (if Color = White then
-                                     Castling_Validity.White_Rook_Queenside_Moved
-                                 else
-                                     Castling_Validity.Black_Rook_Queenside_Moved);
+        King_Moved : Boolean := (if Color = White
+                                 then White_King_Moved
+                                 else Black_King_Moved);
+        Rook_Moved : Boolean := (if Color = White
+                                 then White_Rook_Queenside_Moved
+                                 else Black_Rook_Queenside_Moved);
     begin
         if (not King_Moved and not Rook_Moved
              and Board(a, Rank) = Rook

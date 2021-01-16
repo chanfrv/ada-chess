@@ -49,23 +49,27 @@ package body Board is
     function IsKingCheck(Board : in Board_t;
                          To    : in Coordinates_t) return Boolean
     is
+        King : Cell_t := Board(To.File, To.Rank);
         Cell : Cell_t;
         From : Coordinates_t;
     begin
-        Logs.Debug("Determining if king is check...");
+        Logs.Debug("Determining if " & King.Color'Image & " King is check...");
         -- Find an opponent piece threatening it
         for File in a .. h loop
             for Rank in 1 .. 8 loop
                 Cell := Board(File, Rank);
                 From := (file, Rank);
+                Logs.IncIndent;
                 if not Cell.IsEmpty and then IsValidMove(Board, From, To, True) then
-                    Logs.Debug("King is check by " & Image(Cell) & " (" & Image(From) & ")");
+                    Logs.Debug(King.Color'Image & " King is check by " & Image(Cell) & " (" & Image(From) & ")");
+                    Logs.DecIndent;
                     return True;
                 end if;
+                Logs.DecIndent;
             end loop;
         end loop;
 
-        Logs.Debug("King is not check");
+        Logs.Debug(King.Color'Image & " King is not check");
         return False;
     end IsKingCheck;
 
@@ -80,7 +84,7 @@ package body Board is
         From_Coords : Coordinates_t;
         To_Coords   : Coordinates_t;
     begin
-        Logs.Debug("Determining if king is checkmate...");
+        Logs.Debug("Determining if " & King.Color'Image & " King is checkmate...");
         -- Iterate on all the allied pieces
         for File_From in a .. h loop
             for Rank_From in 1 .. 8 loop
@@ -92,6 +96,8 @@ package body Board is
                     -- Try to move the piece everywhere and check if the king is
                     -- not checked
                     Logs.Debug("Trying to move piece " & Image(From_Cell));
+                    Logs.IncIndent;
+
                     for File_To in a .. h loop
                         for Rank_To in 1 ..8 loop
 
@@ -99,18 +105,21 @@ package body Board is
 
                             if (IsValidMove(Board, From_Coords, To_Coords, False)
                                  or IsValidMove(Board, From_Coords, To_Coords, True)) then
-                                Logs.Debug("King is not checkmate");
+                                Logs.Debug(King.Color'Image & " King is not checkmate");
+                                Logs.DecIndent;
                                 return False;
                             end if;
 
                         end loop;
                     end loop;
 
+                    Logs.DecIndent;
+
                 end if;
 
             end loop;
         end loop;
-        Logs.Debug("King is checkmate");
+        Logs.Debug(King.Color'Image & " King is checkmate");
         return True;
     end IsKingCheckmate;
 
@@ -316,7 +325,7 @@ package body Board is
         -- Rules common to every piece:
         -- + the cell is different from the origin
         -- + either the cell is empty or it belongs to the opponent
-        Logs.Debug("Checking common rules");
+        --Logs.Debug("Checking common rules");
         if (From.File = To.File and From.Rank = To.Rank)
           or not IsCellAccessible(Board, To, Cell_From.Color, Capture)
         then
@@ -324,7 +333,7 @@ package body Board is
             return False;
         end if;
 
-        Logs.Debug("Checking piece specific rules");
+        --Logs.Debug("Checking piece specific rules");
         -- Piece specific rules
         if not (case Cell_From.Piece is
                      when King   => IsValidMove_King  (Board, From, To),
@@ -339,7 +348,8 @@ package body Board is
 
         -- Is King check with this move ?
         TmpBoard := Board;
-        Logs.Debug("Checking if the " & Cell_From.Color'Image & " king would be check");
+        Logs.IncIndent;
+        Logs.Debug("Checking if the " & Cell_From.Color'Image & " King would be check");
 
         TmpBoard(To.File, To.Rank) := TmpBoard(From.File, From.Rank);
         TmpBoard(From.File, From.Rank) := Empty;
@@ -347,9 +357,11 @@ package body Board is
         TmpKing := GetKing(TmpBoard, Cell_From.Color);
 
         if IsKingCheck(TmpBoard, TmpKing) then
-            Logs.Debug("This move would make the allied king check");
+            Logs.Debug("This move would make the allied King check");
+            Logs.DecIndent;
             return False;
         else
+            Logs.DecIndent;
             return True;
         end if;
 

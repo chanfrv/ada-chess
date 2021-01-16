@@ -15,10 +15,6 @@ package Board.Strings is
     
     -- Return the content of a cell, the piece and its color.
     function Image(Cell : in Cell_t) return String;
-    
-    
-    -- Pretty prints the board on the standard output.
-    procedure Pretty_Print(Board : in Board_t; CurrPlayer : in Color_t);
 
     
     -- Converts an algebraic string to a coordinates pair.
