@@ -1,5 +1,5 @@
 package Board.Strings is
-
+    
     
     function Image(File : File_t) return String;
     function Image(Rank : Rank_t) return String;
@@ -15,11 +15,6 @@ package Board.Strings is
     
     -- Return the content of a cell, the piece and its color.
     function Image(Cell : in Cell_t) return String;
-
-    
-    -- Converts an algebraic string to a coordinates pair.
-    function Parse(Move_Str : in String) return Move_t
-      with Pre => Move_Str'Length >= 1;
     
 
 end Board.Strings;

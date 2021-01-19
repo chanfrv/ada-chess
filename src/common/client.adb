@@ -48,7 +48,7 @@ package body Client is
         GameState := Playing;
 
         Game_Loop:
-        while GameState = Playing or GameState = Check_White or GameState = Check_Black loop
+        while GameState = Playing or GameState = Check loop
             -- Get and send move
             Str := (others => Character'Val(0));
             Put(To_lower(My_Color'Image) & "> ");

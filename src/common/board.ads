@@ -62,20 +62,26 @@ package Board is
     type Castling_t is (None, Kingside, Queenside);
 
 
+    -- Enumeration of the possible results after a move is given by
+    -- a player. Used in the function Move().
+    -- TODO add more errors
+    type MoveResult_t is (Valid_Move, Invalid_Move, Ambiguous_Move);
+
+    -- The differents outcomes of a game
+    type GameResult_t is (Playing, Draw, Check, Checkmate, Resignation);
+
+
     -- A move is described by a destination and a prefix.
     -- The move in algebraic notation is described by the grammar:
     --
-    -- Move ::= Prefix <To : Coordinates_t> Suffix
+    -- Move      ::= Piece From Capture To Promotion Status
     --
-    -- <To : Coordinates_t> ::= <File : File_t> <Rank : Rank_t>
-    --
-    -- Prefix ::= From | From <Capture : Boolean>
-    -- From ::= Piece | Piece <From : Disambiguating_Coordinates_t>
-    -- <From : Disambiguating_Coordinates_t> ::=
-    --   <File : File_t> | <Rank : Rank_t> | <Coords : Coordinates_t>
-    -- Piece ::= Empty | <Piece : Piece_t>
-    --
-    -- Suffix ::= Empty | <Promotion : Piece_t>
+    -- Piece     ::= [KQRBN]?
+    -- From      ::= [a-h]?[1-8]?
+    -- Capture   ::= x?
+    -- To        ::= [a-h][1-8]
+    -- Promotion ::= [QRBN]?
+    -- Status    ::= [+#]?
     type Move_t(Castling : Castling_t := None) is
         record
             case Castling is
@@ -85,22 +91,11 @@ package Board is
                     Capture   : Boolean;
                     To        : Coordinates_t;
                     Promotion : Piece_t;
+                    Status    : GameResult_t;
                 when others =>
                     null;
             end case;
         end record;
-
-    -- Enumeration of the possible results after a move is given by
-    -- a player. Used in the function Move().
-    -- TODO add more errors
-    type MoveResult_t is (Valid_Move, Invalid_Move, Ambiguous_Move);
-
-    -- The differents outcomes of a game
-    type GameResult_t is (Playing,
-                          Draw,
-                          Check_White, Check_Black,
-                          Checkmate_White, Checkmate_Black,
-                          Resignation_White, Resignation_Black);
 
 
     Empty   : constant Cell_t := (IsEmpty => True);

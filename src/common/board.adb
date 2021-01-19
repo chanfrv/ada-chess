@@ -490,10 +490,8 @@ package body Board is
     function Game_Ended(Board           : in Board_t;
                         CurrPlayerColor : in Color_t) return GameResult_t
     is
-        Opponent  : Color_t      := (if CurrPlayerColor = White then Black else White);
-        King      : Cell_t       := (if Opponent = White then WKing else BKing);
-        Check     : GameResult_t := (if Opponent = White then Check_White else Check_Black);
-        Checkmate : GameResult_t := (if Opponent = White then Checkmate_White else Checkmate_Black);
+        Opponent  : Color_t := (if CurrPlayerColor = White then Black else White);
+        King      : Cell_t  := (if Opponent        = White then WKing else BKing);
 
         King_Coords : Coordinates_t;
     begin

@@ -3,6 +3,7 @@ with Ada.Strings.Fixed; use Ada.Strings.Fixed;
 
 with Board; use Board;
 with Board.Strings; use Board.Strings;
+with Board.Strings.Parse; use Board.Strings.Parse;
 with Board.Strings.Pretty; use Board.Strings.Pretty;
 with Logs;
 
@@ -103,22 +104,25 @@ package body Server is
             Logs.Info("Waiting for player " & Trim(Index'Image, Ada.Strings.Left));
             AcceptPlayer(Index, Color_t'Val(Index - 1), Server, Address, Players(Index));
         end loop;
-
+        
         -- Play
         Board := StartBoard;
         GameState := Playing;
         CurrPlayerIndex := GetWhitePlayer(Players);
-
+        
+        -- Parser
+        --Parser_Pretty_Print;
+        
         Game_Loop:
-        while GameState = Playing or GameState = Check_White or GameState = Check_Black loop
+        while GameState = Playing or GameState = Check loop
             -- Get the current player info
             CurrPlayer := Players(CurrPlayerIndex);
             
             -- pretty print
-            Pretty_Print(Board, CurrPlayer.Color);
+            Pretty_Print(Board, CurrPlayer.Color, Black);
                 
             -- Receive the move from the current player
-            CurrMove := Parse(String'Input(CurrPlayer.Channel));
+            CurrMove := Traverse(String'Input(CurrPlayer.Channel));
             Logs.Info("Move string parsed as '" & Image(CurrMove) & "'");
             
             -- Play the move

@@ -13,31 +13,35 @@ package body Board.Strings.Pretty is
         end if;
     end Print_Files_Left;
         
-    procedure Print_Files_Right(File       : in File_t;
-                                Rank       : in Rank_t)
+    procedure Print_Files_Right(File : in File_t;
+                                Rank : in Rank_t)
     is
     begin
         if File = h then
-            Put(ASCII.ESC & "[0m " & Image(Rank));
+            Put(Palette_Reset & Image(Rank));
         end if;
     end Print_Files_Right;
-        
-    function Get_Square(File : in File_t; Rank : in Rank_t) return String
-    is        
-        Square_White : String := ASCII.ESC & "[47m" & ASCII.ESC & "[1;30m";
-        Square_Black : String := ASCII.ESC & "[40m" & ASCII.ESC & "[1;37m";
-    begin
-        return (if (Rank + File_t'Pos(File) + 1) mod 2 = 0 then
-                    Square_White
-                else
-                    Square_Black);
-    end Get_Square;
     
-    
-    procedure Pretty_Print(Board : in Board_t)
+    procedure Put_Cell(Board      : in Board_t;
+                       File       : in File_t;
+                       Rank       : in Rank_t;
+                       Background : in Color_ANSI_t)
     is
-        Cell       : Cell_t;
-        Background : String(1 .. 12);
+        Cell : Cell_t := Board(File, Rank);
+        
+        Bg : String := (if (Rank + File_t'Pos(File) + 1) mod 2 = 0
+                        then Palette_Dull_Bg(White)
+                        else Palette_Dull_Bg(Background));
+        
+        Fg : String := (if not Cell.IsEmpty and then Cell.Color = White
+                        then Palette_Bright_Fg(Black)
+                        else Palette_Bright_Fg(Black));
+    begin
+        Put(Bg & " " & Fg & Image(Cell) & " ");
+    end Put_Cell;
+    
+    
+    procedure Pretty_Print(Board : in Board_t; Background : in Color_ANSI_t := Black) is
     begin
         -- Top ranks
         Put_Line("    a  b  c  d  e  f  g  h");
@@ -48,14 +52,8 @@ package body Board.Strings.Pretty is
                 -- Left files
                 Print_Files_Left(File, Rank);
                 
-                -- Background color
-                Background := Get_Square(File, Rank);
-                
-                -- Foreground symbol
-                Cell := Board(File, Rank);
-                
                 -- Print the cell
-                Put(Background & " " & Image(Cell) & " ");
+                Put_Cell(Board, File, Rank, Background);
                 
                 -- Right files
                 Print_Files_Right(File, Rank);
@@ -71,11 +69,8 @@ package body Board.Strings.Pretty is
     end Pretty_Print;
     
     
-    procedure Pretty_Print(Board : in Board_t; CurrPlayer : in Color_t)
+    procedure Pretty_Print(Board : in Board_t; CurrPlayer : in Color_t; Background : in Color_ANSI_t := Black)
     is
-        Cell        : Cell_t;
-        Background  : String(1 .. 12);
-        
         Token_White : String := (if CurrPlayer = White then "➤" else " ");
         Token_Black : String := (if CurrPlayer = Black then "➤" else " ");
     begin
@@ -88,23 +83,19 @@ package body Board.Strings.Pretty is
                 -- Left files
                 Print_Files_Left(File, Rank);
                 
-                -- Background color
-                Background := Get_Square(File, Rank);
-                
-                -- Foreground symbol
-                Cell := Board(File, Rank);
-                
                 -- Print the cell
-                Put(Background & " " & Image(Cell) & " ");
+                Put_Cell(Board, File, Rank, Background);
                 
                 -- Right files
                 Print_Files_Right(File, Rank);
                 
-                case Rank is
-                    when 2 => Put("    " & Token_White & " White");
-                    when 7 => Put("    " & Token_Black & " Black");
-                    when others => null;
-                end case;
+                if File = h then
+                    case Rank is
+                        when 2 => Put("    " & Token_White & " White");
+                        when 7 => Put("    " & Token_Black & " Black");
+                        when others => null;
+                    end case;
+                end if;
             end loop;
             
             New_Line;

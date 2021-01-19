@@ -50,7 +50,7 @@ package body Logs is
     is
         Clock_Format  : String := Formatting.Image(Clock);
         Level_Format  : String := Level_Image(Level_t'Pos(Level) + 1);
-        Indent_Format : String := (if Incr > 0 then (Incr * 2) * ':' & " " else "");
+        Indent_Format : String := (if Incr > 0 then (Incr * 2) * ':' & " " else "");
     begin                
         Put_Line("[" & Clock_Format & "][" & Level_Format & "] " & Indent_Format & Item);
     end Log;
