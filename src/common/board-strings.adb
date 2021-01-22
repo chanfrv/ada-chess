@@ -23,19 +23,20 @@ package body Board.Strings is
         return Image(Coordinates.File) & Image(Coordinates.Rank);
     end Image;
 
-    function Image(Coordinates : in Disambiguating_Coordinates_t) return String is
+    function Image(File : in Opt_File_t) return String is
     begin
-        case Coordinates.Has is
-            when Has_None =>
-                return "";
-            when Has_File =>
-                return Image(Coordinates.File);
-            when Has_Rank =>
-                return Image(Coordinates.Rank);
-            when Has_Both =>
-                return Image(Coordinates.Coordinates);
-        end case;
+        return (case File.IsEmpty is
+                    when True => "",
+                    when False => Image(File.Value));
     end Image;
+    
+    function Image(Rank : in Opt_Rank_t) return String is
+    begin
+        return (case Rank.IsEmpty is
+                    when True => "",
+                    when False => Image(Rank.Value));
+    end Image;
+    
     
     function Image(Piece : Piece_t) return String is
     begin
@@ -47,18 +48,29 @@ package body Board.Strings is
                     when Knight => "N",
                     when Pawn   => "");        
     end Image;
+    
+    
+    function Image(Status : GameResult_t) return String is
+    begin
+        return (case Status is
+                    when Check     => "+",
+                    when Checkmate => "#",
+                    when others    => "");
+    end Image;
+    
         
     function Image(Move : in Move_t) return String is
     begin
         return Image(Move.Piece)
-          & Image(Move.From)
+          & Image(Move.From_File) & Image(Move.From_Rank)
           & (if Move.Capture then "x" else "")
           & Image(Move.To)
-          & (if Move.Promotion /= Pawn then Image(Move.Promotion) else "");
+          & (if not Move.Promotion.IsEmpty then Image(Move.Promotion.Value) else "")
+          & Image(Move.Status);
     end Image;
         
     
-    function Image(Cell : in Cell_t) return String is
+    function Image(Cell : in Opt_Cell_t) return String is
     begin
         return (if    Cell = WKing   then "♔"
                 elsif Cell = WQueen  then "♕"

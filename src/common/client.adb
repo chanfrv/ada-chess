@@ -1,4 +1,3 @@
-with Gnat.Regexp; use GNAT.Regexp;
 with Ada.Characters.Handling; use Ada.Characters.Handling;
 with Ada.Strings.Fixed; use Ada.Strings.Fixed;
 with Ada.Text_IO; use Ada.Text_IO;
@@ -23,10 +22,6 @@ package body Client is
         Str         : String(1 .. 80);
         Last        : Natural;
         My_Color    : Color_t;
-
-        -- TODO put the complete algebraic notation regex
-        Move_String : constant String := "[KQRBN]?[a-h]?[1-8]?x?[a-h][1-8][QRBN]?";
-        Move_Regexp : constant Regexp := Compile(Move_String);
     
     begin
         -- Setup logger
@@ -48,7 +43,7 @@ package body Client is
         GameState := Playing;
 
         Game_Loop:
-        while GameState = Playing or GameState = Check loop
+        while GameState in Playing | Check loop
             -- Get and send move
             Str := (others => Character'Val(0));
             Put(To_lower(My_Color'Image) & "> ");
@@ -58,26 +53,22 @@ package body Client is
             if Str(1 .. Last) = "resign" then
                 exit Game_Loop;
 
-            elsif Str(1 .. Last) = "0-0" then
-                String'Output(Channel, "0-0");
-
-            elsif Str(1 .. Last) = "0-0-0" then
-                String'Output(Channel, "0-0-0");
-
-            elsif Match(Str(1 .. Last), Move_Regexp) = True then
+            else
                 String'Output(Channel, Str(1 .. Last));
 
                 -- Receive response (success, error, you win...)
                 Logs.Info(String'Input(Channel));
-
-            else
-                Logs.Error("Invalid command: '" & Str(1 .. Last) & "'.");
             end if;
 
         end loop Game_Loop;
 
         -- Disconnect
         Close_Socket(Socket);
+        
+    exception
+        when Socket_Error =>
+            Put_Line("Server disconnected");
+            Close_Socket(Socket);
     end Launch;
 
     

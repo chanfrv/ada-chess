@@ -31,57 +31,48 @@ package body Board.Strings.Parse is
         end if;
     end Parser_Piece_Callback;
     
-    function Parser_From_Callback(Item : in String; Move : in out Move_t) return Natural
-    is                
-        Index : Positive;
-        Curr : Character;
-        
-        File : File_t;
-        Rank : Rank_t;
+    function Parser_From_File_Callback(Item : in String; Move : in out Move_t) return Natural
+    is
+        File : Character;
     begin
         if Item'Length = 0 then
-            Move.From := (Has => Has_None);
+            Move.From_File := File_Empty;
             return 0;
             
         else
-            index := Item'First;
-            Curr  := Item(Index);
-        
-            -- Origin file
-            case Curr is
+            File := Item(Item'First);
+            case File is
                 when 'a' .. 'h' =>
-                    File := File_t'Value("" & Curr);
-                    
-                    Move.From := (Has => Has_File, File => File);
-                    
-                    if Item'Length > 1 then
-                        Index := Index + 1;
-                        Curr := Item(Index);
-                    end if;
-                    
+                    Move.From_File := (False, File_t'Value("" & File));    
+                    return 1;
                 when others =>
                     null;
             end case;
-            
-            -- Origin rank
-            case Curr is
-                when '1' .. '8' =>
-                    Rank := Rank_t'Value("" & Curr);
-                    
-                    if Move.From.Has = Has_None then
-                        Move.From := (Has => Has_Rank, Rank => Rank);
-                    else
-                        Move.From := (Has => Has_Both, Coordinates => (File, Rank));
-                    end if;
-                    
-                when others =>
-                    null;
-            end case;
-        
-            return Index - 1;
+            return 0;
         end if;
-
-    end Parser_From_Callback;
+    end Parser_From_File_Callback;
+    
+    function Parser_From_Rank_Callback(Item : in String; Move : in out Move_t) return Natural
+    is
+        Rank : Character;
+    begin
+        if Item'Length = 0 then
+            Move.From_Rank := Rank_Empty;
+            return 0;
+            
+        else
+            Rank := Item(Item'First);
+            case Rank is
+                when '1' .. '8' =>
+                    Move.From_Rank := (False, Rank_t'Value("" & Rank)); 
+                    return 1;
+                when others =>
+                    null;
+            end case;
+            return 0;
+        end if;
+    end Parser_From_Rank_Callback;
+    
     
     function Parser_Capture_Callback(Item : in String; Move : in out Move_t) return Natural is
     begin
@@ -106,18 +97,18 @@ package body Board.Strings.Parse is
     function Parser_Promotion_Callback(Item : in String; Move : in out Move_t) return Natural is
     begin
         if Item'Length = 0 then
-            Move.Promotion := Pawn;
+            Move.Promotion := Promotion_Empty;
             return 0;
         else
             case Item(Item'First) is
                 when 'Q' =>
-                    Move.Promotion := Queen;
+                    Move.Promotion := (IsEmpty => False, Value =>Queen);
                 when 'R' =>
-                    Move.Promotion := Rook;
+                    Move.Promotion := (IsEmpty => False, Value =>Rook);
                 when 'B' =>
-                    Move.Promotion := Bishop;
+                    Move.Promotion := (IsEmpty => False, Value =>Bishop);
                 when 'N' =>
-                    Move.Promotion := Knight;
+                    Move.Promotion := (IsEmpty => False, Value =>Knight);
                 when others =>
                     null;
             end case;
@@ -166,7 +157,7 @@ package body Board.Strings.Parse is
     begin
         -- Enter graph node
         Logs.Debug("Current state: '" & Parser_Nodes(Node).Label.all & "', string: '" & Item & "'");
-        Logs.IncIndent;
+        Logs.Inc_Indent;
         
         for Index_To in Parser_Nodes'Range loop
             Node_To := Parser_Nodes(Index_To);
@@ -179,7 +170,7 @@ package body Board.Strings.Parse is
                 -- if we are in a state
                 if Node_To.Kind = State then
                     Regex := Compile(Node_To.Expr.all);
-                    Logs.Debug("Trying to match string '" & Item & "' from " & Item'First'Image & " to " & Node_To.Length'Image);
+                    Logs.Debug("Trying to match string '" & Item & "'");
             
                     -- match string from grammar
                     End_Bound := Positive'Min(Item'Last, Item'First + Node_To.Length - 1);
@@ -192,7 +183,7 @@ package body Board.Strings.Parse is
                         -- recursively traverse the adjacent nodes
                         if Traverse_Rec(Item(New_First .. Item'Last), Move, Index_To) then
                             -- call unstacking
-                            Logs.DecIndent;
+                            Logs.Dec_Indent;
                             return True;
                         else
                             -- this recursive call ended in an error, backtracking
@@ -203,7 +194,7 @@ package body Board.Strings.Parse is
                     
                 elsif Node_To.Kind = Stop then
                     -- this node is the stop, success!
-                    Logs.DecIndent;
+                    Logs.Dec_Indent;
                     return True;
                     
                 end if;
@@ -212,45 +203,48 @@ package body Board.Strings.Parse is
         end loop;
         
         -- we would arrive at this point if the whole string does not match the grammar
-        Logs.DecIndent;
+        Logs.Dec_Indent;
         return False;
     end Traverse_Rec;
     
-    function Traverse(Item : in String) return Move_t is
-        Move : Move_t := (Castling  => None,
-                          Piece     => Pawn,
-                          From      => (Has => Has_None),
-                          Capture   => False,
-                          To        => (a, 1),
-                          Promotion => Pawn,
-                          Status    => Playing);
-        
-        Success : Boolean;
+    function Traverse(Item : in String; Move : out Move_t) return Boolean is
     begin
-        Logs.Debug("Entering state machine");
-        Success := Traverse_Rec(Item, Move, Parser_Nodes'First);
-        Logs.Debug("Parsing status: " & Success'Image);
+        Move := (Castling  => None,
+                 Piece     => Pawn,
+                 From_File => File_Empty,
+                 From_Rank => Rank_Empty,
+                 Capture   => False,
+                 To        => (a, 1),
+                 Promotion => Promotion_Empty,
+                 Status    => Playing);
         
-        return Move;
+        Logs.Debug("Entering state machine");
+        return Traverse_Rec(Item, Move, Parser_Nodes'First);
     end Traverse;
     
     
     procedure Parser_Pretty_Print
     is
         Node_From, Node_To : Parser_Node_t;
+        
+        First : Parser_Index_t := Parser_Index_t'Succ(Parser_Index_t'First);
+        Last  : Parser_Index_t := Parser_Index_t'Pred(Parser_Index_t'Last);
     begin
         Put_Line("digraph Parser {");
-        
+        Put_Line("    node [ fontname = ""Helvetica"", shape = box ];");
+        Put_Line("    "" START "" [ style = diagonals ];");
+        Put_Line("    "" END "" [ style = diagonals ];");
+                        
         for State_From in Parser_Index_t loop
             
             for State_To in Parser_Index_t loop
                 
                 if Parser_Adj_Matrix(State_From, State_To) then
-                    
+                                        
                     Node_From := Parser_Nodes(State_From);
                     Node_To   := Parser_Nodes(State_To);
                     
-                    Put_Line(("    """ & Node_From.Label.all & """ -> """ & Node_To.Label.all & """"));
+                    Put_Line(("    "" " & Node_From.Label.all & " "" -> "" " & Node_To.Label.all & " """));
                     
                 end if;
             end loop;

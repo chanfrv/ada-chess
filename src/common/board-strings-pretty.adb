@@ -27,13 +27,13 @@ package body Board.Strings.Pretty is
                        Rank       : in Rank_t;
                        Background : in Color_ANSI_t)
     is
-        Cell : Cell_t := Board(File, Rank);
+        Cell : Opt_Cell_t := Board(File, Rank);
         
         Bg : String := (if (Rank + File_t'Pos(File) + 1) mod 2 = 0
                         then Palette_Dull_Bg(White)
                         else Palette_Dull_Bg(Background));
         
-        Fg : String := (if not Cell.IsEmpty and then Cell.Color = White
+        Fg : String := (if not Cell.IsEmpty and then Cell.Value.Color = White
                         then Palette_Bright_Fg(Black)
                         else Palette_Bright_Fg(Black));
     begin

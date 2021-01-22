@@ -114,37 +114,43 @@ package body Server is
         --Parser_Pretty_Print;
         
         Game_Loop:
-        while GameState = Playing or GameState = Check loop
+        while GameState in Playing | Check loop
             -- Get the current player info
             CurrPlayer := Players(CurrPlayerIndex);
             
             -- pretty print
             Pretty_Print(Board, CurrPlayer.Color, Black);
-                
-            -- Receive the move from the current player
-            CurrMove := Traverse(String'Input(CurrPlayer.Channel));
-            Logs.Info("Move string parsed as '" & Image(CurrMove) & "'");
             
-            -- Play the move
-            MoveResult := Move(Board, CurrMove, CurrPlayer.Color);
-
-            -- Decide what to do depending on the move
-            case MoveResult is
-            when Valid_Move =>
-                Logs.Info(Image(CurrPlayer) & " moved");
-                String'Output(CurrPlayer.Channel, Image(CurrPlayer) & " moved");
-                -- Check if the game ended
-                GameState := Game_Ended(Board, CurrPlayer.Color);
-                Logs.Info("Game state: " & GameState'Image);
-                -- change current player
-                CurrPlayerIndex := 3 - CurrPlayerIndex;
-            when Invalid_Move | Ambiguous_Move =>
+            -- Receive the move from the current player
+            if Traverse(String'Input(CurrPlayer.Channel), CurrMove) = False then
                 Logs.Error("Invalid move from " & Image(CurrPlayer));
                 String'Output(CurrPlayer.Channel, "Invalid move from " & Image(CurrPlayer));
-            end case;
-
+                
+            else      
+                -- Valid move string
+                Logs.Info("Move string parsed as '" & Image(CurrMove) & "'");
+                
+                -- Play the move
+                MoveResult := Move(Board, CurrMove, CurrPlayer.Color);
+                
+                -- Decide what to do depending on the move
+                case MoveResult is
+                when Valid_Move =>
+                    Logs.Info(Image(CurrPlayer) & " moved");
+                    String'Output(CurrPlayer.Channel, Image(CurrPlayer) & " moved");
+                    -- Check if the game ended
+                    GameState := Game_Ended(Board, CurrPlayer.Color);
+                    Logs.Info("Game state: " & GameState'Image);
+                    -- change current player
+                    CurrPlayerIndex := 3 - CurrPlayerIndex;
+                when Invalid_Move | Ambiguous_Move =>
+                    Logs.Error("Invalid move from " & Image(CurrPlayer));
+                    String'Output(CurrPlayer.Channel, "Invalid move from " & Image(CurrPlayer));
+                end case;
+            end if;
+            
         end loop Game_Loop;
-
+        
         -- Close
         Close_Socket(Server);
         Close_Socket(Players(1).Socket);

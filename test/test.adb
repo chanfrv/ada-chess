@@ -1,6 +1,3 @@
-with GNAT.Regexp; use GNAT.Regexp;
-with Ada.Text_IO; use Ada.Text_IO;
-
 with Board; use Board;
 with Board.Strings; use Board.Strings;
 with Board.Strings.Parse; use Board.Strings.Parse;
@@ -10,14 +7,26 @@ with Logs;
 
 procedure Test is
 
-    --GameState : GameResult_t;
+    TestBoard : constant Board_t :=
+    (--    1        2      3      4      5      6      7      8
+        (WRook,   WPawn,   Empty, Empty, Empty, Empty, BPawn, BRook  ), -- a
+        (Empty,   WPawn,   Empty, Empty, Empty, Empty, BPawn, BKnight), -- b
+        (WBishop, Empty,   Empty, WPawn, Empty, Empty, BPawn, Empty  ), -- c
+        (WQueen,  Empty,   WPawn, Empty, Empty, Empty, Empty, BQueen ), -- d
+        (WKing,   Empty,   Empty, BPawn, Empty, Empty, Empty, BKing  ), -- e
+        (Empty,   Empty,   Empty, Empty, Empty, Empty, BPawn, BBishop), -- f
+        (WKnight, BKnight, Empty, Empty, Empty, Empty, BPawn, Empty  ), -- g
+        (WRook,   WPawn,   Empty, Empty, Empty, Empty, BPawn, BRook  )  -- h
+    );
+
+    ret : GameResult_t;
 begin
-    logs.Set_Level(Logs.Debug);
+    Logs.Set_Level(Logs.Debug);
 
-    --Pretty_Print(Board);
+    Pretty_Print(TestBoard);
 
-    --GameState := Game_Ended(Board, Black);
+    ret := Game_Ended(TestBoard, Black);
 
-    --Logs.Debug("Game state: " & GameState'Image);
+    Logs.Info(ret'Image);
 
 end Test;

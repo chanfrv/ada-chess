@@ -6,11 +6,11 @@ package body Board.Castling is
    
     procedure Castling_Unregister(Board : in Board_t; From : in Coordinates_t)
     is
-        Cell : Cell_t := Board(From.File, From.Rank);        
+        Cell : Opt_Cell_t := Board(From.File, From.Rank);        
         Side : Castling_t := (if From.File <= d then Queenside else Kingside);
     begin
         -- White king
-        if Cell = WKing then               
+        if Cell = WKing then
             White_King_Moved := True;
         
         -- White rook
@@ -55,8 +55,8 @@ package body Board.Castling is
         
         Rank : Rank_t := (if Color = White then 1 else 8);
         
-        King : Cell_t := (if Color = White then WKing else BKing);
-        Rook : Cell_t := (if Color = White then WRook else BRook);
+        King : Opt_Cell_t := (if Color = White then WKing else BKing);
+        Rook : Opt_Cell_t := (if Color = White then WRook else BRook);
         
         King_Moved : Boolean := (if Color = White then
                                      White_King_Moved
@@ -99,8 +99,8 @@ package body Board.Castling is
         
         Rank : Rank_t := (if Color = White then 1 else 8);
         
-        King : Cell_t := (if Color = White then WKing else BKing);
-        Rook : Cell_t := (if Color = White then WRook else BRook);
+        King : Opt_Cell_t := (if Color = White then WKing else BKing);
+        Rook : Opt_Cell_t := (if Color = White then WRook else BRook);
         
         King_Moved : Boolean := (if Color = White
                                  then White_King_Moved

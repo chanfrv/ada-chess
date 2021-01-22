@@ -5,6 +5,7 @@ with Ada.Exceptions; use Ada.Exceptions;
 with Board.Strings; use Board.Strings;
 with Board.Castling; use Board.Castling;
 with Board.EnPassant; use Board.EnPassant;
+with Board.Strings.Pretty; use Board.Strings.Pretty;
 with Logs;
 
 
@@ -14,13 +15,13 @@ package body Board is
     function IsCellAccessible(Board       : in Board_t;
                               To          : in Coordinates_t;
                               PlayerColor : in Color_t;
-                              Capture     : Boolean) return Boolean
+                              Capture     : in Boolean) return Boolean
     is
-        Cell : Cell_t := Board(To.File, To.Rank);
+        Cell : Opt_Cell_t := Board(To.File, To.Rank);
     begin
         case Capture is
             when True =>
-                return (not Cell.IsEmpty and then Cell.Color /= PlayerColor)
+                return (not Cell.IsEmpty and then Cell.Value.Color /= PlayerColor)
                   or (Cell.IsEmpty and (EnPassant_Coords.IsEnPassant and then To = EnPassant_Coords.To));
             when False =>
                 return Cell.IsEmpty;
@@ -32,14 +33,14 @@ package body Board is
                            From  : in Coordinates_t;
                            To    : in Coordinates_t) return Boolean
     is
-        NewBoard  : Board_t := Board;
-        King      : Cell_t := Board(From.File, From.Rank);
+        NewBoard  : Board_t    := Board;
+        King      : Opt_Cell_t := Board(From.File, From.Rank);
     begin
         Logs.Debug("Checking if the king would be checked on " & Image(To));
 
         -- Move the King
         NewBoard(To.File, To.Rank) := King;
-        NewBoard(From.File, From.Rank) := (IsEmpty => True);
+        NewBoard(From.File, From.Rank) := Empty;
 
         -- See if the king would be check at this position
         return IsKingCheck(NewBoard, To);
@@ -49,27 +50,27 @@ package body Board is
     function IsKingCheck(Board : in Board_t;
                          To    : in Coordinates_t) return Boolean
     is
-        King : Cell_t := Board(To.File, To.Rank);
-        Cell : Cell_t;
+        King : Opt_Cell_t := Board(To.File, To.Rank);
+        Cell : Opt_Cell_t;
         From : Coordinates_t;
     begin
-        Logs.Debug("Determining if " & King.Color'Image & " King is check...");
+        Logs.Debug("Determining if " & Image(King) & " on " & Image(To) & " is check...");
         -- Find an opponent piece threatening it
         for File in a .. h loop
             for Rank in 1 .. 8 loop
                 Cell := Board(File, Rank);
                 From := (file, Rank);
-                Logs.IncIndent;
-                if not Cell.IsEmpty and then IsValidMove(Board, From, To, True) then
-                    Logs.Debug(King.Color'Image & " King is check by " & Image(Cell) & " (" & Image(From) & ")");
-                    Logs.DecIndent;
+                Logs.Inc_Indent;
+                if IsValidMove(Board, From, To, True, Promotion_Empty) then
+                    Logs.Debug(Image(King) & " is check by " & Image(Cell) & " (" & Image(From) & ")");
+                    Logs.Dec_Indent;
                     return True;
                 end if;
-                Logs.DecIndent;
+                Logs.Dec_Indent;
             end loop;
         end loop;
 
-        Logs.Debug(King.Color'Image & " King is not check");
+        Logs.Debug(Image(King) & " is not check");
         return False;
     end IsKingCheck;
 
@@ -77,14 +78,14 @@ package body Board is
     function IsKingCheckmate(Board : in Board_t;
                              To    : in Coordinates_t) return Boolean
     is
-        King     : Cell_t  := Board(To.File, To.Rank);
-        Opponent : Color_t := (if King.Color = White then Black else White);
+        King     : Opt_Cell_t := Board(To.File, To.Rank);
+        Opponent : Color_t    := (if King.Value.Color = White then Black else White);
 
-        From_Cell   : Cell_t;
         From_Coords : Coordinates_t;
+        From_Cell   : Opt_Cell_t;
         To_Coords   : Coordinates_t;
     begin
-        Logs.Debug("Determining if " & King.Color'Image & " King is checkmate...");
+        Logs.Debug("Determining if " & Image(King) & " is checkmate...");
         -- Iterate on all the allied pieces
         for File_From in a .. h loop
             for Rank_From in 1 .. 8 loop
@@ -92,34 +93,35 @@ package body Board is
                 From_Cell := Board(File_From, Rank_From);
                 From_Coords := (File_From, Rank_From);
 
-                if not From_Cell.IsEmpty and then From_Cell.Color = King.Color then
+                if not From_Cell.IsEmpty and then From_Cell.Value.Color = King.Value.Color then
                     -- Try to move the piece everywhere and check if the king is
                     -- not checked
                     Logs.Debug("Trying to move piece " & Image(From_Cell));
-                    Logs.IncIndent;
+                    Logs.Inc_Indent;
 
                     for File_To in a .. h loop
                         for Rank_To in 1 ..8 loop
 
                             To_Coords := (File_To, Rank_To);
 
-                            if (IsValidMove(Board, From_Coords, To_Coords, False)
-                                 or IsValidMove(Board, From_Coords, To_Coords, True)) then
-                                Logs.Debug(King.Color'Image & " King is not checkmate");
-                                Logs.DecIndent;
+                            if (IsValidMove(Board, From_Coords, To_Coords, False, Promotion_Empty)
+                                 or IsValidMove(Board, From_Coords, To_Coords, True, Promotion_Empty))
+                            then
+                                Logs.Debug(Image(King) & " is not checkmate");
+                                Logs.Dec_Indent;
                                 return False;
                             end if;
 
                         end loop;
                     end loop;
 
-                    Logs.DecIndent;
+                    Logs.Dec_Indent;
 
                 end if;
 
             end loop;
         end loop;
-        Logs.Debug(King.Color'Image & " King is checkmate");
+        Logs.Debug(Image(King) & " is checkmate");
         return True;
     end IsKingCheckmate;
 
@@ -162,7 +164,7 @@ package body Board is
         Min_Rank : Rank_t := (if From.Rank < To.Rank then From.Rank else To.Rank);
         Max_Rank : Rank_t := (if From.Rank > To.Rank then From.Rank else To.Rank);
 
-        Cell : Cell_t;
+        Cell : Opt_Cell_t;
     begin
         -- Same File
         if From.File = To.File then
@@ -200,7 +202,7 @@ package body Board is
         Min_File_Rank : Rank_t := (if From.File < To.File then From.Rank else To.Rank);
         Max_File_Rank : Rank_t := (if From.File > To.File then From.Rank else To.Rank);
 
-        Cell    : Cell_t;
+        Cell    : Opt_Cell_t;
         File    : File_t;
         Rank    : Rank_t;
         -- Ascending or descending diagnoal iteratior
@@ -246,13 +248,14 @@ package body Board is
     end IsValidMove_Knight;
 
 
-    function IsValidMove_Pawn(Board : in Board_t;
-                              From  : in Coordinates_t;
-                              To    : in Coordinates_t) return Boolean
+    function IsValidMove_Pawn(Board     : in Board_t;
+                              From      : in Coordinates_t;
+                              To        : in Coordinates_t;
+                              Promotion : in Opt_Promotion_t) return Boolean
     is
-        Cell_From  : constant Cell_t := Board(From.File, From.Rank);
-        Cell_To    : constant Cell_t := Board(To.File, To.Rank);
-        Pawn_Color : Color_t := Cell_From.Color;
+        Cell_From  : constant Opt_Cell_t := Board(From.File, From.Rank);
+        Cell_To    : constant Opt_Cell_t := Board(To.File, To.Rank);
+        Pawn_Color : Color_t := Cell_From.Value.Color;
 
         Forward_Valid  : Boolean;
         Diagonal_Valid : Boolean;
@@ -261,6 +264,7 @@ package body Board is
                                          From.Rank < To.Rank else From.Rank > To.Rank);
         Pawn_Rank      : Rank_t  := (if Pawn_Color = White then 2 else 7);
         Next_Rank      : Rank_t  := (if Pawn_Color = White then From.Rank + 1 else From.Rank - 1);
+        Opp_Home_Rank  : Rank_t  := (if Pawn_Color = White then 8 else 1);
     begin
 
         -- Can only move forward
@@ -268,13 +272,17 @@ package body Board is
             return False;
         end if;
 
-        -- Either we move forward 1 cell (or 2 if we are on the rank 2)...
+        -- On a forward move the cell is empty
         Forward_Valid := Cell_To.IsEmpty
+          -- and we stay on the same file
           and then (From.File = To.File
+                     -- and we move either for one rank or 2 if it is its first move
                      and (case abs (To.Rank - From.Rank) is
                                when 1 => True,
                                when 2 => Board(From.File, Next_Rank).IsEmpty,
-                               when others => False));
+                               when others => False)
+                     -- and moving to the last rank results in a promotion
+                     and (if To.Rank = Opp_Home_Rank then not Promotion.IsEmpty));
 
         -- ...Or we capture on a diagnoal
         Diagonal_Valid :=
@@ -294,14 +302,15 @@ package body Board is
     end IsValidMove_Pawn;
 
 
-    function IsValidMove(Board   : in Board_t;
-                         From    : in Coordinates_t;
-                         To      : in Coordinates_t;
-                         Capture : in Boolean) return Boolean
+    function IsValidMove(Board     : in Board_t;
+                         From      : in Coordinates_t;
+                         To        : in Coordinates_t;
+                         Capture   : in Boolean;
+                         Promotion : in Opt_Promotion_t) return Boolean
     is
         function GetKing(Board : in Board_t; Color : in Color_t) return Coordinates_t
         is
-            King : Cell_t := (if Color = White then WKing else BKing);
+            King : Opt_Cell_t := (if Color = White then WKing else BKing);
         begin
             for File in a .. h loop
                 for Rank in 1 .. 8 loop
@@ -313,55 +322,65 @@ package body Board is
             raise Program_Error with "No King !";
         end GetKing;
 
-        Cell_From : constant Cell_t := Board(From.File, From.Rank);
-        Cell_To   : constant Cell_t := Board(To.File, To.Rank);
+        Cell_From : constant Opt_Cell_t := Board(From.File, From.Rank);
+        Cell_To   : constant Opt_Cell_t := Board(To.File, To.Rank);
 
-        TmpBoard  : Board_t;
-        TmpKing   : Coordinates_t;
+        Tmp_Board : Board_t;
+        Tmp_King  : Coordinates_t;
+        Opp_King  : Coordinates_t;
     begin
+        if Cell_From.IsEmpty then
+            return False;
+        end if;
+
         Logs.Debug("Checking piece " & Image(Board(From.File, From.Rank))
                    & " going from '" & Image(From) & "' to '" & Image(To) & "'");
 
         -- Rules common to every piece:
         -- + the cell is different from the origin
         -- + either the cell is empty or it belongs to the opponent
-        --Logs.Debug("Checking common rules");
         if (From.File = To.File and From.Rank = To.Rank)
-          or not IsCellAccessible(Board, To, Cell_From.Color, Capture)
+          or not IsCellAccessible(Board, To, Cell_From.Value.Color, Capture)
         then
             Logs.Debug("Cell not accessible because of common rules");
             return False;
         end if;
 
-        --Logs.Debug("Checking piece specific rules");
         -- Piece specific rules
-        if not (case Cell_From.Piece is
+        if not (case Cell_From.Value.Piece is
                      when King   => IsValidMove_King  (Board, From, To),
                      when Queen  => IsValidMove_Queen (Board, From, To),
                      when Rook   => IsValidMove_Rook  (Board, From, To),
                      when Bishop => IsValidMove_Bishop(Board, From, To),
                      when Knight => IsValidMove_Knight(Board, From, To),
-                     when Pawn   => IsValidMove_Pawn  (Board, From, To)) then
+                     when Pawn   => IsValidMove_Pawn  (Board, From, To, Promotion))
+        then
             Logs.Debug("Cell not accessible because of piece specific rules");
             return False;
         end if;
 
+        Opp_King := GetKing(Board, (if Cell_From.Value.Color = White then Black else White));
+
+        if To = Opp_King then
+            Logs.Debug("Opponent king already check");
+            return True;
+        end if;
+
         -- Is King check with this move ?
-        TmpBoard := Board;
-        Logs.IncIndent;
-        Logs.Debug("Checking if the " & Cell_From.Color'Image & " King would be check");
+        Tmp_Board := Board;
+        Logs.Inc_Indent;
 
-        TmpBoard(To.File, To.Rank) := TmpBoard(From.File, From.Rank);
-        TmpBoard(From.File, From.Rank) := Empty;
+        Tmp_Board(To.File, To.Rank) := Tmp_Board(From.File, From.Rank);
+        Tmp_Board(From.File, From.Rank) := Empty;
 
-        TmpKing := GetKing(TmpBoard, Cell_From.Color);
+        Tmp_King := GetKing(Tmp_Board, Cell_From.Value.Color);
 
-        if IsKingCheck(TmpBoard, TmpKing) then
+        if IsKingCheck(Tmp_Board, Tmp_King) then
             Logs.Debug("This move would make the allied King check");
-            Logs.DecIndent;
+            Logs.Dec_Indent;
             return False;
         else
-            Logs.DecIndent;
+            Logs.Dec_Indent;
             return True;
         end if;
 
@@ -374,23 +393,23 @@ package body Board is
                        From            : out Coordinates_t) return MoveResult_t
     is
         CurrCord : Coordinates_t;
-        CurrCell : Cell_t;
+        CurrCell : Opt_Cell_t;
 
         Found : Boolean := False;
 
         -- The move contains the origin file or rank information
-        From_Has_File : Boolean := CurrMove.From.Has = Has_File or CurrMove.From.Has = Has_Both;
-        From_Has_Rank : Boolean := CurrMove.From.Has = Has_Rank or CurrMove.From.Has = Has_Both;
+        From_Has_File : Boolean := not CurrMove.From_File.IsEmpty;
+        From_Has_Rank : Boolean := not CurrMove.From_Rank.IsEmpty;
 
         -- Decide of the bounds where to search the piece. If a player inputs
         -- 'e4' neither the origin file nor the ranks are given so the piece
         -- will be searched on both (a .. h) and (1 .. 8). If a player inputs
         -- 'exd4' the file 'e' is given so the search will be restricted to the
         -- pieces from the file range (e .. e).
-        Min_File : File_t := (if From_Has_File then CurrMove.From.File else a);
-        Max_File : File_t := (if From_Has_File then CurrMove.From.File else h);
-        Min_Rank : Rank_t := (if From_Has_Rank then CurrMove.From.Rank else 1);
-        Max_Rank : Rank_t := (if From_Has_Rank then CurrMove.From.Rank else 8);
+        Min_File : File_t := (if From_Has_File then CurrMove.From_File.Value else a);
+        Max_File : File_t := (if From_Has_File then CurrMove.From_File.Value else h);
+        Min_Rank : Rank_t := (if From_Has_Rank then CurrMove.From_Rank.Value else 1);
+        Max_Rank : Rank_t := (if From_Has_Rank then CurrMove.From_Rank.Value else 8);
     begin
         Logs.Debug("Looking for a piece that can move to " & Image(CurrMove.To));
 
@@ -404,8 +423,8 @@ package body Board is
                 -- + the given piece type (ex: 'Be4' matches only bishops)
                 -- + the move is legal
                 if not CurrCell.IsEmpty
-                  and then (CurrCell.Color = CurrPlayerColor and CurrCell.Piece = CurrMove.Piece)
-                  and then IsValidMove(Board, (File, Rank), CurrMove.To, CurrMove.Capture)
+                  and then (CurrCell.Value.Color = CurrPlayerColor and CurrCell.Value.Piece = CurrMove.Piece)
+                  and then IsValidMove(Board, (File, Rank), CurrMove.To, CurrMove.Capture, CurrMove.Promotion)
                 then
                     -- The move is possible
                     Logs.Debug("Found candidate '" & Image(CurrCord) & "'");
@@ -459,9 +478,10 @@ package body Board is
                     Castling_Unregister(Board, From);
 
                     -- if the move is valid, move the piece
-                    Logs.Debug("Found piece " & Image(Board(From.File, From.Rank)) & " on '" & Image(From) & "'");
+                    Logs.Debug("Found piece " & Image(Board(From.File, From.Rank))
+                               & " on '" & Image(From) & "'");
                     Board(CurrMove.To.File, CurrMove.To.Rank) := Board(From.File, From.Rank);
-                    Board(From.File, From.Rank) := (IsEmpty => True);
+                    Board(From.File, From.Rank) := Empty;
 
                     -- En passant handling
                     EnPassant_Coords := EnPassant_Handler(Board,
@@ -472,13 +492,13 @@ package body Board is
                                                           CurrMove.To);
 
                     -- Promotion
-                    Cell_To := Board(CurrMove.To.File, CurrMove.To.Rank);
+                    Cell_To := Board(CurrMove.To.File, CurrMove.To.Rank).Value;
                     if Cell_To.Piece = Pawn
                       and ((Cell_To.Color = White and CurrMove.To.Rank = 8)
                             or (Cell_To.Color = Black and CurrMove.To.Rank = 1))
                     then
-                        Promoted := (IsEmpty => False, Piece => CurrMove.Promotion, Color => Cell_To.Color);
-                        Board(CurrMove.To.File, CurrMove.To.Rank) := Promoted;
+                        Promoted := (Piece => CurrMove.Promotion.Value, Color => Cell_To.Color);
+                        Board(CurrMove.To.File, CurrMove.To.Rank) := (IsEmpty => False, Value => Promoted);
                     end if;
                 end if;
         end case;
@@ -490,8 +510,8 @@ package body Board is
     function Game_Ended(Board           : in Board_t;
                         CurrPlayerColor : in Color_t) return GameResult_t
     is
-        Opponent  : Color_t := (if CurrPlayerColor = White then Black else White);
-        King      : Cell_t  := (if Opponent        = White then WKing else BKing);
+        Opponent  : Color_t    := (if CurrPlayerColor = White then Black else White);
+        King      : Opt_Cell_t := (if Opponent        = White then WKing else BKing);
 
         King_Coords : Coordinates_t;
     begin
