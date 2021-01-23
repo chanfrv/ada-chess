@@ -2,7 +2,7 @@
 
 A chess game written in Ada, where both players play by sending tcp commands to a server.
 
-[Board](colored_board.png)
+![Board](.github/colored_board.png)
 
 ## Build
 

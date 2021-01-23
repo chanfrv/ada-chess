@@ -21,7 +21,7 @@ procedure Test is
 
     ret : GameResult_t;
 begin
-    Logs.Set_Level(Logs.Debug);
+    Logs.Set_Level(Logs.Info);
 
     Pretty_Print(TestBoard);
 

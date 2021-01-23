@@ -11,6 +11,6 @@ package Optional is
                 when False => Value : T;
             end case;
         end record;
-    
+        
 
 end Optional;

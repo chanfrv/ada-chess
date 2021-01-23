@@ -102,13 +102,13 @@ package body Board.Strings.Parse is
         else
             case Item(Item'First) is
                 when 'Q' =>
-                    Move.Promotion := (IsEmpty => False, Value =>Queen);
+                    Move.Promotion := (IsEmpty => False, Value => Queen);
                 when 'R' =>
-                    Move.Promotion := (IsEmpty => False, Value =>Rook);
+                    Move.Promotion := (IsEmpty => False, Value => Rook);
                 when 'B' =>
-                    Move.Promotion := (IsEmpty => False, Value =>Bishop);
+                    Move.Promotion := (IsEmpty => False, Value => Bishop);
                 when 'N' =>
-                    Move.Promotion := (IsEmpty => False, Value =>Knight);
+                    Move.Promotion := (IsEmpty => False, Value => Knight);
                 when others =>
                     null;
             end case;

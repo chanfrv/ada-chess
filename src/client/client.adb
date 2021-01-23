@@ -4,13 +4,16 @@ with Ada.Text_IO; use Ada.Text_IO;
 
 with Board; use Board;
 with Board.Strings; use Board.Strings;
+with Board.Strings.Pretty; use Board.Strings.Pretty;
 with Logs;
 
 
 package body Client is
     
     
-    procedure Launch(Addr : Inet_Addr_Type; Port : Port_Type)
+    procedure Launch(Addr        : Inet_Addr_Type;
+                     Port        : Port_Type;
+                     Board_Color : Color_ANSI_t := Black)
     is
         -- Network information
         Address     : Sock_Addr_Type;
@@ -24,9 +27,6 @@ package body Client is
         My_Color    : Color_t;
     
     begin
-        -- Setup logger
-        Logs.Set_Level(Logs.Debug);
-        
         -- Connect
         Address.Addr := Addr;
         Address.Port := Port;
@@ -44,6 +44,9 @@ package body Client is
 
         Game_Loop:
         while GameState in Playing | Check loop
+            -- Receive the board
+            Pretty_Print(Board => Board_t'Input(Channel), Background => Board_Color);
+            
             -- Get and send move
             Str := (others => Character'Val(0));
             Put(To_lower(My_Color'Image) & "> ");

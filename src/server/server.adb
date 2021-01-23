@@ -1,5 +1,6 @@
 with Ada.Characters.Handling; use Ada.Characters.Handling;
 with Ada.Strings.Fixed; use Ada.Strings.Fixed;
+with Ada.Text_IO; use Ada.Text_IO;
 
 with Board; use Board;
 with Board.Strings; use Board.Strings;
@@ -11,20 +12,6 @@ with Logs;
 package body Server is
     
     
-    -- Index type in the player array
-    subtype Player_Index_t is Natural range 1 .. 2;
-    -- Record associating a player color and its network identity
-    type Player_t is
-        record
-            Id      : Player_Index_t;
-            Color   : Color_t;
-            Socket  : Socket_Type;
-            Channel : Stream_Access;
-        end record;
-    -- Player array containing 2 player records
-    type Players_t is array (Player_Index_t) of Player_t;
-
-
     -- Image of a player
     function Image(Player : Player_t) return String is
     begin
@@ -70,7 +57,7 @@ package body Server is
 
     
     
-    procedure Launch(Port : Port_Type)
+    procedure Launch(Port : Port_Type; Board_Color : Color_ANSI_t := Black)
     is
         -- Server network information
         Address         : Sock_Addr_Type;
@@ -85,9 +72,6 @@ package body Server is
         CurrPlayer      : Player_t;
         CurrMove        : Move_t;
     begin
-        -- Setup logger
-        Logs.Set_Level(Logs.Debug);
-        
         -- Connect
         Address.Addr := Addresses(Get_Host_By_Name(Host_Name), 1);
         Address.Port := Port;
@@ -111,22 +95,25 @@ package body Server is
         CurrPlayerIndex := GetWhitePlayer(Players);
         
         -- Parser
-        --Parser_Pretty_Print;
+        Parser_Pretty_Print;
         
         Game_Loop:
         while GameState in Playing | Check loop
             -- Get the current player info
             CurrPlayer := Players(CurrPlayerIndex);
             
+            -- Send the board
+            Board_t'Output(CurrPlayer.Channel, Board);
+            
             -- pretty print
-            Pretty_Print(Board, CurrPlayer.Color, Black);
+            Pretty_Print(Board, CurrPlayer.Color, Board_Color);
             
             -- Receive the move from the current player
             if Traverse(String'Input(CurrPlayer.Channel), CurrMove) = False then
                 Logs.Error("Invalid move from " & Image(CurrPlayer));
                 String'Output(CurrPlayer.Channel, "Invalid move from " & Image(CurrPlayer));
                 
-            else      
+            else
                 -- Valid move string
                 Logs.Info("Move string parsed as '" & Image(CurrMove) & "'");
                 
@@ -135,17 +122,17 @@ package body Server is
                 
                 -- Decide what to do depending on the move
                 case MoveResult is
-                when Valid_Move =>
-                    Logs.Info(Image(CurrPlayer) & " moved");
-                    String'Output(CurrPlayer.Channel, Image(CurrPlayer) & " moved");
-                    -- Check if the game ended
-                    GameState := Game_Ended(Board, CurrPlayer.Color);
-                    Logs.Info("Game state: " & GameState'Image);
-                    -- change current player
-                    CurrPlayerIndex := 3 - CurrPlayerIndex;
-                when Invalid_Move | Ambiguous_Move =>
-                    Logs.Error("Invalid move from " & Image(CurrPlayer));
-                    String'Output(CurrPlayer.Channel, "Invalid move from " & Image(CurrPlayer));
+                    when Valid_Move =>
+                        Logs.Info(Image(CurrPlayer) & " moved");
+                        String'Output(CurrPlayer.Channel, Image(CurrPlayer) & " moved");
+                        -- Check if the game ended
+                        GameState := Game_Ended(Board, CurrPlayer.Color);
+                        Logs.Info("Game state: " & GameState'Image);
+                        -- change current player
+                        CurrPlayerIndex := 3 - CurrPlayerIndex;
+                    when Invalid_Move | Ambiguous_Move =>
+                        Logs.Error("Invalid move from " & Image(CurrPlayer));
+                        String'Output(CurrPlayer.Channel, "Invalid move from " & Image(CurrPlayer));
                 end case;
             end if;
             
@@ -156,6 +143,15 @@ package body Server is
         Close_Socket(Players(1).Socket);
         Close_Socket(Players(2).Socket);
     
+    exception
+        when Socket_Error | End_Error =>
+            Logs.Error("Lost connection");
+            -- Close
+            Close_Socket(Server);
+            Close_Socket(Players(1).Socket);
+            Close_Socket(Players(2).Socket);
+            
+            
     end Launch;
     
     
