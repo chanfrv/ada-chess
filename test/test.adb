@@ -29,4 +29,6 @@ begin
 
     Logs.Info(ret'Image);
 
+    Parser_Pretty_Print;
+
 end Test;

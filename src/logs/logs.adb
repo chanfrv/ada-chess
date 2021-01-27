@@ -17,23 +17,17 @@ package body Logs is
     
     procedure Error(Item : String) is
     begin
-        if Level >= Error then
-            Log(Error, Item);
-        end if;
+        Log(Error, Item);
     end Error;
     
     procedure Info(Item : String) is
     begin
-        if Level >= Info then
-            Log(Info, Item);
-        end if;
+        Log(Info, Item);
     end Info;
     
     procedure Debug(Item : String) is
     begin
-        if Level >= Debug then
-            Log(Debug, Item);
-        end if;
+        Log(Debug, Item);
     end Debug;
     
     
@@ -53,8 +47,10 @@ package body Logs is
         Clock_Format  : String := Formatting.Image(Clock);
         Level_Format  : String := Level_Image(Level);
         Indent_Format : String := (if Incr > 0 then (Incr * 2) * ':' & " " else "");
-    begin                
-        Put_Line("[" & Clock_Format & "][" & Level_Format & "] " & Indent_Format & Item);
+    begin
+        if Logs.Level >= Level then
+            Put_Line("[" & Clock_Format & "][" & Level_Format & "] " & Indent_Format & Item);
+        end if;
     end Log;
     
     

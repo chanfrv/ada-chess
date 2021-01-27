@@ -14,15 +14,15 @@ package body Board.Strings.Parse is
             return 0;
         else
             case Item(Item'First) is
-                when 'K' =>
+                when 'k'|'K' =>
                     Move.Piece := King;
-                when 'Q' =>
+                when 'q'|'Q' =>
                     Move.Piece := Queen;
-                when 'R' =>
+                when 'r'|'R' =>
                     Move.Piece := Rook;
-                when 'B' =>
+                when 'b'|'B' =>
                     Move.Piece := Bishop;
-                when 'N' =>
+                when 'n'|'N' =>
                     Move.Piece := Knight;
                 when others =>
                     null;
@@ -42,7 +42,7 @@ package body Board.Strings.Parse is
         else
             File := Item(Item'First);
             case File is
-                when 'a' .. 'h' =>
+                when 'a' .. 'h'|'A' .. 'H' =>
                     Move.From_File := (False, File_t'Value("" & File));    
                     return 1;
                 when others =>
@@ -101,13 +101,13 @@ package body Board.Strings.Parse is
             return 0;
         else
             case Item(Item'First) is
-                when 'Q' =>
+                when 'q'|'Q' =>
                     Move.Promotion := (IsEmpty => False, Value => Queen);
-                when 'R' =>
+                when 'r'|'R' =>
                     Move.Promotion := (IsEmpty => False, Value => Rook);
-                when 'B' =>
+                when 'b'|'B' =>
                     Move.Promotion := (IsEmpty => False, Value => Bishop);
-                when 'N' =>
+                when 'n'|'N' =>
                     Move.Promotion := (IsEmpty => False, Value => Knight);
                 when others =>
                     null;
@@ -244,7 +244,7 @@ package body Board.Strings.Parse is
                     Node_From := Parser_Nodes(State_From);
                     Node_To   := Parser_Nodes(State_To);
                     
-                    Put_Line(("    "" " & Node_From.Label.all & " "" -> "" " & Node_To.Label.all & " """));
+                    Put_Line("    "" " & Node_From.Label.all & " "" -> "" " & Node_To.Label.all & " """);
                     
                 end if;
             end loop;

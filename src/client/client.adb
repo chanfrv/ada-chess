@@ -70,7 +70,7 @@ package body Client is
         
     exception
         when Socket_Error =>
-            Put_Line("Server disconnected");
+            Logs.Error("Server disconnected");
             Close_Socket(Socket);
     end Launch;
 

@@ -94,9 +94,6 @@ package body Server is
         GameState := Playing;
         CurrPlayerIndex := GetWhitePlayer(Players);
         
-        -- Parser
-        Parser_Pretty_Print;
-        
         Game_Loop:
         while GameState in Playing | Check loop
             -- Get the current player info

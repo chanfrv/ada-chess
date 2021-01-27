@@ -1,7 +1,7 @@
 package Board.Strings.Parse is
     
     
-    subtype Parser_Index_t is Natural range 1 .. 9;
+    subtype Parser_Index_t is Natural range 1 .. 11;
     
     type Node_Kind_t is (Start, Stop, State);
     
@@ -46,27 +46,27 @@ package Board.Strings.Parse is
       with Pre => 5 <= Item'Length and Item'Length <= 5;
     
     
-    Parser_Piece_S     : aliased constant String := "[KQRBN]?";
-    Parser_From_File_S : aliased constant String := "[a-h]?";
-    Parser_From_Rank_S : aliased constant String := "[1-8]?";
-    Parser_Capture_S   : aliased constant String := "x?";
-    Parser_To_S        : aliased constant String := "[a-h][1-8]";
-    Parser_Promotion_S : aliased constant String := "[QRBN]?";
-    Parser_Status_S    : aliased constant String := "[+#]?";
+    Parser_Piece_S     : aliased constant String := "[kqrbnKQRBN]";
+    Parser_From_File_S : aliased constant String := "[a-hA-H]";
+    Parser_From_Rank_S : aliased constant String := "[1-8]";
+    Parser_Capture_S   : aliased constant String := "[xX]";
+    Parser_To_S        : aliased constant String := "[a-hA-H][1-8]";
+    Parser_Promotion_S : aliased constant String := "[qrbnQRBN]";
+    Parser_Status_S    : aliased constant String := "[+#]";
     Parser_Kingside_S  : aliased constant String := "0-0";
     Parser_Queenside_S : aliased constant String := "0-0-0";
     
     Parser_Start_L     : aliased constant String := "START";
     Parser_Stop_L      : aliased constant String := "END";
-    Parser_Piece_L     : aliased constant String := "Piece '" & Parser_Piece_S & "'";
-    Parser_From_File_L : aliased constant String := "From(Rank) '" & Parser_From_File_S & "'";
-    Parser_From_Rank_L : aliased constant String := "From(File) '" & Parser_From_Rank_S & "'";
-    Parser_Capture_L   : aliased constant String := "Capture '" & Parser_Capture_S & "'";
-    Parser_To_L        : aliased constant String := "To '" & Parser_To_S & "'";
-    Parser_Promotion_L : aliased constant String := "Promotion '" & Parser_Promotion_S & "'";
-    Parser_Status_L    : aliased constant String := "Status '" & Parser_Status_S & "'";
-    Parser_Kingside_L  : aliased constant String := "Kingside '" & Parser_Kingside_S & "'";
-    Parser_Queenside_L : aliased constant String := "Queenside '" & Parser_Queenside_S & "'";
+    Parser_Piece_L     : aliased constant String := "Piece";
+    Parser_From_File_L : aliased constant String := "From(Rank)";
+    Parser_From_Rank_L : aliased constant String := "From(File)";
+    Parser_Capture_L   : aliased constant String := "Capture";
+    Parser_To_L        : aliased constant String := "To";
+    Parser_Promotion_L : aliased constant String := "Promotion";
+    Parser_Status_L    : aliased constant String := "Status";
+    Parser_Kingside_L  : aliased constant String := "Kingside";
+    Parser_Queenside_L : aliased constant String := "Queenside";
     
     
     Parser_Start     : constant Parser_Node_t := (Kind => Start, Label => Parser_Start_L'Access);
@@ -126,19 +126,34 @@ package Board.Strings.Parse is
                                                Parser_To,
                                                Parser_Promotion,
                                                Parser_Status,
+                                               Parser_Kingside,
+                                               Parser_Queenside,
                                                Parser_Stop);
     
     Parser_Adj_Matrix : constant Parser_Adj_Matrix_t :=
     (
-        (False, True,  True,  True,  True,  True,  False, False, False), -- start     -> piece | from_file | from_rank | capture | to
-        (False, False, True,  True,  True,  True,  False, False, False), -- piece     -> from_file | from_rank | capture | to
-        (False, False, False, True,  True,  True,  False, False, False), -- from_file -> from_rank | capture | to
-        (False, False, False, False, True,  True,  False, False, False), -- from_rank -> capture | to
-        (False, False, False, False, False, True,  False, False, False), -- capture   -> to
-        (False, False, False, False, False, False, True,  True,  True),  -- to        -> promotion | status | stop
-        (False, False, False, False, False, False, False, True,  True),  -- promotion -> status | stop
-        (False, False, False, False, False, False, False, False, True),  -- status    -> stop
-        (False, False, False, False, False, False, False, False, False)  -- stop
+        -- start     -> piece | from_file | from_rank | capture | to | kingside | queenside
+        (False, True,  True,  True,  True,  True,  False, False, True,  True,  False),
+        -- piece     -> from_file | from_rank | capture | to
+        (False, False, True,  True,  True,  True,  False, False, False, False, False),
+        -- from_file -> from_rank | capture | to
+        (False, False, False, True,  True,  True,  False, False, False, False, False),
+        -- from_rank -> capture | to
+        (False, False, False, False, True,  True,  False, False, False, False, False),
+        -- capture   -> to
+        (False, False, False, False, False, True,  False, False, False, False, False),
+        -- to        -> promotion | status | stop
+        (False, False, False, False, False, False, True,  True,  False, False, True),
+        -- promotion -> status | stop
+        (False, False, False, False, False, False, False, True,  False, False, True),
+        -- status    -> stop
+        (False, False, False, False, False, False, False, False, False, False, True),
+        -- kingside  -> stop
+        (False, False, False, False, False, False, False, False, False, False, True),
+        -- queenside -> stop
+        (False, False, False, False, False, False, False, False, False, False, True),
+        -- stop
+        (False, False, False, False, False, False, False, False, False, False, False)
     );
     
     
