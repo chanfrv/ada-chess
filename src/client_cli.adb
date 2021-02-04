@@ -46,4 +46,8 @@ begin
     -- Launch
     Client.Launch(Addr, Port, Board_Color);
 
+exception
+    when Constraint_Error =>
+        Logs.Error("Unrecognized value '" & Argument(Arg_Index + 1) & "'");
+
 end Client_CLI;

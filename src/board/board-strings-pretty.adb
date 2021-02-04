@@ -18,7 +18,7 @@ package body Board.Strings.Pretty is
     is
     begin
         if File = h then
-            Put(Palette_Reset & Image(Rank));
+            Put(Palette_Reset & " " & Image(Rank));
         end if;
     end Print_Files_Right;
     
