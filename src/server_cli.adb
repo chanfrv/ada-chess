@@ -49,5 +49,6 @@ begin
 exception
     when Constraint_Error =>
         Logs.Error("Unrecognized value '" & Argument(Arg_Index + 1) & "'");
+        Set_Exit_Status(Failure);
     
 end Server_CLI;

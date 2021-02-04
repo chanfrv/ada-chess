@@ -59,8 +59,8 @@ package Board.Strings.Parse is
     Parser_Start_L     : aliased constant String := "START";
     Parser_Stop_L      : aliased constant String := "END";
     Parser_Piece_L     : aliased constant String := "Piece";
-    Parser_From_File_L : aliased constant String := "From(Rank)";
-    Parser_From_Rank_L : aliased constant String := "From(File)";
+    Parser_From_File_L : aliased constant String := "From (Rank)";
+    Parser_From_Rank_L : aliased constant String := "From (File)";
     Parser_Capture_L   : aliased constant String := "Capture";
     Parser_To_L        : aliased constant String := "To";
     Parser_Promotion_L : aliased constant String := "Promotion";
