@@ -60,7 +60,7 @@ Les différents modules sont découpés par des sous-dossiers de `src/`, ils son
 #### - `logs` le module du logger
 #### - `optional` un record generique permettant de créer des valeurs optionelles comme `std::optional` du c++
 
-### Graph de dépendances
+### 3.2 Graph de dépendances
 
 Les deux racines sont client et server, ces deux modules utilisent board et logs, board utlisant lui-même logs et optional.
 
@@ -74,33 +74,33 @@ Les deux racines sont client et server, ces deux modules utilisent board et logs
       logs <------- board.* --> optional
 ```
 
-### 3.2 Client
+### 3.3 Client
 
 Le client consiste simplement en une procedure `Launch()` qui tente de se connecter au serveur à l'adresse donnée. Si la connexion est un succès, le client va ensuite entrer la boucle de jeu où tant que la partie n'est pas terminée, on lit les mouvements de l'utilisateur et on les envoie au serveur.
 
-### 3.3 Serveur
+### 3.4 Serveur
 
 Le serveur lui aussi consiste simplement en un procédure `Launch()` qui écoute sur localhost au port donné. Ce serveur doit donc forcément être lancé avant les clients. Une fois les deux clients connectés, on entre là aussi la boucle de jeu où tant que la partie n'est pas terminée, on reçoit les mouvements des joueurs, ces dernières sont ensuite parsées, validées puis executées. Le nouveau board est ensuite envoyé aux joueurs puis on passe au joueur  suivant.
 
-### 3.4 Board
+### 3.5 Board
 
 Le board est le module principal du programme, il définit les différents types dont les pièces et le plateau ainsi qui les fonctions de mouvements. Le module est donc responsable de la validation et de l'execution des mouvements considérés "normaux".
 
-### 3.4.b Board.Castling
+### 3.5.b Board.Castling
 
 Ce sous-module est tourné spécifiquement vers la règle du castling. Lorsque le parseur reçoit "0-0" ou "0-0-0", le mouvement est donc respectivement soit un castling côté Roi soit un castling côté Reine qui, si les conditions sont réunies, est executé sans passer par les règles de mouvement classiques (même si elles sont quand même respectées).
 
-### 3.4.c Board.EnPassant
+### 3.5.c Board.EnPassant
 
 Ce sous-module est spécifique pour la règle dite en passant. Lorsqu'un pion bouge de 2 cases (donc lors de son premier mouvement), cette pièce est considérée une cible valide pour un en passant lors du prochain tour.
 
 La fonction `EnPassant_Handler()` utilise donc le mouvement précédent pour déterminer si le mouvement courant est un en passant et l'execute, elle ensuite ne considère plus aucune pièce pour en passant car celui-ci n'est possible que pour 1 tour, et enfin enregistre le pion courant s'il bouge de 2 cases pour le prochain tour.
 
-### 3.4.d Board.Strings
+### 3.5.d Board.Strings
 
 Ce module contient les fonctions `Image()` pour tous les composants du module `Board`. Ces fonctions convertissent donc les types internes en chaînes de charactère. Ce module est particulièrement utilisé pour le logging et le pretty printer.
 
-### 3.4.e Board.Strings.Parse
+### 3.5.e Board.Strings.Parse
 
 Le parser est responsable de convertir la chaîne de charactère en notation algébrique vers le type interne de mouvement, ce mouvement étant ensuite donné au module principal `Board` pour la validation et l'execution.
 
@@ -112,16 +112,16 @@ La grammaire est donc la suivante :
 
 D'un point de vue grammaire, tous les champs sont optionels à part le champ `To` qui sont les coordonnées d'arrivée, c'est pourquoi il est possible de partir de n'importe quel état avant `To` vers le suivant jusqu'à `To`, puis de n'importe quel état après `To` vers le suivant jusqu'à la fin. Les deux tokens spéciaux étant le castling qui n'a pas besoin de coordonnées.
 
-### 3.4.f Board.Strings.Pretty
+### 3.5.f Board.Strings.Pretty
 
 Le pretty printer consiste en une procédure `Pretty_Print()` qui prend le board en entrée (et optionellement le joueur courant) et affiche le plateau avec les pièces en couleurs sur le terminal.
 
 
-### 3.5 Logs
+### 3.6 Logs
 
 Le loggeur est assez simple, il consiste en une variable globale `Level` qui est soit `Error`, soit `Info`, soit `Debug`. Lorsqu'une des procédures `Error()`, `Info()` ou `Debug()` est executée, si le niveau est supérieur où égal au niveau choisit avec les arguements des binaires, le loggeur va affichée une string formatée au format `[CLOCK][LEVEL] MESSAGE`.
 
-### 3.6 Optional
+### 3.7 Optional
 
 Ce record utilitaire permet donc d'implémenter un équivalent de `std::optional` du c++, il a un paramètre booléen `IsEmpty` qui résulte en un record null si `True`, une valeur de type `T` si `False`. Ce optional est souvent utilisé dans le board pour représenter une case vide ou encore des valeurs non renseignées dons la notation algébrique.
 
