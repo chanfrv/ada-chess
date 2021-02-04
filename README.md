@@ -119,7 +119,13 @@ Le pretty printer consiste en une procédure `Pretty_Print()` qui prend le board
 
 ### 3.6 Logs
 
-Le loggeur est assez simple, il consiste en une variable globale `Level` qui est soit `Error`, soit `Info`, soit `Debug`. Lorsqu'une des procédures `Error()`, `Info()` ou `Debug()` est executée, si le niveau est supérieur où égal au niveau choisit avec les arguements des binaires, le loggeur va affichée une string formatée au format `[CLOCK][LEVEL] MESSAGE`.
+Le loggeur est assez simple, il consiste en une variable globale `Level` qui est soit `Error`, soit `Info`, soit `Debug`. Lorsqu'une des procédures `Error()`, `Info()` ou `Debug()` est executée, si le niveau de la procédure correspond au niveau global, le loggeur va afficher une string formatée au format `[CLOCK][LEVEL] MESSAGE`.
+
+```
+[2021-02-04 17:05:26][INFO ] Set logging level to info
+[2021-02-04 17:05:26][INFO ] Listening on 127.0.1.1:5876
+[2021-02-04 17:05:26][INFO ] Waiting for player 1
+```
 
 ### 3.7 Optional
 
