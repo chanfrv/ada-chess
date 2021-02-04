@@ -82,7 +82,7 @@ Le client consiste simplement en une procedure `Launch()` qui tente de se connec
 
 Le serveur lui aussi consiste simplement en un procédure `Launch()` qui écoute sur localhost au port donné. Ce serveur doit donc forcément être lancé avant les clients. Une fois les deux clients connectés, on entre là aussi la boucle de jeu où tant que la partie n'est pas terminée, on reçoit les mouvements des joueurs, ces dernières sont ensuite parsés, validés puis executés. Le nouveau board est ensuite envoyé aux joueurs puis on passe au joueur  suivant.
 
-### 3.5 Board
+### 3.5.a Board
 
 Le board est le module principal du programme, il définit les différents types dont les pièces et le plateau ainsi qui les fonctions de mouvements. Le module est donc responsable de la validation et de l'execution des mouvements considérés "normaux".
 
