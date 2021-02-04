@@ -54,11 +54,11 @@ Par exemple, pour bouger un pion de e7 vers e5, la notation est 'e5'. Pour bouge
 
 Les différents modules sont découpés par des sous-dossiers de `src/`, ils sont les suivants:
 
-#### `client` qui contient le client appélé par `client_cli`
-#### `server` qui contient le serveur appelé par `server_cli`
-#### `board` qui contient l'essentiel du projet, toutes les fonctionnalités allant du parsing à l'execution du mouvement sont effectuées dans ce module
-#### `logs` le module du logger
-#### `optional` un record generique permettant de créer des valeurs optionelles comme `std::optional` du c++
+#### - `client` qui contient le client appélé par `client_cli`
+#### - `server` qui contient le serveur appelé par `server_cli`
+#### - `board` qui contient l'essentiel du projet, toutes les fonctionnalités allant du parsing à l'execution du mouvement sont effectuées dans ce module
+#### - `logs` le module du logger
+#### - `optional` un record generique permettant de créer des valeurs optionelles comme `std::optional` du c++
 
 ### Graph de dépendances
 
