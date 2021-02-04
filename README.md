@@ -1,47 +1,63 @@
 # ADA CHESS
 
-A chess game written in Ada, where both players play by sending tcp commands to a server.
+Un jeu d'echecs écrit en Ada, où les deux joueurs jouent en se connectant à un serveur tcp/ip.
 
 ![Board](.github/colored_board.png)
 
-## 1. Build
+## 1. Instructions de build
 
-Build the project with the command:
+Le projet construit deux binaires, `server_cli` et `client_cli`, avec la commande suivante :
 ```
 gprbuild -d chess.gpr
 ```
 
-## 2. Server
+## 2. Manuel d'utilisation
 
-### Usage
+### 2.1. Server
+
+#### Utilisation
 
 ```
 server_cli [OPTIONS]
 ```
 
-### Options
+#### Options
 
-#### `-p PORT` set the port to listen on
-#### `-c COLOR` set the board color among ANSI colors
-#### `-l LOGLEVEL` set the log level among Error, Info or Debug
+##### `-p PORT` choisit le port où écouter (par défaut 5876)
+##### `-c COLOR` choisit la couleur du plateau d'echecs parmi les couleurs du stadar ANSI (par défaut Black)
+##### `-l LOGLEVEL` choisit le niveau de logs parmi Error, Info ou Debug (par défaut Info)
 
 
-## 3. Client
+### 2.3. Client
 
-### Usage
+#### Utilisation
 
 ```
 client_cli [OPTIONS]
 ```
 
-### Options
+#### Options
 
-#### `-p PORT` set the port to connect to
-#### `-c COLOR` set the board color among ANSI colors
-#### `-l LOGLEVEL` set the log level among Error, Info or Debug
+##### `-p PORT` choisit le port où écouter (par défaut 5876)
+##### `-c COLOR` choisit la couleur du plateau d'echecs parmi les couleurs du stadar ANSI (par défaut Black)
+##### `-l LOGLEVEL` choisit le niveau de logs parmi Error, Info ou Debug (par défaut Info)
 
-### Movement
+#### Mouvement
 
-The game is terminal based, to move one must use the [algebraic notation](https://en.wikipedia.org/wiki/Algebraic_notation_(chess)). The resulting string is then parsed on the server side and executes the movement if valid.
+Le jeu est basé sur terminal, pour bouger le joueur doit utiliser la [notation algébrique](https://en.wikipedia.org/wiki/Algebraic_notation_(chess)) côté client, cette string de mouvement est ensuite parsée par le serveur, validée puis executée.
+
+Par exemple, pour bouger un pion de e7 vers e5, la notation est 'e5'. Pour bouger un cavalier de e8 vers f6, la notation est 'Nf6', ou 'Nef6' en cas d'ambiguité entre les cavaliers si les deux peuvent aller en f6. Les coordonnées d'origine sont donc optionelles, mais les spécifier reste un mouvement valide, cela accélère même le traitement de la commande.
 
 ![State machine](.github/digraph_parser.png)
+
+## 3. Architecture du projet
+
+TODO
+
+## 4. Safe programming
+
+TODO
+
+## 5. DO178
+
+TODO
