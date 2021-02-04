@@ -80,7 +80,7 @@ Le client consiste simplement en une procedure `Launch()` qui tente de se connec
 
 ### 3.4 Serveur
 
-Le serveur lui aussi consiste simplement en un procédure `Launch()` qui écoute sur localhost au port donné. Ce serveur doit donc forcément être lancé avant les clients. Une fois les deux clients connectés, on entre là aussi la boucle de jeu où tant que la partie n'est pas terminée, on reçoit les mouvements des joueurs, ces dernières sont ensuite parsées, validées puis executées. Le nouveau board est ensuite envoyé aux joueurs puis on passe au joueur  suivant.
+Le serveur lui aussi consiste simplement en un procédure `Launch()` qui écoute sur localhost au port donné. Ce serveur doit donc forcément être lancé avant les clients. Une fois les deux clients connectés, on entre là aussi la boucle de jeu où tant que la partie n'est pas terminée, on reçoit les mouvements des joueurs, ces dernières sont ensuite parsés, validés puis executés. Le nouveau board est ensuite envoyé aux joueurs puis on passe au joueur  suivant.
 
 ### 3.5 Board
 
