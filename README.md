@@ -13,7 +13,7 @@ gprbuild -d chess.gpr
 
 ## 2. Manuel d'utilisation
 
-### 2.1. Server
+### 2.1. Serveur
 
 #### Utilisation
 
@@ -24,7 +24,7 @@ server_cli [OPTIONS]
 #### Options
 
 ##### `-p PORT` choisit le port où écouter (par défaut 5876)
-##### `-c COLOR` choisit la couleur du plateau d'echecs parmi les couleurs du stadar ANSI (par défaut Black)
+##### `-c COLOR` choisit la couleur du plateau d'echecs parmi les couleurs du standard ANSI (par défaut Black)
 ##### `-l LOGLEVEL` choisit le niveau de logs parmi Error, Info ou Debug (par défaut Info)
 
 
@@ -39,7 +39,7 @@ client_cli [OPTIONS]
 #### Options
 
 ##### `-p PORT` choisit le port où écouter (par défaut 5876)
-##### `-c COLOR` choisit la couleur du plateau d'echecs parmi les couleurs du stadar ANSI (par défaut Black)
+##### `-c COLOR` choisit la couleur du plateau d'echecs parmi les couleurs du standard ANSI (par défaut Black)
 ##### `-l LOGLEVEL` choisit le niveau de logs parmi Error, Info ou Debug (par défaut Info)
 
 #### Mouvement
