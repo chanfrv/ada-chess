@@ -65,13 +65,13 @@ Les différents modules sont découpés par des sous-dossiers de `src/`, ils son
 Les deux racines sont client et server, ces deux modules utilisent board et logs, board utlisant lui-même logs et optional.
 
 ```
-      ---- client ----
-     |                |
-     |                |
-     |     server     |
-     |    /       \   |
-     v   v         v  v
-      logs <------ board ---> optional
+           client
+          /      \
+         /        \
+        /  server  \
+       /  /      \  \
+      v  v        v  v
+      logs <----- board ---> optional
 ```
 
 ### 3.3 Client
