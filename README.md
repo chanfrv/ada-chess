@@ -126,10 +126,10 @@ Le loggeur est assez simple, il consiste en une variable globale `Level` qui est
 Ce record utilitaire permet donc d'implémenter un équivalent de `std::optional` du c++, il a un paramètre booléen `IsEmpty` qui résulte en un record null si `True`, une valeur de type `T` si `False`. Ce optional est souvent utilisé dans le board pour représenter une case vide ou encore des valeurs non renseignées dons la notation algébrique.
 
 
-## 4. Safe programming
+## 4. DO178
 
-TODO
+### 4.1 High Level Requirements
 
-## 5. DO178
+### 4.2 Low Level Requirements
 
-TODO
+### 4.3 Tests
