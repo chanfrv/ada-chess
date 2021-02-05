@@ -91,7 +91,8 @@ Une des deux fonctions principales est `Move()`, celle-ci prends le mouvement pa
 - Validation du mouvement de cette pièce vers la case cible selon :
     - les règles communes (on ne peu capturer qu'un pièce de l'autre couleur, ou la case est vide, ou bien la case est vide mais c'est un en passant),
     - les règles spécifiques de la pièce,
-    - si ce mouvement ne mettrait pas le Roi allié en echec
+    - si ce mouvement ne mettrait pas le Roi allié en echec.
+
 La recherche est un succès s'il y a un seul candidat. Aucun candidat est un mouvement invalide, plusieurs candidats est un mouvement ambigu et le joueur aurait dû spécifier des coordonnées de départ.
 
 L'autre fonction principale est `Game_Ended()`, celle-ci verifie si le mouvement effectué met le Roi adverse en échec, et si c'est le cas, si le Roi adverse et Echec et Mat.
@@ -116,7 +117,7 @@ Le parser est responsable de convertir la chaîne de charactère en notation alg
 
 Le parser est implémenté par une machine à états, elle même implémentée par un graph dans une matrice d'adjacence. La chaîne de charactères est donnée en entrée de la fonction `Traverse()` qui itère de token en token pour matcher la grammaire et remplir les informations du mouvement.
 
-La grammaire est donc la suivante :
+L'expression régulière est `([KQRBN]?[a-h]?[1-8]?x?[a-h][1-8][QRBN]?[+#]?|0-0[-0])` ce qui donne la machine à états donc la suivante :
 
 ![State machine](.github/digraph_parser.png)
 
