@@ -117,7 +117,7 @@ Le parser est responsable de convertir la chaîne de charactère en notation alg
 
 Le parser est implémenté par une machine à états, elle même implémentée par un graph dans une matrice d'adjacence. La chaîne de charactères est donnée en entrée de la fonction `Traverse()` qui itère de token en token pour matcher la grammaire et remplir les informations du mouvement.
 
-L'expression régulière est `([KQRBN]?[a-h]?[1-8]?x?[a-h][1-8][QRBN]?[+#]?|0-0[-0])` ce qui donne la machine à états donc la suivante :
+L'expression régulière est `([KQRBN]?[a-h]?[1-8]?x?[a-h][1-8][QRBN]?[+#]?|0-0[-0])` ce qui donne la machine à états suivante :
 
 ![State machine](.github/digraph_parser.png)
 
