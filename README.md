@@ -150,34 +150,34 @@ Ce record utilitaire permet donc d'implémenter un équivalent de `std::optional
 HLR 1: les utilisateurs devraient pouvoir se connecter avec leur adresse IP
 
 HLR 2: les utilisateurs devraient pouvoir commencer une partie quand deux
-clients sont connectes
+clients sont connectés
 
-HLR 3: le joueur avec les pieces blanches devrait jouer en premier
+HLR 3: le joueur avec les pièces blanches devrait jouer en premier
 
-HLR 4: les joueurs devraient voir un plateau de jeu actualise lorsque c'est a
+HLR 4: les joueurs devraient voir un plateau de jeu actualisé lorsque c'est a
 leur tour de jouer
 
-HLR 5: les joueurs devraient pouvoir deplacer leurs pieces
+HLR 5: les joueurs devraient pouvoir déplacer leurs pièces
 
-HLR 5.1: les pieces devraient avoir un mouvement particulier selon leur type
+HLR 5.1: les pièces devraient avoir un mouvement particulier selon leur type
 
-HLR 5.2: les pieces devraient avoir un ensemble de destinations possibles
+HLR 5.2: les pièces devraient avoir un ensemble de destinations possibles
 selon leur position
 
-HLR 5.3: si la destination d'une piece ne fais pas partie de l'ensemble de ses
-destinations possibles, un message d'erreur devrait etre affiche et la
-destination devrait etre donnee a nouveau
+HLR 5.3: si la destination d'une pièce ne fais pas partie de l'ensemble de ses
+destinations possibles, un message d'erreur devrait être affiché et la
+destination devrait être donnée à nouveau
 
 HLR 5.4: si un joueur est en echec, il ne devrait pouvoir faire que des
-mouvements lui permettant de ne plus etre en echec
+mouvements lui permettant de ne plus être en echec
 
-HLR 5.5: si un joueur deplace son pion jusqu'au bout du plateau, il devrait
-pouvoir le tranformer en n'importe quelle autre piece
+HLR 5.5: si un joueur déplace son pion jusqu'au bout du plateau, il devrait
+pouvoir le tranformer en n'importe quelle autre pièce
 
-HLR 6: les joueurs devraient pouvoir prendre une piece a l'adversaire
+HLR 6: les joueurs devraient pouvoir prendre une pièce a l'adversaire
 
-HLR 6.1: les joueurs devraient pouvoir prendre une piece a l'adversaire avec
-la regle dite en passant
+HLR 6.1: les joueurs devraient pouvoir prendre une pièce a l'adversaire avec
+la règle dite en passant
 
 HLR 6.2: les joueurs ne devraient pas pouvoir prendre le roi adverse
 
@@ -187,48 +187,46 @@ HLR 7: la partie devrait se terminer quand un joueur est en echec et mat
 
 ### 4.2 Low Level Requirements
 
-LLR 1.1: quand Launch() est appelee avec une adresse IP et un port valides, le
+LLR 1.1: quand Launch() est appelée avec une adresse IP et un port valides, le
 client devrait pouvoir se connecter au serveur
 
-LLR 1.2: quand Launch() est appelee avec une adresse IP ou un port invalide, le
+LLR 1.2: quand Launch() est appelée avec une adresse IP ou un port invalide, le
 client devrait afficher un message d'erreur
 
-LLR 2.1: quand Launch() est appelee, le serveur devrait attendre la connexion
+LLR 2.1: quand Launch() est appelée, le serveur devrait attendre la connexion
 de deux clients et lancer une partie
 
-LLR 3.1: quand GetWhitePlayer() est appelee, le serveur devrait definir le
-joueur avec les pieces blanches comme le premier a jouer
+LLR 3.1: quand GetWhitePlayer() est appelée, le serveur devrait définir le
+joueur avec les pièces blanches comme le premier a jouer
 
-LLR 4.1: quand Board\_t'Output() est appelee, le serveur devrait envoyer le
+LLR 4.1: quand Board\_t'Output() est appelée, le serveur devrait envoyer le
 plateau actuel au client qui doit jouer son tour, quand PrettyPrint() est
-appelee par ce client le plateau devrait s'afficher
+appelée par ce client le plateau devrait s'afficher
 
-LLR 5.1: quand String'Output() est appelee, le client devrait envoyer son
-deplacement au serveur, quand MoveResult() est appelee le serveur devrait
-appliquer le deplacement
+LLR 5.1: quand String'Output() est appelée, le client devrait envoyer son
+déplacement au serveur, quand MoveResult() est appelée le serveur devrait
+appliquer le déplacement
 
-LLR 5.1.1: quand IsValidMove{PieceName}() est appelee, le mouvement specifique
-de la piece devrait etre defini
+LLR 5.1.1: quand IsValidMove{PieceName}() est appelée, le mouvement spécifique
+de la pièce devrait être défini
 
-LLR 5.2.1: quand IsValidMove{PieceName}() est appelee, l'ensemble des
-destinations possible de la piece devraient etre definies selon sa position
+LLR 5.2.1: quand IsValidMove{PieceName}() est appelée, l'ensemble des
+destinations possible de la pièce devraient être définies selon sa position
 
-LLR 5.3.1: quand IsValidMove() est appelee, un message d'erreur devrait
+LLR 5.3.1: quand IsValidMove() est appelée, un message d'erreur devrait
 s'afficher si la destination est invalide, et demander une autre destination
 
-LLR 5.4.1: quand IsValidMove() est appelee, si IsKingCheck() retourne true, le
+LLR 5.4.1: quand IsValidMove() est appelée, si IsKingCheck() retourne true, le
 mouvement est invalide
 
-LLR 5.5.1: euh..
+LLR 6.1: quand Move() est appelée, si une pièce se déplace sur la case d'une
+pièce adverse, elle devrait la remplacer et donc la prendre
 
-LLR 6.1: quand Move() est appelee, si une piece se deplace sur la case d'une
-piece adverse, elle devrait la remplacer et donc la prendre
-
-LLR 6.1.1: quand EnPassantHandler() est appelee, un pion devrait pouvoir
-prendre un pion adverse avec la regle dite en passant
+LLR 6.1.1: quand EnPassantHandler() est appelée, un pion devrait pouvoir
+prendre un pion adverse avec la règle dite en passant
 
 LLR 6.2.1: tant que IsKingCheck() renvoie true, le joueur doit envoyer une
-nouvelle destination, le roi ne devrait donc pas pouvoir etre pris
+nouvelle destination, le roi ne devrait donc pas pouvoir être pris
 
 LLR 7.1: quand GameEnded() renvoie CheckMate, la partie devrait se terminer
 
