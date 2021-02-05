@@ -31,7 +31,7 @@ package body Board.Strings.Pretty is
         
         Bg : String := (if (Rank + File_t'Pos(File) + 1) mod 2 = 0
                         then Palette_Dull_Bg(White)
-                        else Palette_Dull_Bg(Background));
+                        else Palette_Dull_Bg(Red));
         
         Fg : String := (if not Cell.IsEmpty and then Cell.Value.Color = White
                         then Palette_Bright_Fg(Black)
