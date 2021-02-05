@@ -493,9 +493,10 @@ package body Board is
 
                     -- Promotion
                     Cell_To := Board(CurrMove.To.File, CurrMove.To.Rank).Value;
-                    if Cell_To.Piece = Pawn
-                      and ((Cell_To.Color = White and CurrMove.To.Rank = 8)
-                            or (Cell_To.Color = Black and CurrMove.To.Rank = 1))
+                    if not CurrMove.Promotion.IsEmpty
+                         and then (Cell_To.Piece = Pawn
+                             and ((Cell_To.Color = White and CurrMove.To.Rank = 8)
+                               or (Cell_To.Color = Black and CurrMove.To.Rank = 1)))
                     then
                         Promoted := (Piece => CurrMove.Promotion.Value, Color => Cell_To.Color);
                         Board(CurrMove.To.File, CurrMove.To.Rank) := (IsEmpty => False, Value => Promoted);

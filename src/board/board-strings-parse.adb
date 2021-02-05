@@ -178,7 +178,7 @@ package body Board.Strings.Parse is
                     if Match(Item(Item'First .. End_Bound), Regex) then
                         -- there is a match, call the callback
                         Logs.Debug("String '" & Item(Item'First .. End_Bound) & "' matched in node '" & Node_To.Label.all & "'");
-                        New_First := Item'First + Node_To.Eval(Item, Move);
+                        New_First := Item'First + Node_To.Eval(Item(Item'First .. End_Bound), Move);
 
                         -- recursively traverse the adjacent nodes
                         if Traverse_Rec(Item(New_First .. Item'Last), Move, Index_To) then
