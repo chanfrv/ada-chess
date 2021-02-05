@@ -257,14 +257,15 @@ package body Board is
         Cell_To    : constant Opt_Cell_t := Board(To.File, To.Rank);
         Pawn_Color : Color_t := Cell_From.Value.Color;
 
-        Forward_Valid  : Boolean;
-        Diagonal_Valid : Boolean;
+        Forward_Valid   : Boolean;
+        Diagonal_Valid  : Boolean;
+        Promotion_Valid : Boolean;
 
-        Moving_Forward : Boolean := (if Pawn_Color = White then
+        Moving_Forward  : Boolean := (if Pawn_Color = White then
                                          From.Rank < To.Rank else From.Rank > To.Rank);
-        Pawn_Rank      : Rank_t  := (if Pawn_Color = White then 2 else 7);
-        Next_Rank      : Rank_t  := (if Pawn_Color = White then From.Rank + 1 else From.Rank - 1);
-        Opp_Home_Rank  : Rank_t  := (if Pawn_Color = White then 8 else 1);
+        Pawn_Rank       : Rank_t  := (if Pawn_Color = White then 2 else 7);
+        Next_Rank       : Rank_t  := (if Pawn_Color = White then From.Rank + 1 else From.Rank - 1);
+        Opp_Home_Rank   : Rank_t  := (if Pawn_Color = White then 8 else 1);
     begin
 
         -- Can only move forward
@@ -280,9 +281,7 @@ package body Board is
                      and (case abs (To.Rank - From.Rank) is
                                when 1 => True,
                                when 2 => Board(From.File, Next_Rank).IsEmpty,
-                               when others => False)
-                     -- and moving to the last rank results in a promotion
-                     and (if To.Rank = Opp_Home_Rank then not Promotion.IsEmpty));
+                               when others => False));
 
         -- ...Or we capture on a diagnoal
         Diagonal_Valid :=
@@ -298,7 +297,9 @@ package body Board is
                      (File_t'Pos(From.File) + 1 = File_t'Pos(To.File) and Next_Rank = To.Rank)
                    else False));
 
-        return Forward_Valid or Diagonal_Valid;
+        Promotion_Valid := (if To.Rank = Opp_Home_Rank then not Promotion.IsEmpty else True);
+
+        return (Forward_Valid or Diagonal_Valid) and Promotion_Valid;
     end IsValidMove_Pawn;
 
 

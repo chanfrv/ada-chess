@@ -71,7 +71,7 @@ package body Server is
         MoveResult      : MoveResult_t;
         CurrPlayer      : Player_t;
         CurrMove        : Move_t;
-    begin
+    begin        
         -- Connect
         Address.Addr := Addresses(Get_Host_By_Name(Host_Name), 1);
         Address.Port := Port;

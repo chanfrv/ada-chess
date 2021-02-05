@@ -231,9 +231,10 @@ package body Board.Strings.Parse is
         Last  : Parser_Index_t := Parser_Index_t'Pred(Parser_Index_t'Last);
     begin
         Put_Line("digraph Parser {");
-        Put_Line("    node [ fontname = ""Helvetica"", shape = box ];");
-        Put_Line("    "" START "" [ style = diagonals ];");
-        Put_Line("    "" END "" [ style = diagonals ];");
+        Put_Line("    rankdir=LR;");
+        Put_Line("    node [ fontname = ""Helvetica"", shape=box, style=bold ];");
+        Put_Line("    "" START "" [fillcolor=black, shape=circle, label="""", width=0.25];");
+        Put_Line("    "" END "" [fillcolor=black, shape=doublecircle, label="""", width=0.3];");
                         
         for State_From in Parser_Index_t loop
             
@@ -244,7 +245,7 @@ package body Board.Strings.Parse is
                     Node_From := Parser_Nodes(State_From);
                     Node_To   := Parser_Nodes(State_To);
                     
-                    Put_Line("    "" " & Node_From.Label.all & " "" -> "" " & Node_To.Label.all & " """);
+                    Put_Line("    "" " & Node_From.Label.all & " "" -> "" " & Node_To.Label.all & " "" [style=bold];");
                     
                 end if;
             end loop;

@@ -54,11 +54,11 @@ Par exemple, pour bouger un pion de e7 vers e5, la notation est 'e5'. Pour bouge
 
 Les différents modules sont découpés par des sous-dossiers de `src/`, ils sont les suivants:
 
-#### - `client` qui contient le client appélé par `client_cli`
-#### - `server` qui contient le serveur appelé par `server_cli`
-#### - `board` qui contient l'essentiel du projet, toutes les fonctionnalités allant du parsing à l'execution du mouvement sont effectuées dans ce module
-#### - `logs` le module du logger
-#### - `optional` un record generique permettant de créer des valeurs optionelles comme `std::optional` du c++
+#### - `Client` qui contient le client appélé par `client_cli`
+#### - `Server` qui contient le serveur appelé par `server_cli`
+#### - `Board` qui contient l'essentiel du projet, toutes les fonctionnalités allant du parsing à l'execution du mouvement sont effectuées dans ce module
+#### - `Logs` le module du logger
+#### - `Optional` un record generique permettant de créer des valeurs optionelles comme `std::optional` du c++
 
 ### 3.2 Graph de dépendances
 
@@ -85,6 +85,16 @@ Le serveur lui aussi consiste simplement en un procédure `Launch()` qui écoute
 ### 3.5.a Board
 
 Le board est le module principal du programme, il définit les différents types dont les pièces et le plateau ainsi qui les fonctions de mouvements. Le module est donc responsable de la validation et de l'execution des mouvements considérés "normaux".
+
+Une des deux fonctions principales est `Move()`, celle-ci prends le mouvement parsé et tente de trouver une pièce du joueur capable de réaliser le mouvement donné ; et si elle la trouve, execute le mouvement. Les différentes étapes de validation sont :
+- Recherche d'une pièce candidate avec les bonnes caractéristiques (couleur du joueur, type de pièce et position donnée ou non par le joueur)
+- Validation du mouvement de cette pièce vers la case cible selon :
+    - les règles communes (on ne peu capturer qu'un pièce de l'autre couleur, ou la case est vide, ou bien la case est vide mais c'est un en passant),
+    - les règles spécifiques de la pièce,
+    - si ce mouvement ne mettrait pas le Roi allié en echec
+La recherche est un succès s'il y a un seul candidat. Aucun candidat est un mouvement invalide, plusieurs candidats est un mouvement ambigu et le joueur aurait dû spécifier des coordonnées de départ.
+
+L'autre fonction principale est `Game_Ended()`, celle-ci verifie si le mouvement effectué met le Roi adverse en échec, et si c'est le cas, si le Roi adverse et Echec et Mat.
 
 ### 3.5.b Board.Castling
 
