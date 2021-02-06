@@ -5,7 +5,7 @@ use  Ada.Text_IO;
 with Ada.Strings; use Ada.Strings;
 
 
-procedure llr_5_1_stringout_pass is
+procedure llr_5_1_1_stringout_pass is
     
     task server is
         entry Start;
@@ -68,4 +68,4 @@ begin
     server.Start;
     delay(1.0);
     client.Start;
-end llr_5_1_stringout_pass;
+end llr_5_1_1_stringout_pass;
