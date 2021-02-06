@@ -2,8 +2,8 @@ project Chess is
 
    for Source_Dirs use ("src/**", "test/llr");
    for Object_Dir use "obj";
-   for Main use ("llr_5_4_1_check_pass.adb", "llr_5_3_1_valid_pass.adb", "llr_5_2_1_valid_pass.adb", "llr_5_1_2_move_pass.adb", "llr_5_1_1_stringout_pass.adb", "llr_4_1_boardout_pass.adb", "llr_3_2_white_fail.adb", 
-      "llr_3_1_white_pass.adb", "llr_2_1_launch_pass.adb", "llr_1_2_launch_fail.adb", "llr_1_1_launch_pass.adb", "client_cli.adb", "server_cli.adb");
+   for Main use ("llr_5_5_1_promote_pass.adb", "llr_5_4_1_check_pass.adb", "llr_5_3_1_valid_pass.adb", "llr_5_2_1_valid_pass.adb", "llr_5_1_2_move_pass.adb", "llr_5_1_1_stringout_pass.adb", "llr_4_1_boardout_pass.adb", 
+      "llr_3_2_white_fail.adb", "llr_3_1_white_pass.adb", "llr_2_1_launch_pass.adb", "llr_1_2_launch_fail.adb", "llr_1_1_launch_pass.adb", "client_cli.adb", "server_cli.adb");
 
 end Chess;
 
