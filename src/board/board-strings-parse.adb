@@ -112,12 +112,12 @@ package body Board.Strings.Parse is
                 Logs.Debug("Traversing node '" & Node_To.Label.all & "'");
                 
                 -- if we are in a state
-                if Node_To.Kind = State then
-                    Regex := Compile(Node_To.Expr.all);
-                    Logs.Debug("Trying to match string '" & Item & "'");
-            
-                    -- match string from grammar
+                if Node_To.Kind = State then            
                     End_Bound := Item'First + Node_To.Length - 1;
+                    Regex := Compile(Node_To.Expr.all);
+                    
+                    -- match string from grammar
+                    Logs.Debug("Trying to match string '" & Item & "'");
                     
                     if End_Bound <= Item'Last and then Match(Item(Item'First .. End_Bound), Regex) then
                         -- there is a match, call the callback
@@ -177,7 +177,7 @@ package body Board.Strings.Parse is
     begin
         Put_Line("digraph Parser {");
         Put_Line("    rankdir=LR;");
-        Put_Line("    node [ fontname = ""Helvetica"", shape=box, style=filled,bold ];");
+        Put_Line("    node [ fontname=""Helvetica"", shape=box, style=filled,bold ];");
         Put_Line("    "" START "" [fillcolor=black, shape=circle, label="""", width=0.25];");
         Put_Line("    "" END "" [fillcolor=black, shape=doublecircle, label="""", width=0.3];");
                         

@@ -22,4 +22,7 @@ package Server is
 
     procedure Launch(Port : Port_Type; Board_Color : Color_ANSI_t := Black);
 
+
+    function GetWhitePlayer(Players : in Players_t) return Natural;
+
 end Server;
