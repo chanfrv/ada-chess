@@ -144,8 +144,6 @@ package Board is
                         CurrPlayerColor : in Color_t) return GameResult_t;
 
 
-private
-
 
     -- Returns True if the cell is empty or belongs to an opponent
     function IsCellAccessible(Board       : in Board_t;
