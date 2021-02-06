@@ -9,7 +9,7 @@ with Client;
 with Board;
 
 
-procedure llr_1_1_launch_ok is
+procedure llr_1_2_launch_fail is
     task Server_Launch is
         entry Start;
     end Server_Launch;
@@ -18,39 +18,24 @@ procedure llr_1_1_launch_ok is
         entry Start;
     end Client_1_Launch;
     
-    task Client_2_Launch is
-        entry Start;
-    end Client_2_Launch;
-    
-    
     task body Server_Launch is
     begin
         accept Start;
         Server.Launch(5876, Black);
-        OS_Exit(1);
     end Server_Launch;
     
     task body Client_1_Launch is
     begin
         accept Start;
-        Client.Launch(Addresses(Get_Host_By_Name(Host_Name), 1), 5876, Black);
-        OS_Exit(2);
+        Client.Launch(Addresses(Get_Host_By_Name(Host_Name), 1), 5877, Black);
+        OS_Exit(0); -- launch error, success
     end Client_1_Launch;
-    
-    task body Client_2_Launch is
-    begin
-        accept Start;
-        Client.Launch(Addresses(Get_Host_By_Name(Host_Name), 1), 5876, Black);
-        OS_Exit(3);
-    end Client_2_Launch;
     
 begin
     Server_Launch.Start;
     delay(1.0);
     Client_1_Launch.Start;
     delay(1.0);
-    Client_2_Launch.Start;
-    delay(1.0);
     
-    OS_Exit(0);
-end llr_1_1_launch_ok;
+    OS_Exit(1); -- launch successful, failure
+end llr_1_2_launch_fail;
