@@ -148,7 +148,6 @@ package body Server is
             Close_Socket(Players(1).Socket);
             Close_Socket(Players(2).Socket);
             
-            
     end Launch;
     
     

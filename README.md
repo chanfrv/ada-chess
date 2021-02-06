@@ -147,7 +147,7 @@ Ce record utilitaire permet donc d'implémenter un équivalent de `std::optional
 
 ### 4.1 High Level Requirements
 
-HLR 1: les utilisateurs devraient pouvoir se connecter avec leur adresse IP
+HLR 1: les utilisateurs devraient pouvoir se connecter à un serveur
 
 HLR 2: les utilisateurs devraient pouvoir commencer une partie quand deux
 clients sont connectés
