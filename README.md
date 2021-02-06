@@ -181,7 +181,7 @@ la règle dite en passant
 
 HLR 6.2: les joueurs ne devraient pas pouvoir prendre le roi adverse
 
-HLR 7: la partie devrait se terminer quand un joueur est en echec et mat
+HLR 7: la partie devrait se terminer quand une des condition de fin est remplie
 
 ### Derived HLR:
 
@@ -203,9 +203,9 @@ LLR 5.1.2: quand le mouvement est valide Move() devrait bouger la pièce
 
 LLR 5.2.1: IsValidMove\_{PieceName}() devrait valider un mouvement spécifique à la pièce
 
-LLR 5.3.1: IsValidMove() devrait vérifier la validité d'un mouvement peu importe la pièce
+LLR 5.3.1: quand IsValidMove() est appelée, un message d'erreur devrait s'afficher si la destination est invalide, et demander une autre destination
 
-LLR 5.4.1: quand le mouvement est valide mais IsKingCheck() retourne true, le mouvement est invalide
+LLR 5.4.1: quand IsValidMove() est appelée, si IsKingCheck() retourne true, le mouvement est invalide
 
 LLR 5.5.1: quand l'argument CurrMove de la fonction Move() a les propriétés suivantes: la pièce est un pion, la destination est au dernier rang, et la promotion est spécifiée ; le pion devrait recevoir une promotion
 
@@ -215,7 +215,9 @@ LLR 6.1.1: quand EnPassantHandler() est appelée, un pion devrait pouvoir prendr
 
 LLR 6.2.1: tant que IsKingCheck() renvoie true, le joueur doit envoyer une nouvelle destination, le roi ne devrait donc pas pouvoir être pris
 
-LLR 7.1: quand GameEnded() renvoie CheckMate, la partie devrait se terminer
+LLR 7.1: quand un des joueur est en echec et mat la fonction GameEnded() doit renvoyer CheckMate
+
+LLR 7.2: quand un des joueur est en echec et mat la fonction GameEnded() doit renvoyer CheckMate
 
 ### Derived LLR:
 
