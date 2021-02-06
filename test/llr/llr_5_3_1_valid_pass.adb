@@ -18,27 +18,27 @@ procedure llr_5_3_1_valid_pass is
     
     res : Boolean;
 begin
-    res := IsValidMove(testboard, (e,2), (e,4), False, (IsEmpty => True));
+    res := IsValidMove(testboard, (e,2), (e,4), False);
     if res = False then
         OS_Exit(1);
     end if;
     
-    res := IsValidMove(testboard, (e,2), (e,8), False, (IsEmpty => True));
+    res := IsValidMove(testboard, (e,2), (e,8), False);
     if res = True then
         OS_Exit(2);
     end if;
     
-    res := IsValidMove(testboard, (c,3), (c,4), False, (IsEmpty => True));
+    res := IsValidMove(testboard, (c,3), (c,4), False);
     if res = True then
         OS_Exit(3);
     end if;
     
-    res := IsValidMove(testboard, (g,1), (f,3), False, (IsEmpty => True));
+    res := IsValidMove(testboard, (g,1), (f,3), False);
     if res = False then
         OS_Exit(4);
     end if;
     
-    res := IsValidMove(testboard, (g,1), (e,2), False, (IsEmpty => True));
+    res := IsValidMove(testboard, (g,1), (e,2), False);
     if res = True then
         OS_Exit(5);
     end if;

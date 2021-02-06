@@ -61,7 +61,7 @@ package body Board is
                 Cell := Board(File, Rank);
                 From := (file, Rank);
                 Logs.Inc_Indent;
-                if IsValidMove(Board, From, To, True, Promotion_Empty) then
+                if IsValidMove(Board, From, To, True) then
                     Logs.Debug(Image(King) & " is check by " & Image(Cell) & " (" & Image(From) & ")");
                     Logs.Dec_Indent;
                     return True;
@@ -104,8 +104,8 @@ package body Board is
 
                             To_Coords := (File_To, Rank_To);
 
-                            if (IsValidMove(Board, From_Coords, To_Coords, False, Promotion_Empty)
-                                 or IsValidMove(Board, From_Coords, To_Coords, True, Promotion_Empty))
+                            if (IsValidMove(Board, From_Coords, To_Coords, False)
+                                 or IsValidMove(Board, From_Coords, To_Coords, True))
                             then
                                 Logs.Debug(Image(King) & " is not checkmate");
                                 Logs.Dec_Indent;
@@ -250,22 +250,20 @@ package body Board is
 
     function IsValidMove_Pawn(Board     : in Board_t;
                               From      : in Coordinates_t;
-                              To        : in Coordinates_t;
-                              Promotion : in Opt_Promotion_t) return Boolean
+                              To        : in Coordinates_t) return Boolean
     is
         Cell_From  : constant Opt_Cell_t := Board(From.File, From.Rank);
         Cell_To    : constant Opt_Cell_t := Board(To.File, To.Rank);
         Pawn_Color : Color_t := Cell_From.Value.Color;
 
-        Forward_Valid   : Boolean;
-        Diagonal_Valid  : Boolean;
-        Promotion_Valid : Boolean;
+        Forward_Valid  : Boolean;
+        Diagonal_Valid : Boolean;
 
-        Moving_Forward  : Boolean := (if Pawn_Color = White then
+        Moving_Forward : Boolean := (if Pawn_Color = White then
                                          From.Rank < To.Rank else From.Rank > To.Rank);
-        Pawn_Rank       : Rank_t  := (if Pawn_Color = White then 2 else 7);
-        Next_Rank       : Rank_t  := (if Pawn_Color = White then From.Rank + 1 else From.Rank - 1);
-        Opp_Home_Rank   : Rank_t  := (if Pawn_Color = White then 8 else 1);
+        Pawn_Rank      : Rank_t  := (if Pawn_Color = White then 2 else 7);
+        Next_Rank      : Rank_t  := (if Pawn_Color = White then From.Rank + 1 else From.Rank - 1);
+        Opp_Home_Rank  : Rank_t  := (if Pawn_Color = White then 8 else 1);
     begin
 
         -- Can only move forward
@@ -297,17 +295,14 @@ package body Board is
                      (File_t'Pos(From.File) + 1 = File_t'Pos(To.File) and Next_Rank = To.Rank)
                    else False));
 
-        Promotion_Valid := (if To.Rank = Opp_Home_Rank then not Promotion.IsEmpty else True);
-
-        return (Forward_Valid or Diagonal_Valid) and Promotion_Valid;
+        return Forward_Valid or Diagonal_Valid;
     end IsValidMove_Pawn;
 
 
     function IsValidMove(Board     : in Board_t;
                          From      : in Coordinates_t;
                          To        : in Coordinates_t;
-                         Capture   : in Boolean;
-                         Promotion : in Opt_Promotion_t) return Boolean
+                         Capture   : in Boolean) return Boolean
     is
         function GetKing(Board : in Board_t; Color : in Color_t) return Coordinates_t
         is
@@ -354,7 +349,7 @@ package body Board is
                      when Rook   => IsValidMove_Rook  (Board, From, To),
                      when Bishop => IsValidMove_Bishop(Board, From, To),
                      when Knight => IsValidMove_Knight(Board, From, To),
-                     when Pawn   => IsValidMove_Pawn  (Board, From, To, Promotion))
+                     when Pawn   => IsValidMove_Pawn  (Board, From, To))
         then
             Logs.Debug("Cell not accessible because of piece specific rules");
             return False;
@@ -425,7 +420,7 @@ package body Board is
                 -- + the move is legal
                 if not CurrCell.IsEmpty
                   and then (CurrCell.Value.Color = CurrPlayerColor and CurrCell.Value.Piece = CurrMove.Piece)
-                  and then IsValidMove(Board, (File, Rank), CurrMove.To, CurrMove.Capture, CurrMove.Promotion)
+                  and then IsValidMove(Board, (File, Rank), CurrMove.To, CurrMove.Capture)
                 then
                     -- The move is possible
                     Logs.Debug("Found candidate '" & Image(CurrCord) & "'");

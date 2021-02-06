@@ -201,8 +201,7 @@ package Board is
 
     function IsValidMove_Pawn(Board     : in Board_t;
                               From      : in Coordinates_t;
-                              To        : in Coordinates_t;
-                              Promotion : in Opt_Promotion_t) return Boolean
+                              To        : in Coordinates_t) return Boolean
       with Pre => (not Board(From.File, From.Rank).IsEmpty
                    and then Board(From.File, From.Rank).Value.Piece = Pawn);
 
@@ -211,8 +210,7 @@ package Board is
     function IsValidMove(Board     : in Board_t;
                          From      : in Coordinates_t;
                          To        : in Coordinates_t;
-                         Capture   : in Boolean;
-                         Promotion : in Opt_Promotion_t) return Boolean;
+                         Capture   : in Boolean) return Boolean;
 
 
     -- Find a piece which fulfills the requirements from the given algebraic

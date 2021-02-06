@@ -18,7 +18,7 @@ procedure llr_5_4_1_check_pass is
     
     res : Boolean;
 begin
-    res := IsValidMove(testboard, (e,2), (b,5), False, (IsEmpty => True));
+    res := IsValidMove(testboard, (e,2), (b,5), False);
     if res = True then
         OS_Exit(1);
     end if;

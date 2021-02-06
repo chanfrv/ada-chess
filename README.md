@@ -213,7 +213,7 @@ LLR 6.1: quand Move() est appelée, si une pièce se déplace sur la case d'une 
 
 LLR 6.1.1: quand EnPassantHandler() est appelée, un pion devrait pouvoir prendre un pion adverse avec la règle dite en passant
 
-LLR 6.2.1: tant que IsKingCheck() renvoie true, le joueur doit envoyer une nouvelle destination, le roi ne devrait donc pas pouvoir être pris
+LLR 6.2.1: IsKingCheck() devrait detecter que le roi est en echec
 
 LLR 7.1: quand un des joueur est en echec et mat la fonction GameEnded() doit renvoyer CheckMate
 

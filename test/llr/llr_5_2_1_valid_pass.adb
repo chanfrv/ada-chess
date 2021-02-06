@@ -18,7 +18,7 @@ procedure llr_5_2_1_valid_pass is
     
     res : Boolean;
 begin
-    res := IsValidMove_Pawn(testboard, (e,2), (e,4), (IsEmpty => True));
+    res := IsValidMove_Pawn(testboard, (e,2), (e,4));
     if res = False then
         OS_Exit(1);
     end if;
