@@ -1,8 +1,8 @@
 project Chess is
 
-   for Source_Dirs use ("src", "src/board", "src/logs", "src/optional", "src/client", "src/server", "test");
+   for Source_Dirs use ("src/**", "test/hlr", "test/llr");
    for Object_Dir use "obj";
-   for Main use ("test.adb", "client_cli.adb", "server_cli.adb");
+   for Main use ("llr_1_1_launch_ok.adb", "client_cli.adb", "server_cli.adb");
 
 end Chess;
 
