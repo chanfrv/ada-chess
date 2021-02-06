@@ -183,8 +183,6 @@ HLR 6.2: les joueurs ne devraient pas pouvoir prendre le roi adverse
 
 HLR 7: la partie devrait se terminer quand une des condition de fin est remplie
 
-### Derived HLR:
-
 ### 4.2 Low Level Requirements
 
 LLR 1.1: quand Launch() est appelée avec une adresse IP et un port valides, le client devrait pouvoir se connecter au serveur
@@ -215,11 +213,9 @@ LLR 6.1.1: quand EnPassantHandler() est appelée, un pion devrait pouvoir prendr
 
 LLR 6.2.1: IsKingCheck() devrait detecter que le roi est en echec
 
-LLR 7.1: quand un des joueur est en echec et mat la fonction GameEnded() doit renvoyer CheckMate
+LLR 7.1: quand un des joueur est en echec la fonction GameEnded() doit renvoyer Check
 
 LLR 7.2: quand un des joueur est en echec et mat la fonction GameEnded() doit renvoyer CheckMate
-
-### Derived LLR:
 
 ### 4.3 Tests
 
