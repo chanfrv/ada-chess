@@ -1,7 +1,6 @@
 with GNAT.OS_Lib; use GNAT.OS_Lib;
 
 with Board; use Board;
-with Board.Strings.Parse; use Board.Strings.Parse;
 
 
 procedure llr_5_2_1_valid_pass is

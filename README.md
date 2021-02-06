@@ -205,7 +205,7 @@ LLR 5.2.1: IsValidMove\_{PieceName}() devrait valider un mouvement spécifique �
 
 LLR 5.3.1: IsValidMove() devrait vérifier la validité d'un mouvement peu importe la pièce
 
-LLR 5.4.1: quand IsValidMove() retourne true, mais IsKingCheck() retourne aussi true, le mouvement est invalide
+LLR 5.4.1: quand le mouvement est valide mais IsKingCheck() retourne true, le mouvement est invalide
 
 LLR 5.5.1: quand l'argument CurrMove de la fonction Move() a les propriétés suivantes: la pièce est un pion, la destination est au dernier rang, et la promotion est spécifiée ; le pion devrait recevoir une promotion
 
