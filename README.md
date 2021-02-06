@@ -187,46 +187,33 @@ HLR 7: la partie devrait se terminer quand un joueur est en echec et mat
 
 ### 4.2 Low Level Requirements
 
-LLR 1.1: quand Launch() est appelée avec une adresse IP et un port valides, le
-client devrait pouvoir se connecter au serveur
+LLR 1.1: quand Launch() est appelée avec une adresse IP et un port valides, le client devrait pouvoir se connecter au serveur
 
-LLR 1.2: quand Launch() est appelée avec une adresse IP ou un port invalide, le
-client devrait afficher un message d'erreur
+LLR 1.2: quand Launch() est appelée avec une adresse IP ou un port invalide, le client devrait afficher un message d'erreur
 
-LLR 2.1: quand Launch() est appelée, le serveur devrait attendre la connexion
-de deux clients et lancer une partie
+LLR 2.1: quand Launch() est appelée, le serveur devrait attendre la connexion de deux clients et lancer une partie
 
-LLR 3.1: quand GetWhitePlayer() est appelée, le serveur devrait définir le
-joueur avec les pièces blanches comme le premier a jouer
+LLR 3.1: quand GetWhitePlayer() est appelée, le serveur devrait définir le joueur avec les pièces blanches comme le premier a jouer
 
-LLR 4.1: quand Board\_t'Output() est appelée, le serveur devrait envoyer le
-plateau actuel au client qui doit jouer son tour, quand PrettyPrint() est
-appelée par ce client le plateau devrait s'afficher
+LLR 4.1: quand Board\_t'Output() est appelée, le serveur devrait envoyer le plateau actuel au client qui doit jouer son tour, quand PrettyPrint() est appelée par ce client le plateau devrait s'afficher
 
-LLR 5.1: quand String'Output() est appelée, le client devrait envoyer son
-déplacement au serveur, quand MoveResult() est appelée le serveur devrait
-appliquer le déplacement
+LLR 5.1.1: quand String'Output() est appelée, le client devrait envoyer son déplacement au serveur
 
-LLR 5.1.1: quand IsValidMove{PieceName}() est appelée, le mouvement spécifique
-de la pièce devrait être défini
+LLR 5.1.2: quand le mouvement est valide Move() devrait bouger la pièce
 
-LLR 5.2.1: quand IsValidMove{PieceName}() est appelée, l'ensemble des
-destinations possible de la pièce devraient être définies selon sa position
+LLR 5.2.1: IsValidMove\_{PieceName}() devrait valider un mouvement spécifique à la pièce
 
-LLR 5.3.1: quand IsValidMove() est appelée, un message d'erreur devrait
-s'afficher si la destination est invalide, et demander une autre destination
+LLR 5.3.1: quand IsValidMove() est appelée, un message d'erreur devrait s'afficher si la destination est invalide, et demander une autre destination
 
-LLR 5.4.1: quand IsValidMove() est appelée, si IsKingCheck() retourne true, le
-mouvement est invalide
+LLR 5.4.1: quand IsValidMove() est appelée, si IsKingCheck() retourne true, le mouvement est invalide
 
-LLR 6.1: quand Move() est appelée, si une pièce se déplace sur la case d'une
-pièce adverse, elle devrait la remplacer et donc la prendre
+LLR 5.5.1: quand l'argument CurrMove de la fonction Move() a les propriétés suivantes: la pièce est un pion, la destination est au dernier rang, et la promotion est spécifiée ; le pion devrait recevoir une promotion
 
-LLR 6.1.1: quand EnPassantHandler() est appelée, un pion devrait pouvoir
-prendre un pion adverse avec la règle dite en passant
+LLR 6.1: quand Move() est appelée, si une pièce se déplace sur la case d'une pièce adverse, elle devrait la remplacer et donc la prendre
 
-LLR 6.2.1: tant que IsKingCheck() renvoie true, le joueur doit envoyer une
-nouvelle destination, le roi ne devrait donc pas pouvoir être pris
+LLR 6.1.1: quand EnPassantHandler() est appelée, un pion devrait pouvoir prendre un pion adverse avec la règle dite en passant
+
+LLR 6.2.1: tant que IsKingCheck() renvoie true, le joueur doit envoyer une nouvelle destination, le roi ne devrait donc pas pouvoir être pris
 
 LLR 7.1: quand GameEnded() renvoie CheckMate, la partie devrait se terminer
 
