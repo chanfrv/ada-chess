@@ -234,6 +234,6 @@ LLR 7.1: quand GameEnded() renvoie CheckMate, la partie devrait se terminer
 
 ### 4.3 Tests
 
-Les tests pour les HLR et LLR sont séparés dans respectivement `test/hlr/` et `test/llr/`. Chaque prérequis a un test associé, le LLR 1.1 pour `Launch()` qui s'attend à un succès aura par exemple le test `test/llr/1_1_launch_pass.adb`.
+Les tests pour les HLR et LLR sont séparés dans respectivement `test/hlr/` et `test/llr/`. Chaque prérequis a un test associé, par exemple le LLR 1.1 pour `Launch()` qui s'attend à un succès aura pour test `test/llr/1_1_launch_pass.adb`.
 
-Chaque test génère un executable dans `/obj/`. Afin de faciliter l'évaluation des tests, et gnattest n'ayant jamais fonctionné sur mon pc pour automatiser le processus, une test suite `test/test_suite.sh` permet de simplement les lancer à la suite et d'afficher 'pass' ou 'fail' si le resultat est celui attendu.
+Chaque test génère un executable dans `/obj/`. Afin de faciliter l'évaluation des tests, une test suite `test/test_suite.sh` permet de simplement les lancer à la suite et d'afficher 'pass' ou 'fail' si le resultat est celui attendu.
