@@ -459,15 +459,13 @@ package body Board is
         Cell_To    : Cell_t;
         Promoted   : Cell_t;
     begin
-        Logs.Debug("Moving to " & Image(CurrMove.To));
-
         case CurrMove.Castling is
             when Kingside =>
                 Logs.Debug("Trying kingside castling");
-                Castling_Kingside(Board, CurrPlayerColor);
+                return Castling_Kingside(Board, CurrPlayerColor);
             when Queenside =>
                 Logs.Debug("Trying queenside castling");
-                Castling_Queenside(Board, CurrPlayerColor);
+                return Castling_Queenside(Board, CurrPlayerColor);
             -- Normal move
             when None =>
                 Logs.Debug("Normal move, looking for a valid piece");

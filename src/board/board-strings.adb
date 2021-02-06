@@ -61,12 +61,19 @@ package body Board.Strings is
         
     function Image(Move : in Move_t) return String is
     begin
-        return Image(Move.Piece)
-          & Image(Move.From_File) & Image(Move.From_Rank)
-          & (if Move.Capture then "x" else "")
-          & Image(Move.To)
-          & (if not Move.Promotion.IsEmpty then Image(Move.Promotion.Value) else "")
-          & Image(Move.Status);
+        case Move.Castling is
+            when Kingside =>
+                return "0-0";
+            when Queenside =>
+                return "0-0-0";
+            when others =>
+                return Image(Move.Piece)
+                  & Image(Move.From_File) & Image(Move.From_Rank)
+                  & (if Move.Capture then "x" else "")
+                  & Image(Move.To)
+                  & (if not Move.Promotion.IsEmpty then Image(Move.Promotion.Value) else "")
+                  & Image(Move.Status);
+        end case;
     end Image;
         
     

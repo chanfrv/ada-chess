@@ -4,9 +4,9 @@ package Board.Castling is
     procedure Castling_Unregister(Board : in Board_t; From : in Coordinates_t);
     
     
-    procedure Castling_Kingside(Board : in out Board_t; Color : in Color_t);
+    function Castling_Kingside(Board : in out Board_t; Color : in Color_t) return MoveResult_t;
     
-    procedure Castling_Queenside(Board : in out Board_t; Color : in Color_t);
+    function Castling_Queenside(Board : in out Board_t; Color : in Color_t) return MoveResult_t;
     
     
 private

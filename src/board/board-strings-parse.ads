@@ -5,7 +5,7 @@ package Board.Strings.Parse is
     
     type Node_Kind_t is (Start, Stop, State);
     
-    type Parser_Callback_t is access function(Item : in String; Move : in out Move_t) return Natural;
+    type Parser_Callback_t is access procedure(Item : in String; Move : in out Move_t);
     
     type Parser_Node_t(Kind : Node_Kind_t := State) is
         record
@@ -26,24 +26,24 @@ package Board.Strings.Parse is
     type Parser_Adj_Matrix_t is array (Parser_Index_t, Parser_Index_t) of Boolean;
     
     
-    function Parser_Piece_Callback    (Item : in String; Move : in out Move_t) return Natural
-      with Pre => 0 <= Item'Length and Item'Length <= 1;
-    function Parser_From_File_Callback(Item : in String; Move : in out Move_t) return Natural
-      with Pre => 0 <= Item'Length and Item'Length <= 1;
-    function Parser_From_Rank_Callback(Item : in String; Move : in out Move_t) return Natural
-      with Pre => 0 <= Item'Length and Item'Length <= 1;
-    function Parser_Capture_Callback  (Item : in String; Move : in out Move_t) return Natural
-      with Pre => 0 <= Item'Length and Item'Length <= 1;
-    function Parser_To_Callback       (Item : in String; Move : in out Move_t) return Natural
-      with Pre => 2 <= Item'Length and Item'Length <= 2;
-    function Parser_Promotion_Callback(Item : in String; Move : in out Move_t) return Natural
-      with Pre => 0 <= Item'Length and Item'Length <= 1;
-    function Parser_Status_Callback   (Item : in String; Move : in out Move_t) return Natural
-      with Pre => 0 <= Item'Length and Item'Length <= 1;
-    function Parser_Kingside_Callback (Item : in String; Move : in out Move_t) return Natural
-      with Pre => 3 <= Item'Length and Item'Length <= 3;
-    function Parser_Queenside_Callback(Item : in String; Move : in out Move_t) return Natural
-      with Pre => 5 <= Item'Length and Item'Length <= 5;
+    procedure Parser_Piece_Callback    (Item : in String; Move : in out Move_t)
+      with Pre => Item'Length = 1;
+    procedure Parser_From_File_Callback(Item : in String; Move : in out Move_t)
+      with Pre => Item'Length = 1;
+    procedure Parser_From_Rank_Callback(Item : in String; Move : in out Move_t)
+      with Pre => Item'Length = 1;
+    procedure Parser_Capture_Callback  (Item : in String; Move : in out Move_t)
+      with Pre => Item'Length = 1;
+    procedure Parser_To_Callback       (Item : in String; Move : in out Move_t)
+      with Pre => Item'Length = 2;
+    procedure Parser_Promotion_Callback(Item : in String; Move : in out Move_t)
+      with Pre => Item'Length = 1;
+    procedure Parser_Status_Callback   (Item : in String; Move : in out Move_t)
+      with Pre => Item'Length = 1;
+    procedure Parser_Kingside_Callback (Item : in String; Move : in out Move_t)
+      with Pre => Item'Length = 3;
+    procedure Parser_Queenside_Callback(Item : in String; Move : in out Move_t)
+      with Pre => Item'Length = 2;
     
     
     Parser_Piece_S     : aliased constant String := "[kqrbnKQRBN]";
@@ -54,7 +54,7 @@ package Board.Strings.Parse is
     Parser_Promotion_S : aliased constant String := "[qrbnQRBN]";
     Parser_Status_S    : aliased constant String := "[+#]";
     Parser_Kingside_S  : aliased constant String := "0-0";
-    Parser_Queenside_S : aliased constant String := "0-0-0";
+    Parser_Queenside_S : aliased constant String := "-0";
     
     Parser_Start_L     : aliased constant String := "START";
     Parser_Stop_L      : aliased constant String := "END";
@@ -114,7 +114,7 @@ package Board.Strings.Parse is
                                                   Eval => Parser_Kingside_Callback'Access);
     Parser_Queenside : constant Parser_Node_t := (Kind => State,
                                                   Label => Parser_Queenside_L'Access,
-                                                  Length => 5,
+                                                  Length => 2,
                                                   Expr => Parser_Queenside_S'Access,
                                                   Eval => Parser_Queenside_Callback'Access);
     
@@ -132,8 +132,8 @@ package Board.Strings.Parse is
     
     Parser_Adj_Matrix : constant Parser_Adj_Matrix_t :=
     (
-        -- start     -> piece | from_file | from_rank | capture | to | kingside | queenside
-        (False, True,  True,  True,  True,  True,  False, False, True,  True,  False),
+        -- start     -> piece | from_file | from_rank | capture | to | kingside
+        (False, True,  True,  True,  True,  True,  False, False, True,  False, False),
         -- piece     -> from_file | from_rank | capture | to
         (False, False, True,  True,  True,  True,  False, False, False, False, False),
         -- from_file -> from_rank | capture | to
@@ -148,8 +148,8 @@ package Board.Strings.Parse is
         (False, False, False, False, False, False, False, True,  False, False, True),
         -- status    -> stop
         (False, False, False, False, False, False, False, False, False, False, True),
-        -- kingside  -> stop
-        (False, False, False, False, False, False, False, False, False, False, True),
+        -- kingside  -> queenside | stop
+        (False, False, False, False, False, False, False, False, False, True,  True),
         -- queenside -> stop
         (False, False, False, False, False, False, False, False, False, False, True),
         -- stop

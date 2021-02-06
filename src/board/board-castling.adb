@@ -40,7 +40,7 @@ package body Board.Castling is
     end Castling_Unregister;
     
   
-    procedure Castling_Kingside(Board : in out Board_t; Color : in Color_t)
+    function Castling_Kingside(Board : in out Board_t; Color : in Color_t) return MoveResult_t
     is
         -- check that the king is never check on its way to the final
         -- castling position
@@ -77,13 +77,15 @@ package body Board.Castling is
             Board(f, Rank) := Rook;
             Board(g, Rank) := King;
             Board(h, Rank) := Empty;
+            return Valid_Move;
         else
             Logs.Debug("Invalid castling");
+            return Invalid_Move;
         end if;
     end Castling_Kingside;
     
     
-    procedure Castling_Queenside(Board : in out Board_t; Color : in Color_t)
+    function Castling_Queenside(Board : in out Board_t; Color : in Color_t) return MoveResult_t
     is
         -- check that the king is never check on its way to the final
         -- castling position
@@ -122,8 +124,10 @@ package body Board.Castling is
             Board(c, Rank) := Rook;
             Board(d, Rank) := Empty;
             Board(e, Rank) := Empty;
+            return Valid_Move;
         else
             Logs.Debug("Invalid castling");
+            return Invalid_Move;
         end if;
     end Castling_Queenside;
     

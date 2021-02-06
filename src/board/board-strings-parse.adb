@@ -7,143 +7,87 @@ with Logs;
 package body Board.Strings.Parse is
     
     
-    function Parser_Piece_Callback(Item : in String; Move : in out Move_t) return Natural is
+    procedure Parser_Piece_Callback(Item : in String; Move : in out Move_t) is
     begin
-        if Item'Length = 0 then
-            Move.Piece := Pawn;
-            return 0;
-        else
-            case Item(Item'First) is
-                when 'k'|'K' =>
-                    Move.Piece := King;
-                when 'q'|'Q' =>
-                    Move.Piece := Queen;
-                when 'r'|'R' =>
-                    Move.Piece := Rook;
-                when 'b'|'B' =>
-                    Move.Piece := Bishop;
-                when 'n'|'N' =>
-                    Move.Piece := Knight;
-                when others =>
-                    null;
-            end case;
-            return 1;
-        end if;
+        case Item(Item'First) is
+            when 'k'|'K' =>
+                Move.Piece := King;
+            when 'q'|'Q' =>
+                Move.Piece := Queen;
+            when 'r'|'R' =>
+                Move.Piece := Rook;
+            when 'b'|'B' =>
+                Move.Piece := Bishop;
+            when 'n'|'N' =>
+                Move.Piece := Knight;
+            when others =>
+                null;
+        end case;
     end Parser_Piece_Callback;
     
-    function Parser_From_File_Callback(Item : in String; Move : in out Move_t) return Natural
-    is
+    procedure Parser_From_File_Callback(Item : in String; Move : in out Move_t) is
         File : Character;
     begin
-        if Item'Length = 0 then
-            Move.From_File := File_Empty;
-            return 0;
-            
-        else
-            File := Item(Item'First);
-            case File is
-                when 'a' .. 'h'|'A' .. 'H' =>
-                    Move.From_File := (False, File_t'Value("" & File));    
-                    return 1;
-                when others =>
-                    null;
-            end case;
-            return 0;
-        end if;
+        File := Item(Item'First);
+        Move.From_File := (False, File_t'Value("" & File));
     end Parser_From_File_Callback;
     
-    function Parser_From_Rank_Callback(Item : in String; Move : in out Move_t) return Natural
-    is
+    procedure Parser_From_Rank_Callback(Item : in String; Move : in out Move_t) is
         Rank : Character;
     begin
-        if Item'Length = 0 then
-            Move.From_Rank := Rank_Empty;
-            return 0;
-            
-        else
-            Rank := Item(Item'First);
-            case Rank is
-                when '1' .. '8' =>
-                    Move.From_Rank := (False, Rank_t'Value("" & Rank)); 
-                    return 1;
-                when others =>
-                    null;
-            end case;
-            return 0;
-        end if;
+        Rank := Item(Item'First);
+        Move.From_Rank := (False, Rank_t'Value("" & Rank));
     end Parser_From_Rank_Callback;
     
     
-    function Parser_Capture_Callback(Item : in String; Move : in out Move_t) return Natural is
+    procedure Parser_Capture_Callback(Item : in String; Move : in out Move_t) is
     begin
-        if Item'Length = 0 then
-            Move.Capture := False;
-            return 0;
-        else
-            Move.Capture := True;
-            return 1;
-        end if;
+        Move.Capture := True;
     end Parser_Capture_Callback;
     
-    function Parser_To_Callback(Item : in String; Move : in out Move_t) return Natural
-    is
+    procedure Parser_To_Callback(Item : in String; Move : in out Move_t) is
         File : File_t := File_t'Value(Item(Item'First .. Item'First));
         Rank : Rank_t := Rank_t'Value(Item(Item'Last .. Item'Last));
     begin
         Move.To := (File => File, Rank => Rank);
-        return 2;
     end Parser_To_Callback;
     
-    function Parser_Promotion_Callback(Item : in String; Move : in out Move_t) return Natural is
+    procedure Parser_Promotion_Callback(Item : in String; Move : in out Move_t) is
     begin
-        if Item'Length = 0 then
-            Move.Promotion := Promotion_Empty;
-            return 0;
-        else
-            case Item(Item'First) is
-                when 'q'|'Q' =>
-                    Move.Promotion := (IsEmpty => False, Value => Queen);
-                when 'r'|'R' =>
-                    Move.Promotion := (IsEmpty => False, Value => Rook);
-                when 'b'|'B' =>
-                    Move.Promotion := (IsEmpty => False, Value => Bishop);
-                when 'n'|'N' =>
-                    Move.Promotion := (IsEmpty => False, Value => Knight);
-                when others =>
-                    null;
-            end case;
-            return 1;
-        end if;
+        case Item(Item'First) is
+            when 'q'|'Q' =>
+                Move.Promotion := (IsEmpty => False, Value => Queen);
+            when 'r'|'R' =>
+                Move.Promotion := (IsEmpty => False, Value => Rook);
+            when 'b'|'B' =>
+                Move.Promotion := (IsEmpty => False, Value => Bishop);
+            when 'n'|'N' =>
+                Move.Promotion := (IsEmpty => False, Value => Knight);
+            when others =>
+                null;
+        end case;
     end Parser_Promotion_Callback;
     
-    function Parser_Status_Callback(Item : in String; Move : in out Move_t) return Natural is
+    procedure Parser_Status_Callback(Item : in String; Move : in out Move_t) is
     begin
-        if Item'Length = 0 then
-            Move.Status := Playing;
-            return 0;
-        else
-            case Item(Item'First) is
-                when '+' =>
-                    Move.Status := Check;
-                when '#' =>
-                    Move.Status := Checkmate;
-                when others =>
-                    null;
-            end case;
-            return 1;
-        end if;
+        case Item(Item'First) is
+            when '+' =>
+                Move.Status := Check;
+            when '#' =>
+                Move.Status := Checkmate;
+            when others =>
+                null;
+        end case;
     end Parser_Status_Callback;
     
-    function Parser_Kingside_Callback(Item : in String; Move : in out Move_t) return Natural is
+    procedure Parser_Kingside_Callback(Item : in String; Move : in out Move_t) is
     begin
         Move := (Castling => Kingside);
-        return 3;
     end Parser_Kingside_Callback;
     
-    function Parser_Queenside_Callback(Item : in String; Move : in out Move_t) return Natural is
+    procedure Parser_Queenside_Callback(Item : in String; Move : in out Move_t) is
     begin
         Move := (Castling => Queenside);
-        return 5;
     end Parser_Queenside_Callback;
     
     
@@ -173,12 +117,13 @@ package body Board.Strings.Parse is
                     Logs.Debug("Trying to match string '" & Item & "'");
             
                     -- match string from grammar
-                    End_Bound := Positive'Min(Item'Last, Item'First + Node_To.Length - 1);
+                    End_Bound := Item'First + Node_To.Length - 1;
                     
-                    if Match(Item(Item'First .. End_Bound), Regex) then
+                    if End_Bound <= Item'Last and then Match(Item(Item'First .. End_Bound), Regex) then
                         -- there is a match, call the callback
                         Logs.Debug("String '" & Item(Item'First .. End_Bound) & "' matched in node '" & Node_To.Label.all & "'");
-                        New_First := Item'First + Node_To.Eval(Item(Item'First .. End_Bound), Move);
+                        Node_To.Eval(Item(Item'First .. End_Bound), Move);
+                        New_First := Item'First + Node_To.Length;
 
                         -- recursively traverse the adjacent nodes
                         if Traverse_Rec(Item(New_First .. Item'Last), Move, Index_To) then
@@ -232,7 +177,7 @@ package body Board.Strings.Parse is
     begin
         Put_Line("digraph Parser {");
         Put_Line("    rankdir=LR;");
-        Put_Line("    node [ fontname = ""Helvetica"", shape=box, style=bold ];");
+        Put_Line("    node [ fontname = ""Helvetica"", shape=box, style=filled,bold ];");
         Put_Line("    "" START "" [fillcolor=black, shape=circle, label="""", width=0.25];");
         Put_Line("    "" END "" [fillcolor=black, shape=doublecircle, label="""", width=0.3];");
                         

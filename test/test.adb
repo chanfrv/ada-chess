@@ -24,6 +24,8 @@ procedure Test is
     succ : Boolean;
     res  : MoveResult_t;
 begin
+    Parser_Pretty_Print;
+
     Logs.Set_Level(Logs.Info);
 
     Pretty_Print(TestBoard);
